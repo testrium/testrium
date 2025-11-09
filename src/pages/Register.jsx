@@ -81,117 +81,126 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary rounded-lg p-3">
-              <TestTube2 className="h-8 w-8 text-primary-foreground" />
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-3xl mb-6 shadow-lg shadow-indigo-500/30">
+            <TestTube2 className="h-10 w-10 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>
-            Enter your details to get started with Pramana
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {errors.general && (
-              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-                {errors.general}
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">Create Account</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">Get started with Pramana Manager</p>
+        </div>
+
+        <Card className="shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+          <CardHeader className="space-y-2 pb-6">
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">Sign Up</CardTitle>
+            <CardDescription className="text-base text-gray-600 dark:text-gray-400">
+              Create your account to start managing test cases
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {errors.general && (
+                <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm p-3 rounded-md border border-red-200 dark:border-red-800">
+                  {errors.general}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label htmlFor="username" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  placeholder="Enter your username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="h-11 text-base"
+                />
+                {errors.username && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.username}</p>
+                )}
               </div>
-            )}
-            
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Username
-              </label>
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                placeholder="johndoe"
-                value={formData.username}
-                onChange={handleChange}
-                error={errors.username}
-                disabled={loading}
-              />
-              {errors.username && (
-                <p className="text-sm text-destructive">{errors.username}</p>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                disabled={loading}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="h-11 text-base"
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                Password
-              </label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                disabled={loading}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="h-11 text-base"
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">
-                Confirm Password
-              </label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                disabled={loading}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Confirm Password
+                </label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  disabled={loading}
+                  className="h-11 text-base"
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+                )}
+              </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Create account'}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <div className="text-sm text-center text-muted-foreground">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary hover:underline font-medium">
-              Sign in
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-semibold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-lg shadow-indigo-500/30 transition-all"
+                disabled={loading}
+              >
+                {loading ? 'Creating account...' : 'Create Account'}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-3 border-t pt-4">
+            <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+              Already have an account?{' '}
+              <Link to="/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">
+                Sign in
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }

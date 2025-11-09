@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../api/auth';
-import { tokenService } from '../lib/utils';
+import { authAPI } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -21,11 +20,16 @@ export const AuthProvider = ({ children }) => {
   // Check if user is already logged in on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = tokenService.getToken();
-      const savedUser = tokenService.getUser();
-      
+      const token = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user');
+
       if (token && savedUser) {
-        setUser(savedUser);
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch (err) {
+          console.error('Failed to parse saved user:', err);
+          localStorage.removeItem('user');
+        }
       }
       setLoading(false);
     };
@@ -36,13 +40,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setError(null);
-      const data = await authAPI.login(credentials);
-      
+      const response = await authAPI.login(credentials);
+      const { token, user: userData } = response.data;
+
       // Save token and user
-      tokenService.setToken(data.token);
-      tokenService.setUser(data.user);
-      setUser(data.user);
-      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || 'Login failed. Please try again.';
@@ -54,13 +59,14 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setError(null);
-      const data = await authAPI.register(userData);
-      
+      const response = await authAPI.register(userData);
+      const { token, user: newUser } = response.data;
+
       // Auto login after registration
-      tokenService.setToken(data.token);
-      tokenService.setUser(data.user);
-      setUser(data.user);
-      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+
       return { success: true };
     } catch (err) {
       const message = err.response?.data?.message || 'Registration failed. Please try again.';
@@ -75,8 +81,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
-      tokenService.removeToken();
-      tokenService.removeUser();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       setUser(null);
     }
   };
