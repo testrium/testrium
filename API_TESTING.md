@@ -382,14 +382,226 @@ SELECT * FROM USERS;
 
 ---
 
-## Future Endpoints (Phase 2+)
+## Project Management Endpoints
 
-### Projects (Coming Soon)
-- `GET /projects` - List all projects
-- `POST /projects` - Create project
-- `GET /projects/:id` - Get project details
-- `PUT /projects/:id` - Update project
-- `DELETE /projects/:id` - Delete project
+### 1. Create Project
+
+**Endpoint:** `POST /api/projects`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "My First Project",
+  "description": "Test automation project for web application"
+}
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "My First Project",
+  "description": "Test automation project for web application",
+  "status": "ACTIVE",
+  "userId": 1,
+  "username": "testuser",
+  "createdAt": "2025-11-09T18:04:49.462217",
+  "updatedAt": "2025-11-09T18:04:49.462217"
+}
+```
+
+**Error Response (401 Unauthorized):**
+- No/invalid token provided
+
+**Testing with cURL:**
+```bash
+curl -X POST http://localhost:8080/api/projects \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My First Project","description":"Test automation project"}'
+```
+
+---
+
+### 2. Get All Projects
+
+**Endpoint:** `GET /api/projects`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Query Parameters:**
+- `status` (optional) - Filter by status: ACTIVE, COMPLETED, ARCHIVED
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "My First Project",
+    "description": "Test automation project for web application",
+    "status": "ACTIVE",
+    "userId": 1,
+    "username": "testuser",
+    "createdAt": "2025-11-09T18:04:49.462217",
+    "updatedAt": "2025-11-09T18:04:49.462217"
+  }
+]
+```
+
+**Testing with cURL:**
+```bash
+# Get all projects
+curl http://localhost:8080/api/projects \
+  -H "Authorization: Bearer <your-token>"
+
+# Get projects by status
+curl "http://localhost:8080/api/projects?status=ACTIVE" \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+### 3. Get Project by ID
+
+**Endpoint:** `GET /api/projects/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "My First Project",
+  "description": "Test automation project for web application",
+  "status": "ACTIVE",
+  "userId": 1,
+  "username": "testuser",
+  "createdAt": "2025-11-09T18:04:49.462217",
+  "updatedAt": "2025-11-09T18:04:49.462217"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Project not found"
+}
+```
+
+**Error Response (403 Forbidden):**
+```json
+{
+  "message": "Access denied"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl http://localhost:8080/api/projects/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+### 4. Update Project
+
+**Endpoint:** `PUT /api/projects/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Updated Project Name",
+  "description": "Updated description",
+  "status": "COMPLETED"
+}
+```
+
+**Notes:**
+- All fields are optional
+- Only provided fields will be updated
+- Status values: ACTIVE, COMPLETED, ARCHIVED
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "Updated Project Name",
+  "description": "Updated description",
+  "status": "COMPLETED",
+  "userId": 1,
+  "username": "testuser",
+  "createdAt": "2025-11-09T18:04:49.462217",
+  "updatedAt": "2025-11-09T18:05:05.415724"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X PUT http://localhost:8080/api/projects/1 \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated Project Name","status":"COMPLETED"}'
+```
+
+---
+
+### 5. Delete Project
+
+**Endpoint:** `DELETE /api/projects/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "message": "Project deleted successfully"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Project not found"
+}
+```
+
+**Error Response (403 Forbidden):**
+```json
+{
+  "message": "Access denied"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X DELETE http://localhost:8080/api/projects/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+## Future Endpoints (Phase 3+)
 
 ### Test Cases (Coming Soon)
 - `GET /projects/:id/testcases` - List test cases
@@ -400,5 +612,5 @@ SELECT * FROM USERS;
 
 ---
 
-**Last Updated:** Phase 1 - Authentication Complete
-**Version:** 1.0.0
+**Last Updated:** Phase 2 - Project Management Complete
+**Version:** 1.1.0
