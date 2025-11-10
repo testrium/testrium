@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { testSuitesAPI, projectsAPI } from '../services/api';
 import Navigation from '../components/Navigation';
@@ -18,12 +18,13 @@ import {
 } from '../components/ui/Modal';
 import { Textarea } from '../components/ui/Textarea';
 import {
-  Plus, Search, Edit, Trash2, AlertCircle, FileText, Filter
+  Plus, Search, Edit, Trash2, AlertCircle, FileText, Filter, FolderKanban
 } from 'lucide-react';
 
 export default function TestSuites() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [suites, setSuites] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,9 +46,10 @@ export default function TestSuites() {
     projectId: ''
   });
 
+  // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadData();
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     loadSuites();
@@ -96,9 +98,11 @@ export default function TestSuites() {
         response = await testSuitesAPI.getAll();
       }
       setSuites(response.data);
+      setError(''); // Clear any previous errors
     } catch (err) {
       console.error('Load suites error:', err);
       setError('Failed to load test suites');
+      setSuites([]); // Ensure we show empty state on error
     }
   };
 
@@ -173,7 +177,7 @@ export default function TestSuites() {
       <Navigation />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      <main className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="space-y-6">
           {/* Page Header */}
           <div className="flex items-center justify-between">
@@ -283,67 +287,67 @@ export default function TestSuites() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-3">
                 {filteredSuites.map((suite) => (
-                  <Card key={suite.id} className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:scale-105">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                            {suite.name}
-                          </CardTitle>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                            <span>{suite.projectName}</span>
+                  <Card key={suite.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
+                              {suite.name}
+                            </h4>
+                            <div className="flex items-center gap-2 text-sm">
+                              <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                              <span className="font-semibold text-gray-900 dark:text-white">
+                                {suite.testCaseCount || 0}
+                              </span>
+                              <span className="text-gray-600 dark:text-gray-400">
+                                test {suite.testCaseCount === 1 ? 'case' : 'cases'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {suite.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                              {suite.description}
+                            </p>
+                          )}
+
+                          <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                              <span className="font-medium">Project:</span>
+                              <span>{suite.projectName}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                              <span>Created by {suite.createdByUsername}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {suite.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">
-                          {suite.description}
-                        </p>
-                      )}
 
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                          <span className="font-semibold text-gray-900 dark:text-white">
-                            {suite.testCaseCount || 0}
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            test {suite.testCaseCount === 1 ? 'case' : 'cases'}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setEditingSuite(suite);
+                              setShowModal(true);
+                            }}
+                            className="hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(suite.id)}
+                            className="hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                        <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                        <span>Created by {suite.createdByUsername}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingSuite(suite);
-                            setShowModal(true);
-                          }}
-                          className="flex-1 hover:bg-purple-50 dark:hover:bg-purple-900/20 border-purple-200 dark:border-purple-800"
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDelete(suite.id)}
-                          className="hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -453,3 +457,4 @@ export default function TestSuites() {
     </div>
   );
 }
+/* Force rebuild Mon, Nov 10, 2025 12:51:40 PM */

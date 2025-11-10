@@ -1,0 +1,66 @@
+Phase,Feature Category,Backend API Tasks,Frontend Tasks,Priority,Estimated Time,Dependencies,Status,Notes
+1,Authentication,Register/Sign Up API,Signup/Registration Page,High,1 week,None,Done,JWT token implementation
+1,Authentication,Login API,Sign In Page,High,1 week,None,Done,Email + Password validation
+1,Authentication,Forgot Password API,Forgot Password Page,Medium,3 days,None,Done,Email reset link
+1,Authentication,Get Current User API,Protected Route Component,High,2 days,None,Done,Token validation
+1,Authentication,Logout API,Logout Functionality,Medium,1 day,None,Done,Clear tokens
+1,Dashboard,N/A,Basic Dashboard Layout,Medium,2 days,Phase 1,Done,Welcome page with stats placeholders
+2,Project Management,Create Project API,Create Project Modal/Form,High,3 days,Phase 1,Done,Project name and description
+2,Project Management,Update Project API,Edit Project Form,High,2 days,Phase 1,Done,Update project details
+2,Project Management,Get All Projects API,Project List View,High,3 days,Phase 1,Done,Display all user projects
+2,Project Management,Get Project by ID API,Project Detail View,Medium,2 days,Phase 1,Done,Single project details
+2,Project Management,Delete Project API,Delete Project Button,Medium,2 days,Phase 1,Done,Soft delete with confirmation
+2,Project Management,N/A,Project Selector in Header,High,2 days,Phase 2,Done,Dropdown to switch projects
+3,Folder Management,Create Folder API,Create Folder Modal,Medium,2 days,Phase 2,Backlog,For organizing test cases
+3,Folder Management,Update Folder API,Rename Folder,Low,1 day,Phase 2,Backlog,Edit folder name
+3,Folder Management,Delete Folder API,Delete Folder,Low,1 day,Phase 2,Backlog,Delete empty folders
+3,Folder Management,Get Folder Tree API,Folder Tree Sidebar,Medium,3 days,Phase 2,Backlog,Nested folder structure
+3,Test Case Management,Create Test Case API,Create Test Case Form,High,4 days,Phase 2,Backlog,Title description steps expected result
+3,Test Case Management,Update Test Case API,Edit Test Case Form,High,3 days,Phase 2,Backlog,Modify existing test cases
+3,Test Case Management,Get All Test Cases API,Test Case List View,High,4 days,Phase 2,Backlog,Table/card view with pagination
+3,Test Case Management,Get Test Case by ID API,Test Case Detail View,Medium,2 days,Phase 2,Backlog,Single test case details
+3,Test Case Management,Delete Test Case API,Delete Test Case,Medium,2 days,Phase 2,Backlog,Soft delete with confirmation
+3,Test Case Management,Assign Test Case to Folder API,Drag & Drop to Folders,Medium,3 days,Phase 3 Folders,Backlog,Move test cases between folders
+3,Test Case Management,Search Test Cases API,Search & Filter Bar,High,3 days,Phase 2,Backlog,Search by title keywords priority
+3,Test Case Management,Bulk Operations API,Bulk Delete/Move,Low,3 days,Phase 3,Backlog,Select multiple test cases
+4,Test Plan Management,Create Test Plan API,Create Test Plan Form,High,3 days,Phase 3,Backlog,Plan name description
+4,Test Plan Management,Update Test Plan API,Edit Test Plan,High,2 days,Phase 3,Backlog,Modify plan details
+4,Test Plan Management,Delete Test Plan API,Delete Test Plan,Medium,2 days,Phase 3,Backlog,Remove test plan
+4,Test Plan Management,Get All Test Plans API,Test Plan List View,High,3 days,Phase 3,Backlog,Display all plans
+4,Test Plan Management,Get Test Plan by ID API,Test Plan Detail View,Medium,2 days,Phase 3,Backlog,Single plan details
+4,Test Plan Management,Add Test Cases to Plan API,Test Case Selector Component,High,4 days,Phase 3,Backlog,Multi-select test cases
+4,Test Plan Management,Remove Test Cases from Plan API,Remove from Plan Button,Medium,2 days,Phase 4,Backlog,Unlink test cases
+5,Test Run Management,Create Test Run API,Create Test Run Form,High,3 days,Phase 4,Backlog,From test plan
+5,Test Run Management,Update Test Run API,Edit Test Run Details,Medium,2 days,Phase 4,Backlog,Modify run info
+5,Test Run Management,Delete Test Run API,Delete Test Run,Low,2 days,Phase 4,Backlog,Remove test run
+5,Test Run Management,Get All Test Runs API,Test Run List View,High,3 days,Phase 4,Backlog,Display all runs
+5,Test Run Management,Get Test Run by ID API,Test Run Detail View,High,3 days,Phase 4,Backlog,Single run details
+5,Test Execution,Record Test Result API,Test Execution Interface,High,5 days,Phase 5,Backlog,Mark pass/fail/blocked/skip
+5,Test Execution,Update Test Result API,Edit Result,Medium,2 days,Phase 5,Backlog,Change result status
+5,Test Execution,Add Comment to Result API,Comment Section,Medium,3 days,Phase 5,Backlog,Add execution notes
+5,Test Execution,Add Attachment API,File Upload Component,Low,3 days,Phase 5,Backlog,Attach screenshots/logs
+5,Test Execution,Track Time Spent API,Time Tracking Input,Low,2 days,Phase 5,Backlog,Record execution time
+5,Test Execution,Get Test Run Progress API,Progress Bar/Chart,High,3 days,Phase 5,Backlog,Visual progress indicator
+6,Project Members,Add Member to Project API,Invite Member Modal,High,3 days,Phase 2,Backlog,Email invitation
+6,Project Members,Remove Member API,Remove Member Button,Medium,2 days,Phase 6,Backlog,Revoke access
+6,Project Members,Update Member Role API,Role Selector Dropdown,High,2 days,Phase 6,Backlog,Owner/Member/Viewer
+6,Project Members,Get Project Members API,Member List View,Medium,2 days,Phase 2,Backlog,Display all members
+6,Access Control,Project Access Validation,Protected Project Routes,High,3 days,Phase 6,Backlog,Verify user has access
+6,Access Control,Role-based Permissions,Permission Checks in UI,High,4 days,Phase 6,Backlog,Show/hide based on role
+7,Reporting,Get Test Run Summary API,Test Run Report Page,High,4 days,Phase 5,Backlog,Pass/fail statistics
+7,Reporting,Get Project Statistics API,Project Dashboard,High,4 days,Phase 5,Backlog,Overall project metrics
+7,Reporting,Get Test Coverage API,Coverage Report,Medium,3 days,Phase 5,Backlog,Test case coverage
+7,Reporting,Export Report API,Export to PDF/Excel,Medium,4 days,Phase 7,Backlog,Download reports
+7,Analytics,Get Historical Data API,Trend Charts,Medium,4 days,Phase 5,Backlog,Line/bar charts
+7,Analytics,Get Pass Rate API,Pass Rate Widget,High,2 days,Phase 5,Backlog,Success percentage
+7,Dashboard,N/A,Enhanced Dashboard with Charts,High,5 days,Phase 7,Backlog,Recharts integration
+8,Bulk Operations,Import Test Cases API,CSV Import Component,Medium,4 days,Phase 3,Backlog,Bulk upload test cases
+8,Bulk Operations,Export Test Cases API,Export to CSV/Excel,Medium,3 days,Phase 3,Backlog,Download test cases
+8,Templates,Create Template API,Template Library,Low,3 days,Phase 3,Backlog,Reusable test templates
+8,Templates,Apply Template API,Use Template Button,Low,2 days,Phase 8,Backlog,Quick test creation
+8,Notifications,Email Notification Service,N/A,Low,4 days,Phase 5,Future,Test run completion alerts
+8,Integration,Webhook APIs,Webhook Configuration UI,Low,5 days,Phase 7,Future,External integrations
+9,AI Features,Duplicate Detection API,Duplicate Checker UI,Low,1 week,Phase 3,Future,ML-based similarity
+9,AI Features,Test Case Generation API,AI Test Generator,Low,2 weeks,Phase 3,Future,Generate from requirements
+9,AI Features,Analytics & Insights API,AI Insights Dashboard,Low,1 week,Phase 7,Future,Predictive analytics
+9,AI Features,Risk-based Prioritization API,Smart Test Prioritization,Low,1 week,Phase 5,Future,Risk assessment

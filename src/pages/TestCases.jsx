@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { testCasesAPI, projectsAPI, testSuitesAPI } from '../services/api';
 import Navigation from '../components/Navigation';
@@ -11,12 +11,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import TestCaseForm from '../components/TestCaseForm';
 import {
   Plus, Search, Filter, ChevronRight,
-  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle
+  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText
 } from 'lucide-react';
 
 export default function TestCases() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [testCases, setTestCases] = useState([]);
   const [projects, setProjects] = useState([]);
   const [suites, setSuites] = useState([]);
@@ -34,9 +35,10 @@ export default function TestCases() {
     search: ''
   });
 
+  // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadData();
-  }, []);
+  }, [location]);
 
   useEffect(() => {
     if (filters.projectId) {
@@ -77,9 +79,11 @@ export default function TestCases() {
 
       const response = await testCasesAPI.getAll(params);
       setTestCases(response.data);
+      setError(''); // Clear any previous errors
     } catch (err) {
       console.error('Load test cases error:', err);
       setError('Failed to load test cases');
+      setTestCases([]); // Ensure we show empty state on error
     }
   };
 
@@ -156,7 +160,7 @@ export default function TestCases() {
       <Navigation />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+      <main className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="space-y-6">
           {/* Page Header */}
           <div className="flex items-center justify-between">
@@ -416,3 +420,4 @@ export default function TestCases() {
     </div>
   );
 }
+/* Force rebuild Mon, Nov 10, 2025 12:51:40 PM */
