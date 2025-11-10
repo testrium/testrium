@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI } from '../services/api';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { LogOut, FolderOpen, TrendingUp, CheckCircle2, FolderKanban } from 'lucide-react';
+import { LogOut, FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -89,6 +91,59 @@ export default function Dashboard() {
             <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">
               Here's an overview of your test management projects
             </p>
+          </div>
+
+          {/* Quick Navigation */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Card
+              onClick={() => navigate('/test-cases')}
+              className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-800 cursor-pointer hover:scale-105"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                    <FileText className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Test Cases</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Manage test cases</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              onClick={() => navigate('/test-suites')}
+              className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-800 cursor-pointer hover:scale-105"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                    <Layers className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Test Suites</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Organize test suites</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 cursor-pointer hover:scale-105"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
+                    <FolderKanban className="h-7 w-7 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Projects</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">View projects below</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Stats */}

@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
+import TestCases from './pages/TestCases';
+import TestSuites from './pages/TestSuites';
 
 function App() {
   return (
@@ -26,7 +28,23 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+          <Route
+            path="/test-cases"
+            element={
+              <ProtectedRoute>
+                <TestCases />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test-suites"
+            element={
+              <ProtectedRoute>
+                <TestSuites />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
