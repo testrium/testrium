@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI } from '../services/api';
-import { Button } from '../components/ui/Button';
+import Navigation from '../components/Navigation';
+import Footer from '../components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { LogOut, FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers } from 'lucide-react';
+import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -38,47 +39,8 @@ export default function Dashboard() {
   const completedProjects = projects.filter(p => p.status === 'COMPLETED').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <span className="text-white font-bold text-lg">P</span>
-              </div>
-              <div>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white">
-                  Pramana Manager
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
-                  <span className="text-blue-700 dark:text-blue-300 font-bold text-sm">
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="text-sm">
-                  <p className="font-semibold text-gray-900 dark:text-white">{user?.username}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'User'}</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex flex-col">
+      <Navigation />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -258,6 +220,8 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

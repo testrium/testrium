@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { testSuitesAPI, projectsAPI } from '../services/api';
+import Navigation from '../components/Navigation';
+import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -16,7 +18,7 @@ import {
 } from '../components/ui/Modal';
 import { Textarea } from '../components/ui/Textarea';
 import {
-  Plus, Search, FolderKanban, Edit, Trash2, AlertCircle, FileText, Filter, Home, LogOut
+  Plus, Search, Edit, Trash2, AlertCircle, FileText, Filter
 } from 'lucide-react';
 
 export default function TestSuites() {
@@ -167,67 +169,27 @@ export default function TestSuites() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <FolderKanban className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="font-bold text-lg text-gray-900 dark:text-white">
-                  Test Suites
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 flex items-center justify-center ring-2 ring-purple-200 dark:ring-purple-800">
-                  <span className="text-purple-700 dark:text-purple-300 font-bold text-sm">
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="text-sm">
-                  <p className="font-semibold text-gray-900 dark:text-white">{user?.username}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'User'}</p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Home
-              </Button>
-              <Button
-                onClick={() => setShowModal(true)}
-                size="sm"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                New Test Suite
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={logout}
-                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex flex-col">
+      <Navigation />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
         <div className="space-y-6">
+          {/* Page Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Test Suites</h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Organize your test cases into suites</p>
+            </div>
+            <Button
+              onClick={() => setShowModal(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              New Test Suite
+            </Button>
+          </div>
+
           {/* Filters Section */}
           <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <CardHeader>
@@ -486,6 +448,8 @@ export default function TestSuites() {
           </ModalFooter>
         </form>
       </Modal>
+
+      <Footer />
     </div>
   );
 }
