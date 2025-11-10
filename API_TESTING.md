@@ -601,16 +601,571 @@ curl -X DELETE http://localhost:8080/api/projects/1 \
 
 ---
 
-## Future Endpoints (Phase 3+)
+## Test Case Management Endpoints
 
-### Test Cases (Coming Soon)
-- `GET /projects/:id/testcases` - List test cases
-- `POST /projects/:id/testcases` - Create test case
-- `GET /testcases/:id` - Get test case details
-- `PUT /testcases/:id` - Update test case
-- `DELETE /testcases/:id` - Delete test case
+### 1. Get All Test Cases
+
+**Endpoint:** `GET /api/test-cases`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Query Parameters (all optional):**
+- `projectId` - Filter by project ID
+- `suiteId` - Filter by test suite ID
+- `status` - Filter by status: ACTIVE, DEPRECATED, DRAFT
+- `priority` - Filter by priority: LOW, MEDIUM, HIGH, CRITICAL
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "title": "Login with valid credentials",
+    "description": "Test user login functionality",
+    "preconditions": "User account exists in the system",
+    "steps": "1. Navigate to login page\n2. Enter valid email\n3. Enter valid password\n4. Click login button",
+    "expectedResult": "User should be logged in and redirected to dashboard",
+    "priority": "HIGH",
+    "status": "ACTIVE",
+    "type": "FUNCTIONAL",
+    "projectId": 1,
+    "projectName": "My First Project",
+    "suiteId": 1,
+    "suiteName": "Authentication Tests",
+    "createdByUsername": "testuser",
+    "updatedByUsername": null,
+    "createdAt": "2025-11-10T06:00:00",
+    "updatedAt": "2025-11-10T06:00:00"
+  }
+]
+```
+
+**Testing with cURL:**
+```bash
+# Get all test cases
+curl http://localhost:8080/api/test-cases \
+  -H "Authorization: Bearer <your-token>"
+
+# Filter by project
+curl "http://localhost:8080/api/test-cases?projectId=1" \
+  -H "Authorization: Bearer <your-token>"
+
+# Filter by multiple criteria
+curl "http://localhost:8080/api/test-cases?projectId=1&status=ACTIVE&priority=HIGH" \
+  -H "Authorization: Bearer <your-token>"
+```
 
 ---
 
-**Last Updated:** Phase 2 - Project Management Complete
-**Version:** 1.1.0
+### 2. Get Test Case by ID
+
+**Endpoint:** `GET /api/test-cases/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "title": "Login with valid credentials",
+  "description": "Test user login functionality",
+  "preconditions": "User account exists in the system",
+  "steps": "1. Navigate to login page\n2. Enter valid email\n3. Enter valid password\n4. Click login button",
+  "expectedResult": "User should be logged in and redirected to dashboard",
+  "priority": "HIGH",
+  "status": "ACTIVE",
+  "type": "FUNCTIONAL",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "suiteId": 1,
+  "suiteName": "Authentication Tests",
+  "createdByUsername": "testuser",
+  "updatedByUsername": null,
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:00:00"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Test case not found with id: 1"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl http://localhost:8080/api/test-cases/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+### 3. Create Test Case
+
+**Endpoint:** `POST /api/test-cases`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "Login with valid credentials",
+  "description": "Test user login functionality",
+  "preconditions": "User account exists in the system",
+  "steps": "1. Navigate to login page\n2. Enter valid email\n3. Enter valid password\n4. Click login button",
+  "expectedResult": "User should be logged in and redirected to dashboard",
+  "priority": "HIGH",
+  "status": "ACTIVE",
+  "type": "FUNCTIONAL",
+  "projectId": 1,
+  "suiteId": 1
+}
+```
+
+**Field Details:**
+- `title` (required) - Test case title
+- `description` (optional) - Detailed description
+- `preconditions` (optional) - Prerequisites before running test
+- `steps` (required) - Steps to execute the test
+- `expectedResult` (required) - Expected outcome
+- `priority` (required) - LOW, MEDIUM, HIGH, CRITICAL
+- `status` (required) - ACTIVE, DEPRECATED, DRAFT
+- `type` (required) - FUNCTIONAL, INTEGRATION, REGRESSION, SMOKE, PERFORMANCE, SECURITY, UI, API
+- `projectId` (required) - Project ID
+- `suiteId` (optional) - Test suite ID
+
+**Success Response (201 Created):**
+```json
+{
+  "id": 1,
+  "title": "Login with valid credentials",
+  "description": "Test user login functionality",
+  "preconditions": "User account exists in the system",
+  "steps": "1. Navigate to login page\n2. Enter valid email\n3. Enter valid password\n4. Click login button",
+  "expectedResult": "User should be logged in and redirected to dashboard",
+  "priority": "HIGH",
+  "status": "ACTIVE",
+  "type": "FUNCTIONAL",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "suiteId": 1,
+  "suiteName": "Authentication Tests",
+  "createdByUsername": "testuser",
+  "updatedByUsername": null,
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:00:00"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X POST http://localhost:8080/api/test-cases \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Login with valid credentials",
+    "steps": "1. Open login page\n2. Enter credentials\n3. Click login",
+    "expectedResult": "User logged in successfully",
+    "priority": "HIGH",
+    "status": "ACTIVE",
+    "type": "FUNCTIONAL",
+    "projectId": 1
+  }'
+```
+
+---
+
+### 4. Update Test Case
+
+**Endpoint:** `PUT /api/test-cases/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "title": "Updated test case title",
+  "description": "Updated description",
+  "preconditions": "Updated preconditions",
+  "steps": "Updated steps",
+  "expectedResult": "Updated expected result",
+  "priority": "CRITICAL",
+  "status": "ACTIVE",
+  "type": "REGRESSION",
+  "projectId": 1,
+  "suiteId": 2
+}
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "title": "Updated test case title",
+  "description": "Updated description",
+  "preconditions": "Updated preconditions",
+  "steps": "Updated steps",
+  "expectedResult": "Updated expected result",
+  "priority": "CRITICAL",
+  "status": "ACTIVE",
+  "type": "REGRESSION",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "suiteId": 2,
+  "suiteName": "Regression Tests",
+  "createdByUsername": "testuser",
+  "updatedByUsername": "testuser",
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:30:00"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X PUT http://localhost:8080/api/test-cases/1 \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated test case",
+    "steps": "New steps",
+    "expectedResult": "New result",
+    "priority": "CRITICAL",
+    "status": "ACTIVE",
+    "type": "REGRESSION",
+    "projectId": 1
+  }'
+```
+
+---
+
+### 5. Delete Test Case
+
+**Endpoint:** `DELETE /api/test-cases/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (204 No Content)**
+- No response body
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Test case not found with id: 1"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X DELETE http://localhost:8080/api/test-cases/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+## Test Suite Management Endpoints
+
+### 1. Get All Test Suites
+
+**Endpoint:** `GET /api/test-suites`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Query Parameters:**
+- `projectId` (optional) - Filter by project ID
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Authentication Tests",
+    "description": "Test suite for authentication features",
+    "projectId": 1,
+    "projectName": "My First Project",
+    "testCaseCount": 5,
+    "createdByUsername": "testuser",
+    "createdAt": "2025-11-10T06:00:00",
+    "updatedAt": "2025-11-10T06:00:00"
+  }
+]
+```
+
+**Testing with cURL:**
+```bash
+# Get all test suites
+curl http://localhost:8080/api/test-suites \
+  -H "Authorization: Bearer <your-token>"
+
+# Filter by project
+curl "http://localhost:8080/api/test-suites?projectId=1" \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+### 2. Get Test Suite by ID
+
+**Endpoint:** `GET /api/test-suites/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "Authentication Tests",
+  "description": "Test suite for authentication features",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "testCaseCount": 5,
+  "createdByUsername": "testuser",
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:00:00"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Test suite not found with id: 1"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl http://localhost:8080/api/test-suites/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+### 3. Create Test Suite
+
+**Endpoint:** `POST /api/test-suites`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Authentication Tests",
+  "description": "Test suite for authentication features",
+  "projectId": 1
+}
+```
+
+**Field Details:**
+- `name` (required) - Test suite name
+- `description` (optional) - Suite description
+- `projectId` (required) - Project ID
+
+**Success Response (201 Created):**
+```json
+{
+  "id": 1,
+  "name": "Authentication Tests",
+  "description": "Test suite for authentication features",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "testCaseCount": 0,
+  "createdByUsername": "testuser",
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:00:00"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X POST http://localhost:8080/api/test-suites \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Authentication Tests",
+    "description": "Test suite for authentication features",
+    "projectId": 1
+  }'
+```
+
+---
+
+### 4. Update Test Suite
+
+**Endpoint:** `PUT /api/test-suites/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Updated Suite Name",
+  "description": "Updated suite description"
+}
+```
+
+**Success Response (200 OK):**
+```json
+{
+  "id": 1,
+  "name": "Updated Suite Name",
+  "description": "Updated suite description",
+  "projectId": 1,
+  "projectName": "My First Project",
+  "testCaseCount": 5,
+  "createdByUsername": "testuser",
+  "createdAt": "2025-11-10T06:00:00",
+  "updatedAt": "2025-11-10T06:30:00"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X PUT http://localhost:8080/api/test-suites/1 \
+  -H "Authorization: Bearer <your-token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Suite Name",
+    "description": "Updated description"
+  }'
+```
+
+---
+
+### 5. Delete Test Suite
+
+**Endpoint:** `DELETE /api/test-suites/{id}`
+
+**Headers:**
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+**Success Response (204 No Content)**
+- No response body
+
+**Error Response (404 Not Found):**
+```json
+{
+  "message": "Test suite not found with id: 1"
+}
+```
+
+**Testing with cURL:**
+```bash
+curl -X DELETE http://localhost:8080/api/test-suites/1 \
+  -H "Authorization: Bearer <your-token>"
+```
+
+---
+
+## Complete Testing Workflow
+
+### Test Case Management Flow
+
+1. **Create a project** (if not exists)
+   ```bash
+   POST /api/projects
+   ```
+
+2. **Create a test suite**
+   ```bash
+   POST /api/test-suites
+   Body: { "name": "Auth Tests", "projectId": 1 }
+   ```
+
+3. **Create test cases**
+   ```bash
+   POST /api/test-cases
+   Body: {
+     "title": "Login test",
+     "steps": "...",
+     "expectedResult": "...",
+     "priority": "HIGH",
+     "status": "ACTIVE",
+     "type": "FUNCTIONAL",
+     "projectId": 1,
+     "suiteId": 1
+   }
+   ```
+
+4. **List test cases by project**
+   ```bash
+   GET /api/test-cases?projectId=1
+   ```
+
+5. **Filter test cases**
+   ```bash
+   GET /api/test-cases?projectId=1&status=ACTIVE&priority=HIGH
+   ```
+
+6. **Update test case**
+   ```bash
+   PUT /api/test-cases/1
+   Body: { "status": "DEPRECATED" }
+   ```
+
+7. **Delete test case**
+   ```bash
+   DELETE /api/test-cases/1
+   ```
+
+---
+
+## Enums Reference
+
+### Test Case Priority
+- `LOW` - Low priority
+- `MEDIUM` - Medium priority (default)
+- `HIGH` - High priority
+- `CRITICAL` - Critical priority
+
+### Test Case Status
+- `ACTIVE` - Active test case (default)
+- `DEPRECATED` - Deprecated test case
+- `DRAFT` - Draft test case
+
+### Test Case Type
+- `FUNCTIONAL` - Functional test (default)
+- `INTEGRATION` - Integration test
+- `REGRESSION` - Regression test
+- `SMOKE` - Smoke test
+- `PERFORMANCE` - Performance test
+- `SECURITY` - Security test
+- `UI` - UI test
+- `API` - API test
+
+---
+
+**Last Updated:** Phase 4 - Test Case Management Complete
+**Version:** 2.0.0

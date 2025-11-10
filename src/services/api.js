@@ -56,4 +56,26 @@ export const projectsAPI = {
   delete: (id) => api.delete(`/projects/${id}`),
 };
 
+// Test Cases API
+export const testCasesAPI = {
+  getAll: (params) => api.get('/test-cases', { params }),
+  getById: (id) => api.get(`/test-cases/${id}`),
+  getByProject: (projectId) => api.get('/test-cases', { params: { projectId } }),
+  getBySuite: (suiteId) => api.get('/test-cases', { params: { suiteId } }),
+  getByFilters: (filters) => api.get('/test-cases', { params: filters }),
+  create: (data) => api.post('/test-cases', data),
+  update: (id, data) => api.put(`/test-cases/${id}`, data),
+  delete: (id) => api.delete(`/test-cases/${id}`),
+};
+
+// Test Suites API
+export const testSuitesAPI = {
+  getAll: () => api.get('/test-suites'),
+  getById: (id) => api.get(`/test-suites/${id}`),
+  getByProject: (projectId) => api.get('/test-suites', { params: { projectId } }),
+  create: (data) => api.post('/test-suites', data),
+  update: (id, data) => api.put(`/test-suites/${id}`, data),
+  delete: (id) => api.delete(`/test-suites/${id}`),
+};
+
 export default api;
