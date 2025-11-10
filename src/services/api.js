@@ -78,4 +78,20 @@ export const testSuitesAPI = {
   delete: (id) => api.delete(`/test-suites/${id}`),
 };
 
+// Users API
+export const usersAPI = {
+  getAll: () => api.get('/users'),
+  getById: (id) => api.get(`/users/${id}`),
+};
+
+// Project Members API
+export const projectMembersAPI = {
+  getProjectMembers: (projectId) => api.get(`/project-members/project/${projectId}`),
+  getUserProjects: (userId) => api.get(`/project-members/user/${userId}`),
+  getAvailableUsers: (projectId) => api.get(`/project-members/project/${projectId}/available-users`),
+  addMembers: (projectId, data) => api.post(`/project-members/project/${projectId}`, data),
+  removeMember: (memberId) => api.delete(`/project-members/${memberId}`),
+  updateMemberRole: (memberId, role) => api.put(`/project-members/${memberId}/role`, { role }),
+};
+
 export default api;

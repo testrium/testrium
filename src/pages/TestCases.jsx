@@ -373,7 +373,7 @@ export default function TestCases() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {/* TODO: View details */}}
+                            onClick={() => navigate(`/test-cases/${testCase.id}`)}
                             className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
                           >
                             <ChevronRight className="h-4 w-4" />

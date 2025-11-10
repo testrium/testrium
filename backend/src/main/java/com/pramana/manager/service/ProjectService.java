@@ -24,7 +24,12 @@ public class ProjectService {
 
     public List<ProjectDTO> getAllProjects(String email) {
         User user = getUserByEmail(email);
-        List<Project> projects = projectRepository.findByUserId(user.getId());
+        System.out.println("getAllProjects called for user: " + email + ", role: " + user.getRole());
+
+        // Return all projects for all users
+        // Frontend will filter based on project membership for regular users
+        List<Project> projects = projectRepository.findAll();
+        System.out.println("Returning all projects, count: " + projects.size());
         return projects.stream()
                 .map(this::toProjectDTO)
                 .collect(Collectors.toList());

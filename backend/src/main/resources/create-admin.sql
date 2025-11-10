@@ -1,0 +1,27 @@
+-- Create Admin User
+--
+-- RECOMMENDED METHOD: Use the API endpoint
+-- ==========================================
+-- POST http://localhost:8080/api/admin/create-admin
+-- This will automatically create an admin user with:
+--   Username: admin
+--   Password: admin123
+--   Email: admin@pramana.com
+--
+-- To check if admin exists:
+-- GET http://localhost:8080/api/admin/admin-exists
+--
+-- ALTERNATIVE METHOD: Run this SQL script (requires BCrypt hash)
+-- ==========================================
+-- Note: Replace '$2a$10$...' with actual BCrypt hash of 'admin123'
+-- You can generate hash using: PasswordHashGenerator.java
+
+-- INSERT INTO users (username, email, password, role, created_at, updated_at)
+-- VALUES (
+--     'admin',
+--     'admin@pramana.com',
+--     '$2a$10$YourBCryptHashHere',
+--     'ADMIN',
+--     CURRENT_TIMESTAMP,
+--     CURRENT_TIMESTAMP
+-- );

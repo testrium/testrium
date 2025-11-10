@@ -8,6 +8,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import TestCases from './pages/TestCases';
 import TestSuites from './pages/TestSuites';
+import TestCaseDetails from './pages/TestCaseDetails';
 
 function App() {
   return (
@@ -41,6 +42,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestSuites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test-cases/:id"
+            element={
+              <ProtectedRoute>
+                <TestCaseDetails />
               </ProtectedRoute>
             }
           />
