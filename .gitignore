@@ -28,3 +28,6 @@ dist-ssr
 .env.example
 nul
 **/target/
+
+/data/**.db */
+**.db
