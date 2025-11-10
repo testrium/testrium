@@ -14,10 +14,9 @@ import {
 } from './ui/Modal';
 import { AlertCircle } from 'lucide-react';
 
-export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = null }) {
+export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = null, projects = [] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [projects, setProjects] = useState([]);
   const [suites, setSuites] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -35,7 +34,6 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
 
   useEffect(() => {
     if (isOpen) {
-      loadProjects();
       if (testCase) {
         setFormData({
           title: testCase.title || '',
@@ -64,15 +62,6 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       setFormData(prev => ({ ...prev, suiteId: '' }));
     }
   }, [formData.projectId]);
-
-  const loadProjects = async () => {
-    try {
-      const response = await projectsAPI.getAll();
-      setProjects(response.data);
-    } catch (err) {
-      console.error('Load projects error:', err);
-    }
-  };
 
   const loadSuitesByProject = async (projectId) => {
     try {

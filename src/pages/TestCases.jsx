@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { testCasesAPI, projectsAPI, testSuitesAPI } from '../services/api';
+import { testCasesAPI, projectsAPI, testSuitesAPI, projectMembersAPI } from '../services/api';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import TestCaseForm from '../components/TestCaseForm';
 import {
   Plus, Search, Filter, ChevronRight,
-  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText
+  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers
 } from 'lucide-react';
 
 export default function TestCases() {
@@ -56,10 +56,26 @@ export default function TestCases() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [projectsRes] = await Promise.all([
-        projectsAPI.getAll()
-      ]);
-      setProjects(projectsRes.data);
+
+      // Load projects based on user role
+      let userProjects = [];
+      if (user?.role === 'ADMIN') {
+        const projectsRes = await projectsAPI.getAll();
+        userProjects = projectsRes.data;
+      } else if (user?.id) {
+        // Get projects user is member of
+        const membershipResponse = await projectMembersAPI.getUserProjects(user.id);
+        const memberships = membershipResponse.data;
+
+        // Get unique project IDs
+        const projectIds = [...new Set(memberships.map(m => m.projectId))];
+
+        // Fetch all projects and filter to only those user is member of
+        const allProjectsResponse = await projectsAPI.getAll();
+        userProjects = allProjectsResponse.data.filter(p => projectIds.includes(p.id));
+      }
+
+      setProjects(userProjects);
       await loadTestCases();
     } catch (err) {
       setError('Failed to load data');
@@ -78,7 +94,15 @@ export default function TestCases() {
       if (filters.priority) params.priority = filters.priority;
 
       const response = await testCasesAPI.getAll(params);
-      setTestCases(response.data);
+      let testCasesList = response.data;
+
+      // Filter test cases based on user's accessible projects when no specific project is selected
+      if (!filters.projectId && user?.role !== 'ADMIN') {
+        const userProjectIds = projects.map(p => p.id);
+        testCasesList = testCasesList.filter(tc => userProjectIds.includes(tc.projectId));
+      }
+
+      setTestCases(testCasesList);
       setError(''); // Clear any previous errors
     } catch (err) {
       console.error('Load test cases error:', err);
@@ -126,6 +150,33 @@ export default function TestCases() {
     }
     return true;
   });
+
+  // Group test cases by suite when no suite filter is selected
+  const groupedTestCases = () => {
+    if (filters.suiteId) {
+      // If a specific suite is selected, return as is
+      return [{ suiteName: null, testCases: filteredTestCases }];
+    }
+
+    // Group by suite
+    const groups = {};
+    filteredTestCases.forEach(tc => {
+      const suiteKey = tc.suiteName || 'No Suite';
+      if (!groups[suiteKey]) {
+        groups[suiteKey] = [];
+      }
+      groups[suiteKey].push(tc);
+    });
+
+    // Convert to array and sort: "No Suite" last, others alphabetically
+    return Object.entries(groups)
+      .map(([suiteName, testCases]) => ({ suiteName, testCases }))
+      .sort((a, b) => {
+        if (a.suiteName === 'No Suite') return 1;
+        if (b.suiteName === 'No Suite') return -1;
+        return a.suiteName.localeCompare(b.suiteName);
+      });
+  };
 
   const getPriorityColor = (priority) => {
     const colors = {
@@ -317,87 +368,108 @@ export default function TestCases() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-3">
-                {filteredTestCases.map((testCase) => (
-                  <Card key={testCase.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
-                    <CardContent className="p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
-                              {testCase.title}
-                            </h4>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full flex items-center gap-1 ${getPriorityColor(testCase.priority)}`}>
-                                {testCase.priority}
-                              </span>
-                              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full flex items-center gap-1 ${getStatusColor(testCase.status)}`}>
-                                {getStatusIcon(testCase.status)}
-                                {testCase.status}
-                              </span>
-                            </div>
-                          </div>
-
-                          {testCase.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                              {testCase.description}
-                            </p>
-                          )}
-
-                          <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                              <span className="font-medium">Project:</span>
-                              <span>{testCase.projectName}</span>
-                            </div>
-                            {testCase.suiteName && (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                                <span className="font-medium">Suite:</span>
-                                <span>{testCase.suiteName}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                              <span className="font-medium">Type:</span>
-                              <span>{testCase.type}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-                              <span>Created by {testCase.createdByUsername}</span>
-                            </div>
-                          </div>
+              <div className="space-y-6">
+                {groupedTestCases().map((group, groupIndex) => (
+                  <div key={groupIndex} className="space-y-3">
+                    {/* Suite Header - only show if not filtering by specific suite */}
+                    {!filters.suiteId && (
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <Layers className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                          <span className="font-semibold text-purple-900 dark:text-purple-300">
+                            {group.suiteName}
+                          </span>
+                          <span className="text-xs text-purple-600 dark:text-purple-400">
+                            ({group.testCases.length} {group.testCases.length === 1 ? 'test' : 'tests'})
+                          </span>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate(`/test-cases/${testCase.id}`)}
-                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditingTestCase(testCase)}
-                            className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(testCase.id)}
-                            className="hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <div className="flex-1 h-px bg-gradient-to-r from-purple-200 to-transparent dark:from-purple-800"></div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+
+                    {/* Test Cases in this group */}
+                    {group.testCases.map((testCase) => (
+                      <Card key={testCase.id} className="border-0 shadow-md hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                        <CardContent className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
+                                  {testCase.title}
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full flex items-center gap-1 ${getPriorityColor(testCase.priority)}`}>
+                                    {testCase.priority}
+                                  </span>
+                                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full flex items-center gap-1 ${getStatusColor(testCase.status)}`}>
+                                    {getStatusIcon(testCase.status)}
+                                    {testCase.status}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {testCase.description && (
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                  {testCase.description}
+                                </p>
+                              )}
+
+                              <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-500">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                                  <span className="font-medium">Project:</span>
+                                  <span>{testCase.projectName}</span>
+                                </div>
+                                {testCase.suiteName && (
+                                  <div className="flex items-center gap-1.5">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                                    <span className="font-medium">Suite:</span>
+                                    <span>{testCase.suiteName}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                  <span className="font-medium">Type:</span>
+                                  <span>{testCase.type}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
+                                  <span>Created by {testCase.createdByUsername}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigate(`/test-cases/${testCase.id}`)}
+                                className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingTestCase(testCase)}
+                                className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(testCase.id)}
+                                className="hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 ))}
               </div>
             )}
@@ -414,6 +486,7 @@ export default function TestCases() {
         }}
         onSuccess={loadTestCases}
         testCase={editingTestCase}
+        projects={projects}
       />
 
       <Footer />

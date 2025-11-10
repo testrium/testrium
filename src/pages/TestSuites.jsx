@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { testSuitesAPI, projectsAPI } from '../services/api';
+import { testSuitesAPI, projectsAPI, projectMembersAPI } from '../services/api';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -76,10 +76,26 @@ export default function TestSuites() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [projectsRes] = await Promise.all([
-        projectsAPI.getAll()
-      ]);
-      setProjects(projectsRes.data);
+
+      // Load projects based on user role
+      let userProjects = [];
+      if (user?.role === 'ADMIN') {
+        const projectsRes = await projectsAPI.getAll();
+        userProjects = projectsRes.data;
+      } else if (user?.id) {
+        // Get projects user is member of
+        const membershipResponse = await projectMembersAPI.getUserProjects(user.id);
+        const memberships = membershipResponse.data;
+
+        // Get unique project IDs
+        const projectIds = [...new Set(memberships.map(m => m.projectId))];
+
+        // Fetch all projects and filter to only those user is member of
+        const allProjectsResponse = await projectsAPI.getAll();
+        userProjects = allProjectsResponse.data.filter(p => projectIds.includes(p.id));
+      }
+
+      setProjects(userProjects);
       await loadSuites();
     } catch (err) {
       setError('Failed to load data');
@@ -97,7 +113,16 @@ export default function TestSuites() {
       } else {
         response = await testSuitesAPI.getAll();
       }
-      setSuites(response.data);
+
+      let suitesList = response.data;
+
+      // Filter suites based on user's accessible projects when no specific project is selected
+      if (!filters.projectId && user?.role !== 'ADMIN') {
+        const userProjectIds = projects.map(p => p.id);
+        suitesList = suitesList.filter(suite => userProjectIds.includes(suite.projectId));
+      }
+
+      setSuites(suitesList);
       setError(''); // Clear any previous errors
     } catch (err) {
       console.error('Load suites error:', err);

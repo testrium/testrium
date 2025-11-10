@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
 import { Home, FileText, Layers, LogOut } from 'lucide-react';
 
@@ -8,6 +9,43 @@ export default function Navigation() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [displayRole, setDisplayRole] = useState('');
+
+  useEffect(() => {
+    const determineRole = async () => {
+      if (!user) return;
+
+      // Admin users always show ADMIN
+      if (user.role === 'ADMIN') {
+        setDisplayRole('Admin');
+        return;
+      }
+
+      // For regular users, check their project memberships
+      try {
+        const response = await projectMembersAPI.getUserProjects(user.id);
+        const memberships = response.data;
+
+        if (memberships.length === 0) {
+          setDisplayRole('User');
+          return;
+        }
+
+        // Check if user is LEAD in any project
+        const hasLeadRole = memberships.some(m => m.role === 'LEAD');
+        if (hasLeadRole) {
+          setDisplayRole('Lead');
+        } else {
+          setDisplayRole('User');
+        }
+      } catch (err) {
+        console.error('Error fetching user role:', err);
+        setDisplayRole('User');
+      }
+    };
+
+    determineRole();
+  }, [user]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -73,7 +111,7 @@ export default function Navigation() {
               </div>
               <div className="text-sm">
                 <p className="font-semibold text-gray-900 dark:text-white">{user?.username}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'User'}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
               </div>
             </div>
 
