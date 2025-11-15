@@ -52,8 +52,11 @@ export default function TestSuites() {
   }, [location]);
 
   useEffect(() => {
-    loadSuites();
-  }, [filters.projectId]);
+    // Only load suites if projects are loaded (or if user is admin)
+    if (projects.length > 0 || user?.role === 'ADMIN') {
+      loadSuites();
+    }
+  }, [filters.projectId, projects]);
 
   useEffect(() => {
     if (showModal) {

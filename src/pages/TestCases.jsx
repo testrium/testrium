@@ -50,8 +50,11 @@ export default function TestCases() {
   }, [filters.projectId]);
 
   useEffect(() => {
-    loadTestCases();
-  }, [filters.projectId, filters.suiteId, filters.status, filters.priority]);
+    // Only load test cases if projects are loaded (or if user is admin)
+    if (projects.length > 0 || user?.role === 'ADMIN') {
+      loadTestCases();
+    }
+  }, [filters.projectId, filters.suiteId, filters.status, filters.priority, projects]);
 
   const loadData = async () => {
     try {

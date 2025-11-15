@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import TestCases from './pages/TestCases';
 import TestSuites from './pages/TestSuites';
 import TestCaseDetails from './pages/TestCaseDetails';
+import TestRuns from './pages/TestRuns';
+import TestRunExecution from './pages/TestRunExecution';
 
 function App() {
   return (
@@ -50,6 +52,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestCaseDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test-runs"
+            element={
+              <ProtectedRoute>
+                <TestRuns />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/test-runs/:id"
+            element={
+              <ProtectedRoute>
+                <TestRunExecution />
               </ProtectedRoute>
             }
           />
