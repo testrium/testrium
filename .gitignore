@@ -29,5 +29,9 @@ dist-ssr
 nul
 **/target/
 
-/data/**.db */
-**.db
+# Database files
+*.db
+*.db-shm
+*.db-wal
+data/
+backend/data/

@@ -4,13 +4,16 @@ echo   Stopping Pramana Manager
 echo ========================================
 echo.
 
-REM Kill Java processes (Backend)
-echo Stopping backend...
-taskkill /F /FI "WINDOWTITLE eq Pramana Backend*" 2>nul
-powershell "Get-Process java -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle -like '*Pramana*'} | Stop-Process -Force" 2>nul
+REM Kill all Java processes
+echo Stopping all Java processes...
+taskkill /F /IM java.exe 2>nul
 
-REM Kill Node processes (Frontend)
-echo Stopping frontend...
+REM Kill all Node processes
+echo Stopping all Node processes...
+taskkill /F /IM node.exe 2>nul
+
+REM Kill by window title as backup
+taskkill /F /FI "WINDOWTITLE eq Pramana Backend*" 2>nul
 taskkill /F /FI "WINDOWTITLE eq Pramana Frontend*" 2>nul
 
 echo.

@@ -3,11 +3,12 @@ package com.pramana.manager.controller;
 import com.pramana.manager.dto.CreateTestRunRequest;
 import com.pramana.manager.dto.TestRunDTO;
 import com.pramana.manager.entity.User;
+import com.pramana.manager.repository.UserRepository;
 import com.pramana.manager.service.TestRunService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,11 +23,18 @@ public class TestRunController {
     @Autowired
     private TestRunService testRunService;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @PostMapping
     public ResponseEntity<?> createTestRun(
             @RequestBody CreateTestRunRequest request,
-            @AuthenticationPrincipal User currentUser) {
+            Authentication authentication) {
         try {
+            String email = authentication.getName();
+            User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
             TestRunDTO testRun = testRunService.createTestRun(request, currentUser.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(testRun);
         } catch (Exception e) {
