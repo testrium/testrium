@@ -13,6 +13,10 @@ REM Wait for backend to start
 echo Waiting for backend to start (15 seconds)...
 timeout /t 15 /nobreak > nul
 
+REM Create admin user
+echo Creating admin user...
+curl -X POST http://localhost:8080/api/admin/create-admin 2>nul
+
 REM Start frontend in a new window
 start "Pramana Frontend" cmd /k "npm run dev"
 
