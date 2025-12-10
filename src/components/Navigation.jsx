@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3 } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -108,6 +108,15 @@ export default function Navigation() {
               >
                 <Play className="mr-2 h-4 w-4" />
                 Test Runs
+              </Button>
+              <Button
+                variant={isActive('/reports') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => navigate('/reports')}
+                className={isActive('/reports') ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' : ''}
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Reports
               </Button>
             </nav>
 

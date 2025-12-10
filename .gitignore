@@ -35,3 +35,6 @@ nul
 *.db-wal
 data/
 backend/data/
+
+pramana-manager-**.7z
+pramana-manager-**.jar

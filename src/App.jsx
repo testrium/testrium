@@ -11,6 +11,7 @@ import TestSuites from './pages/TestSuites';
 import TestCaseDetails from './pages/TestCaseDetails';
 import TestRuns from './pages/TestRuns';
 import TestRunExecution from './pages/TestRunExecution';
+import Reports from './pages/Reports';
 
 function App() {
   return (
@@ -68,6 +69,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestRunExecution />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Reports />
               </ProtectedRoute>
             }
           />
