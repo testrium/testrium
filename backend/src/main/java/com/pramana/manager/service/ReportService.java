@@ -2,8 +2,12 @@ package com.pramana.manager.service;
 
 import com.pramana.manager.dto.OverallStatsDTO;
 import com.pramana.manager.dto.ProjectStatsDTO;
+import com.pramana.manager.dto.TestRunReportDTO;
+import com.pramana.manager.dto.TestRunDetailDTO;
 import com.pramana.manager.entity.Project;
 import com.pramana.manager.entity.TestExecution;
+import com.pramana.manager.entity.TestRun;
+import com.pramana.manager.entity.TestCase;
 import com.pramana.manager.entity.User;
 import com.pramana.manager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,9 +109,9 @@ public class ReportService {
             .collect(Collectors.toList());
 
         long totalExecutions = executions.size();
-        long passed = executions.stream().filter(e -> "PASSED".equals(e.getStatus())).count();
-        long failed = executions.stream().filter(e -> "FAILED".equals(e.getStatus())).count();
-        long skipped = executions.stream().filter(e -> "SKIPPED".equals(e.getStatus())).count();
+        long passed = executions.stream().filter(e -> "PASS".equals(e.getStatus())).count();
+        long failed = executions.stream().filter(e -> "FAIL".equals(e.getStatus()) || "BLOCKED".equals(e.getStatus())).count();
+        long skipped = executions.stream().filter(e -> "SKIPPED".equals(e.getStatus()) || "NOT_EXECUTED".equals(e.getStatus())).count();
 
         stats.setTotalTestCases(totalTestCases);
         stats.setTotalTestRuns(totalTestRuns);
@@ -118,5 +122,68 @@ public class ReportService {
         stats.setPassRate(totalExecutions > 0 ? (passed * 100.0 / totalExecutions) : 0.0);
 
         return stats;
+    }
+
+    public TestRunReportDTO getTestRunReport(Long testRunId) {
+        TestRun testRun = testRunRepository.findById(testRunId)
+            .orElseThrow(() -> new RuntimeException("Test Run not found"));
+
+        Project project = projectRepository.findById(testRun.getProjectId())
+            .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        List<TestExecution> executions = testExecutionRepository.findAll().stream()
+            .filter(e -> e.getTestRunId().equals(testRunId))
+            .collect(Collectors.toList());
+
+        long passed = executions.stream().filter(e -> "PASS".equals(e.getStatus())).count();
+        long failed = executions.stream().filter(e -> "FAIL".equals(e.getStatus()) || "BLOCKED".equals(e.getStatus())).count();
+        long skipped = executions.stream().filter(e -> "SKIPPED".equals(e.getStatus()) || "NOT_EXECUTED".equals(e.getStatus())).count();
+
+        List<TestRunDetailDTO> testCaseDetails = new ArrayList<>();
+        for (TestExecution execution : executions) {
+            TestCase testCase = testCaseRepository.findById(execution.getTestCaseId())
+                .orElse(null);
+
+            if (testCase != null) {
+                String executedByName = null;
+                if (execution.getExecutedByUserId() != null) {
+                    User executedBy = userRepository.findById(execution.getExecutedByUserId()).orElse(null);
+                    if (executedBy != null) {
+                        executedByName = executedBy.getUsername();
+                    }
+                }
+
+                TestRunDetailDTO detail = new TestRunDetailDTO(
+                    testCase.getId(),
+                    testCase.getTitle(),
+                    testCase.getDescription(),
+                    testCase.getPriority() != null ? testCase.getPriority().toString() : null,
+                    execution.getStatus(),
+                    execution.getActualResult(),
+                    execution.getComments(),
+                    executedByName,
+                    execution.getExecutedAt(),
+                    execution.getExecutionTimeMinutes(),
+                    execution.getDefectReference()
+                );
+                testCaseDetails.add(detail);
+            }
+        }
+
+        TestRunReportDTO report = new TestRunReportDTO();
+        report.setTestRunId(testRun.getId());
+        report.setTestRunName(testRun.getName());
+        report.setProjectName(project.getName());
+        report.setStatus(testRun.getStatus());
+        report.setCreatedAt(testRun.getCreatedAt());
+        report.setCompletedAt(testRun.getEndDate());
+        report.setTotalTestCases((long) executions.size());
+        report.setPassedExecutions(passed);
+        report.setFailedExecutions(failed);
+        report.setSkippedExecutions(skipped);
+        report.setPassRate(executions.size() > 0 ? (passed * 100.0 / executions.size()) : 0.0);
+        report.setTestCases(testCaseDetails);
+
+        return report;
     }
 }

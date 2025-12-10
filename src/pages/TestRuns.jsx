@@ -326,7 +326,7 @@ export default function TestRuns() {
 
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 whitespace-nowrap"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 New Test Run
