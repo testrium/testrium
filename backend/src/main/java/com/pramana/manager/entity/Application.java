@@ -6,34 +6,24 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "test_suites")
-public class TestSuite {
+@Table(name = "applications")
+public class Application {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Suite name is required")
+    @NotBlank(message = "Application name is required")
     @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    private Project project;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "application_id")
-    private Application application;
-
-    @OneToMany(mappedBy = "suite", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TestCase> testCases = new ArrayList<>();
+    @Column(nullable = false)
+    private String status = "ACTIVE"; // ACTIVE, ARCHIVED
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
@@ -46,7 +36,7 @@ public class TestSuite {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public TestSuite() {
+    public Application() {
     }
 
     // Getters and Setters
@@ -74,20 +64,12 @@ public class TestSuite {
         this.description = description;
     }
 
-    public Project getProject() {
-        return project;
+    public String getStatus() {
+        return status;
     }
 
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public List<TestCase> getTestCases() {
-        return testCases;
-    }
-
-    public void setTestCases(List<TestCase> testCases) {
-        this.testCases = testCases;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public User getCreatedBy() {
@@ -112,13 +94,5 @@ public class TestSuite {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public Application getApplication() {
-        return application;
-    }
-
-    public void setApplication(Application application) {
-        this.application = application;
     }
 }

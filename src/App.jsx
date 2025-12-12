@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import TestCases from './pages/TestCases';
+import Applications from './pages/Applications';
 import TestSuites from './pages/TestSuites';
 import TestCaseDetails from './pages/TestCaseDetails';
 import TestRuns from './pages/TestRuns';
@@ -37,6 +38,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TestCases />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/applications"
+            element={
+              <ProtectedRoute>
+                <Applications />
               </ProtectedRoute>
             }
           />

@@ -43,6 +43,12 @@ public class TestCase {
     @Column(nullable = false)
     private TestType type = TestType.FUNCTIONAL;
 
+    @Column(nullable = false)
+    private Boolean isAutomated = false;
+
+    @Column(nullable = false)
+    private Boolean isRegression = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -188,6 +194,22 @@ public class TestCase {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getIsAutomated() {
+        return isAutomated;
+    }
+
+    public void setIsAutomated(Boolean isAutomated) {
+        this.isAutomated = isAutomated;
+    }
+
+    public Boolean getIsRegression() {
+        return isRegression;
+    }
+
+    public void setIsRegression(Boolean isRegression) {
+        this.isRegression = isRegression;
     }
 
     public enum Priority {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { testSuitesAPI, projectsAPI, projectMembersAPI } from '../services/api';
+import { applicationsAPI } from '../services/applications';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -27,6 +28,7 @@ export default function TestSuites() {
   const location = useLocation();
   const [suites, setSuites] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +38,7 @@ export default function TestSuites() {
   // Filters
   const [filters, setFilters] = useState({
     projectId: '',
+    applicationId: '',
     search: ''
   });
 
@@ -43,7 +46,8 @@ export default function TestSuites() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    projectId: ''
+    projectId: '',
+    applicationId: ''
   });
 
   // Reload data whenever this component mounts or location changes
@@ -56,7 +60,7 @@ export default function TestSuites() {
     if (projects.length > 0 || user?.role === 'ADMIN') {
       loadSuites();
     }
-  }, [filters.projectId, projects]);
+  }, [filters.projectId, filters.applicationId, projects]);
 
   useEffect(() => {
     if (showModal) {
@@ -64,13 +68,15 @@ export default function TestSuites() {
         setFormData({
           name: editingSuite.name || '',
           description: editingSuite.description || '',
-          projectId: editingSuite.projectId?.toString() || ''
+          projectId: editingSuite.projectId?.toString() || '',
+          applicationId: editingSuite.applicationId?.toString() || ''
         });
       } else {
         setFormData({
           name: '',
           description: '',
-          projectId: ''
+          projectId: '',
+          applicationId: ''
         });
       }
     }
@@ -99,6 +105,11 @@ export default function TestSuites() {
       }
 
       setProjects(userProjects);
+
+      // Load applications
+      const appsRes = await applicationsAPI.getAll();
+      setApplications(appsRes.data);
+
       await loadSuites();
     } catch (err) {
       setError('Failed to load data');
@@ -125,6 +136,11 @@ export default function TestSuites() {
         suitesList = suitesList.filter(suite => userProjectIds.includes(suite.projectId));
       }
 
+      // Filter by application if selected
+      if (filters.applicationId) {
+        suitesList = suitesList.filter(suite => suite.applicationId?.toString() === filters.applicationId);
+      }
+
       setSuites(suitesList);
       setError(''); // Clear any previous errors
     } catch (err) {
@@ -142,7 +158,8 @@ export default function TestSuites() {
     try {
       const payload = {
         ...formData,
-        projectId: parseInt(formData.projectId)
+        projectId: parseInt(formData.projectId),
+        applicationId: formData.applicationId ? parseInt(formData.applicationId) : null
       };
 
       if (editingSuite) {
@@ -187,6 +204,7 @@ export default function TestSuites() {
   const clearFilters = () => {
     setFilters({
       projectId: '',
+      applicationId: '',
       search: ''
     });
   };
@@ -230,7 +248,7 @@ export default function TestSuites() {
                   <Filter className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                {(filters.projectId || filters.search) && (
+                {(filters.projectId || filters.applicationId || filters.search) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     Clear All
                   </Button>
@@ -238,7 +256,7 @@ export default function TestSuites() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
                     Search
@@ -265,6 +283,21 @@ export default function TestSuites() {
                     <option value="">All Projects</option>
                     {projects.map(project => (
                       <option key={project.id} value={project.id}>{project.name}</option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Application
+                  </label>
+                  <Select
+                    value={filters.applicationId}
+                    onChange={(e) => setFilters(prev => ({ ...prev, applicationId: e.target.value }))}
+                  >
+                    <option value="">All Applications</option>
+                    {applications.filter(a => a.status === 'ACTIVE').map(app => (
+                      <option key={app.id} value={app.id}>{app.name}</option>
                     ))}
                   </Select>
                 </div>
@@ -440,6 +473,25 @@ export default function TestSuites() {
                   {projects.map(project => (
                     <option key={project.id} value={project.id}>
                       {project.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              {/* Application */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                  Application
+                </label>
+                <Select
+                  name="applicationId"
+                  value={formData.applicationId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, applicationId: e.target.value }))}
+                >
+                  <option value="">Select Application (Optional)</option>
+                  {applications.filter(a => a.status === 'ACTIVE').map(app => (
+                    <option key={app.id} value={app.id}>
+                      {app.name}
                     </option>
                   ))}
                 </Select>

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play, BarChart3 } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3, Package } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -92,10 +92,19 @@ export default function Navigation() {
                 Test Cases
               </Button>
               <Button
+                variant={isActive('/applications') ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => navigate('/applications')}
+                className={isActive('/applications') ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : ''}
+              >
+                <Package className="mr-2 h-4 w-4" />
+                Applications
+              </Button>
+              <Button
                 variant={isActive('/test-suites') ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => navigate('/test-suites')}
-                className={isActive('/test-suites') ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : ''}
+                className={isActive('/test-suites') ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' : ''}
               >
                 <Layers className="mr-2 h-4 w-4" />
                 Test Suites
