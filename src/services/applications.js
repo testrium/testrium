@@ -3,6 +3,7 @@ import api from '../api/axios';
 export const applicationsAPI = {
   getAll: () => api.get('/applications'),
   getActive: () => api.get('/applications/active'),
+  getByProject: (projectId) => api.get(`/applications/project/${projectId}`),
   getById: (id) => api.get(`/applications/${id}`),
   create: (data) => api.post('/applications', data),
   update: (id, data) => api.put(`/applications/${id}`, data),

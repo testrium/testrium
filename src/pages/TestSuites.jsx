@@ -110,6 +110,7 @@ export default function TestSuites() {
       const appsRes = await applicationsAPI.getAll();
       setApplications(appsRes.data);
 
+      // Load suites
       await loadSuites();
     } catch (err) {
       setError('Failed to load data');
@@ -481,15 +482,16 @@ export default function TestSuites() {
               {/* Application */}
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                  Application
+                  Application <span className="text-red-500">*</span>
                 </label>
                 <Select
                   name="applicationId"
                   value={formData.applicationId}
                   onChange={(e) => setFormData(prev => ({ ...prev, applicationId: e.target.value }))}
+                  required
                 >
-                  <option value="">Select Application (Optional)</option>
-                  {applications.filter(a => a.status === 'ACTIVE').map(app => (
+                  <option value="">Select Application</option>
+                  {applications.filter(a => a.status === 'ACTIVE' && (!formData.projectId || a.project?.id?.toString() === formData.projectId)).map(app => (
                     <option key={app.id} value={app.id}>
                       {app.name}
                     </option>

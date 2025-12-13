@@ -4,8 +4,7 @@ import com.pramana.manager.entity.Application;
 import com.pramana.manager.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +26,11 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getActiveApplications());
     }
 
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<Application>> getApplicationsByProject(@PathVariable Long projectId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByProject(projectId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
         return ResponseEntity.ok(applicationService.getApplicationById(id));
@@ -35,8 +39,9 @@ public class ApplicationController {
     @PostMapping
     public ResponseEntity<Application> createApplication(
             @RequestBody Application application,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Application created = applicationService.createApplication(application, userDetails.getUsername());
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        Application created = applicationService.createApplication(application, userEmail);
         return ResponseEntity.ok(created);
     }
 

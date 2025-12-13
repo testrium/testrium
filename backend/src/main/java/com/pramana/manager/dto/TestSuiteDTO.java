@@ -19,6 +19,10 @@ public class TestSuiteDTO {
 
     private String projectName;
 
+    private Long applicationId;
+
+    private String applicationName;
+
     private Integer testCaseCount;
 
     private String createdByUsername;
@@ -101,5 +105,21 @@ public class TestSuiteDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Long getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(Long applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 }

@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     List<Application> findByStatus(String status);
+    List<Application> findByProjectId(Long projectId);
 }

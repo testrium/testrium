@@ -1,5 +1,6 @@
 package com.pramana.manager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,8 +26,14 @@ public class Application {
     @Column(nullable = false)
     private String status = "ACTIVE"; // ACTIVE, ARCHIVED
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "project_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "created_by", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "password"})
     private User createdBy;
 
     @CreationTimestamp
@@ -94,5 +101,13 @@ public class Application {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { applicationsAPI } from '../services/applications';
+import { projectsAPI, projectMembersAPI } from '../services/api';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -14,31 +15,75 @@ import { Plus, Edit, Trash2, AlertCircle, Package } from 'lucide-react';
 export default function Applications() {
   const { user } = useAuth();
   const [applications, setApplications] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingApp, setEditingApp] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
+  const [canManageApps, setCanManageApps] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    status: 'ACTIVE'
+    status: 'ACTIVE',
+    projectId: ''
   });
 
   useEffect(() => {
-    loadApplications();
-  }, []);
+    if (user) {
+      loadData();
+      checkUserPermissions();
+    }
+  }, [user]);
 
-  const loadApplications = async () => {
+  const loadData = async () => {
+    if (!user) return;
+
     try {
       setLoading(true);
-      const response = await applicationsAPI.getAll();
-      setApplications(response.data);
+      const [appsRes, projectsRes] = await Promise.all([
+        applicationsAPI.getAll(),
+        user.role === 'ADMIN' ? projectsAPI.getAll() : loadUserProjects()
+      ]);
+      setApplications(appsRes.data);
+      setProjects(projectsRes?.data || projectsRes || []);
     } catch (err) {
-      setError('Failed to load applications');
+      setError('Failed to load data');
       console.error('Load error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUserProjects = async () => {
+    if (!user?.id) return [];
+    const membershipRes = await projectMembersAPI.getUserProjects(user.id);
+    const projectIds = [...new Set(membershipRes.data.map(m => m.projectId))];
+    const allProjectsRes = await projectsAPI.getAll();
+    return allProjectsRes.data.filter(p => projectIds.includes(p.id));
+  };
+
+  const checkUserPermissions = async () => {
+    if (!user) {
+      setCanManageApps(false);
+      return;
+    }
+
+    // Admin users can always manage applications
+    if (user.role === 'ADMIN') {
+      setCanManageApps(true);
+      return;
+    }
+
+    // Check if user is LEAD in any project
+    try {
+      const response = await projectMembersAPI.getUserProjects(user.id);
+      const memberships = response.data;
+      const hasLeadRole = memberships.some(m => m.role === 'LEAD');
+      setCanManageApps(hasLeadRole);
+    } catch (err) {
+      console.error('Error checking user permissions:', err);
+      setCanManageApps(false);
     }
   };
 
@@ -46,12 +91,16 @@ export default function Applications() {
     e.preventDefault();
     setFormLoading(true);
     try {
+      const payload = {
+        ...formData,
+        project: { id: parseInt(formData.projectId) }
+      };
       if (editingApp) {
-        await applicationsAPI.update(editingApp.id, formData);
+        await applicationsAPI.update(editingApp.id, payload);
       } else {
-        await applicationsAPI.create(formData);
+        await applicationsAPI.create(payload);
       }
-      await loadApplications();
+      await loadData();
       handleCloseModal();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save application');
@@ -64,7 +113,7 @@ export default function Applications() {
     if (!window.confirm('Archive this application?')) return;
     try {
       await applicationsAPI.delete(id);
-      loadApplications();
+      loadData();
     } catch (err) {
       setError('Failed to delete application');
     }
@@ -73,7 +122,7 @@ export default function Applications() {
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingApp(null);
-    setFormData({ name: '', description: '', status: 'ACTIVE' });
+    setFormData({ name: '', description: '', status: 'ACTIVE', projectId: '' });
     setError('');
   };
 
@@ -82,7 +131,8 @@ export default function Applications() {
       setFormData({
         name: editingApp.name || '',
         description: editingApp.description || '',
-        status: editingApp.status || 'ACTIVE'
+        status: editingApp.status || 'ACTIVE',
+        projectId: editingApp.project?.id?.toString() || ''
       });
     }
   }, [showModal, editingApp]);
@@ -99,7 +149,7 @@ export default function Applications() {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Applications</h2>
               <p className="text-gray-600 dark:text-gray-400 mt-2">Manage your test applications</p>
             </div>
-            {user?.role === 'ADMIN' && (
+            {canManageApps && (
               <Button onClick={() => setShowModal(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
                 <Plus className="mr-2 h-4 w-4" />
                 New Application
@@ -163,7 +213,7 @@ export default function Applications() {
                     {app.description && (
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{app.description}</p>
                     )}
-                    {user?.role === 'ADMIN' && (
+                    {canManageApps && (
                       <div className="flex gap-2">
                         <Button variant="ghost" size="sm" onClick={() => { setEditingApp(app); setShowModal(true); }}>
                           <Edit className="h-4 w-4" />
@@ -196,6 +246,13 @@ export default function Applications() {
               </div>
             )}
             <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">Project <span className="text-red-500">*</span></label>
+                <Select value={formData.projectId} onChange={(e) => setFormData({...formData, projectId: e.target.value})} required>
+                  <option value="">Select Project</option>
+                  {projects.map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}
+                </Select>
+              </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">Name <span className="text-red-500">*</span></label>
                 <Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />

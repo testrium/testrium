@@ -43,10 +43,10 @@ public class TestCase {
     @Column(nullable = false)
     private TestType type = TestType.FUNCTIONAL;
 
-    @Column(nullable = false)
+    @Column
     private Boolean isAutomated = false;
 
-    @Column(nullable = false)
+    @Column
     private Boolean isRegression = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
