@@ -13,6 +13,7 @@ import TestCaseDetails from './pages/TestCaseDetails';
 import TestRuns from './pages/TestRuns';
 import TestRunExecution from './pages/TestRunExecution';
 import Reports from './pages/Reports';
+import Metrics from './pages/Metrics';
 
 function App() {
   return (
@@ -86,6 +87,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/metrics"
+            element={
+              <ProtectedRoute>
+                <Metrics />
               </ProtectedRoute>
             }
           />

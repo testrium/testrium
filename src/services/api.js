@@ -94,4 +94,21 @@ export const projectMembersAPI = {
   updateMemberRole: (memberId, role) => api.put(`/project-members/${memberId}/role`, { role }),
 };
 
+// Metrics API
+export const metricsAPI = {
+  getModuleMetrics: (moduleId) => api.get(`/metrics/module/${moduleId}`),
+  getApplicationMetrics: (applicationId) => api.get(`/metrics/application/${applicationId}`),
+  getProjectMetrics: (projectId) => api.get(`/metrics/project/${projectId}`),
+  getAllApplicationMetricsForProject: (projectId) => api.get(`/metrics/project/${projectId}/applications`),
+  getAllModuleMetricsForApplication: (applicationId) => api.get(`/metrics/application/${applicationId}/modules`),
+};
+
+// Automation Comments API
+export const automationCommentsAPI = {
+  addComment: (data, userId) => api.post('/automation-comments', data, { params: { userId } }),
+  getCurrentComment: (testCaseId) => api.get(`/automation-comments/current/${testCaseId}`),
+  getCommentHistory: (testCaseId) => api.get(`/automation-comments/history/${testCaseId}`),
+  deleteComment: (commentId) => api.delete(`/automation-comments/${commentId}`),
+};
+
 export default api;

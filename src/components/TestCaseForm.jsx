@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { testCasesAPI, projectsAPI, testModulesAPI } from '../services/api';
+import { testCasesAPI, projectsAPI, testModulesAPI, automationCommentsAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
@@ -12,12 +13,17 @@ import {
   ModalContent,
   ModalFooter
 } from './ui/Modal';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, MessageSquare, History } from 'lucide-react';
 
 export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = null, projects = [] }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [modules, setModules] = useState([]);
+  const [automationComment, setAutomationComment] = useState('');
+  const [automationStatus, setAutomationStatus] = useState('');
+  const [commentHistory, setCommentHistory] = useState([]);
+  const [showCommentHistory, setShowCommentHistory] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -54,6 +60,10 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
         if (testCase.projectId) {
           loadModulesByProject(testCase.projectId);
         }
+        // Load automation comment if test case is not automated
+        if (!testCase.isAutomated && testCase.id) {
+          loadAutomationComment(testCase.id);
+        }
       }
     }
   }, [isOpen, testCase]);
@@ -73,6 +83,30 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       setModules(response.data);
     } catch (err) {
       console.error('Load modules error:', err);
+    }
+  };
+
+  const loadAutomationComment = async (testCaseId) => {
+    try {
+      const response = await automationCommentsAPI.getCurrentComment(testCaseId);
+      if (response.data) {
+        setAutomationComment(response.data.comment);
+        setAutomationStatus(response.data.automationStatus || '');
+      }
+    } catch (err) {
+      // No current comment exists, which is fine
+      console.log('No automation comment found');
+    }
+  };
+
+  const loadCommentHistory = async () => {
+    if (!testCase || !testCase.id) return;
+    try {
+      const response = await automationCommentsAPI.getCommentHistory(testCase.id);
+      setCommentHistory(response.data);
+      setShowCommentHistory(true);
+    } catch (err) {
+      console.error('Load comment history error:', err);
     }
   };
 
@@ -96,10 +130,23 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
         moduleId: formData.moduleId ? parseInt(formData.moduleId) : null
       };
 
+      let savedTestCaseId;
       if (testCase) {
         await testCasesAPI.update(testCase.id, payload);
+        savedTestCaseId = testCase.id;
       } else {
-        await testCasesAPI.create(payload);
+        const response = await testCasesAPI.create(payload);
+        savedTestCaseId = response.data.id;
+      }
+
+      // Save automation comment if not automated and comment is provided
+      if (!formData.isAutomated && automationComment.trim() && savedTestCaseId && user) {
+        const commentPayload = {
+          testCaseId: savedTestCaseId,
+          comment: automationComment.trim(),
+          automationStatus: automationStatus || null
+        };
+        await automationCommentsAPI.addComment(commentPayload, user.id);
       }
 
       onSuccess();
@@ -128,6 +175,10 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       isAutomated: false,
       isRegression: false
     });
+    setAutomationComment('');
+    setAutomationStatus('');
+    setCommentHistory([]);
+    setShowCommentHistory(false);
     setError('');
   };
 
@@ -346,6 +397,119 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
                 </label>
               </div>
             </div>
+
+            {/* Automation Comment Section - Show only when NOT automated */}
+            {!formData.isAutomated && (
+              <div className="border-2 border-orange-200 dark:border-orange-800 rounded-lg p-4 bg-orange-50/50 dark:bg-orange-900/10">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-semibold text-orange-900 dark:text-orange-300 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Why is this test not automated?
+                  </label>
+                  {testCase && testCase.id && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={loadCommentHistory}
+                      className="text-xs text-orange-700 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-200"
+                    >
+                      <History className="h-3 w-3 mr-1" />
+                      View History
+                    </Button>
+                  )}
+                </div>
+
+                {/* Automation Status */}
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-400 mb-1.5 block">
+                    Automation Status
+                  </label>
+                  <Select
+                    value={automationStatus}
+                    onChange={(e) => setAutomationStatus(e.target.value)}
+                    className="text-sm"
+                  >
+                    <option value="">Select status...</option>
+                    <option value="NOT_FEASIBLE">Not Feasible</option>
+                    <option value="REQUIRES_MANUAL">Requires Manual Testing</option>
+                    <option value="BLOCKED">Blocked by Technical Limitations</option>
+                    <option value="PENDING_TOOLING">Pending Tooling/Infrastructure</option>
+                    <option value="PLANNED">Planned for Automation</option>
+                    <option value="IN_PROGRESS">Automation in Progress</option>
+                    <option value="DEFERRED">Deferred to Future Sprint</option>
+                  </Select>
+                </div>
+
+                {/* Comment */}
+                <Textarea
+                  value={automationComment}
+                  onChange={(e) => setAutomationComment(e.target.value)}
+                  placeholder="Explain why this test case cannot be automated or what is blocking automation..."
+                  rows={3}
+                  className="text-sm"
+                />
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  This comment will be tracked with history for audit purposes
+                </p>
+
+                {/* Comment History Modal */}
+                {showCommentHistory && (
+                  <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Comment History</h4>
+                      <button
+                        type="button"
+                        onClick={() => setShowCommentHistory(false)}
+                        className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    {commentHistory.length === 0 ? (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
+                        No comment history available
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {commentHistory.map((historyItem, index) => (
+                          <div
+                            key={historyItem.id}
+                            className={`p-2 rounded border ${
+                              historyItem.isCurrent
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                                : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-900 dark:text-white">
+                                {historyItem.createdByUsername}
+                                {historyItem.isCurrent && (
+                                  <span className="ml-2 px-1.5 py-0.5 bg-blue-600 text-white rounded text-[10px]">
+                                    CURRENT
+                                  </span>
+                                )}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(historyItem.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            {historyItem.automationStatus && (
+                              <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">
+                                Status: {historyItem.automationStatus.replace(/_/g, ' ')}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                              {historyItem.comment}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Expected Result */}
             <div>
