@@ -3,13 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [displayRole, setDisplayRole] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const determineRole = async () => {
@@ -49,105 +50,68 @@ export default function Navigation() {
 
   const isActive = (path) => location.pathname === path;
 
+  const navItems = [
+    { path: '/dashboard', icon: Home, label: 'Dashboard', gradient: 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' },
+    { path: '/metrics', icon: TrendingUp, label: 'Metrics', gradient: 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' },
+    { path: '/applications', icon: Package, label: 'Applications', gradient: 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' },
+    { path: '/test-modules', icon: Layers, label: 'Modules', gradient: 'from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' },
+    { path: '/test-cases', icon: FileText, label: 'Test Cases', gradient: 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' },
+    { path: '/test-runs', icon: Play, label: 'Test Runs', gradient: 'from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700' },
+    { path: '/reports', icon: BarChart3, label: 'Reports', gradient: 'from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' }
+  ];
+
+  const handleNavClick = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-3">
+          {/* Logo and Brand */}
+          <div className="flex items-center space-x-2 flex-shrink-0">
             <div
               onClick={() => navigate('/dashboard')}
               className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 cursor-pointer hover:scale-105 transition-transform"
             >
               <span className="text-white font-bold text-lg">P</span>
             </div>
-            <div>
-              <h1
-                onClick={() => navigate('/dashboard')}
-                className="font-bold text-lg text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Pramana Manager
-              </h1>
-            </div>
+            <h1
+              onClick={() => navigate('/dashboard')}
+              className="font-bold text-base sm:text-lg text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden sm:block"
+            >
+              Pramana Manager
+            </h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Navigation Links */}
-            <nav className="hidden md:flex items-center gap-2">
+          {/* Desktop/Tablet Navigation - Text Only */}
+          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center mx-4 overflow-x-auto">
+            {navItems.map(({ path, label, gradient }) => (
               <Button
-                variant={isActive('/dashboard') ? 'default' : 'ghost'}
+                key={path}
+                variant={isActive(path) ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => navigate('/dashboard')}
-                className={isActive('/dashboard') ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : ''}
+                onClick={() => handleNavClick(path)}
+                className={`${isActive(path) ? `bg-gradient-to-r ${gradient}` : ''} whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3`}
               >
-                <Home className="mr-2 h-4 w-4" />
-                Dashboard
+                {label}
               </Button>
-              <Button
-                variant={isActive('/test-cases') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/test-cases')}
-                className={isActive('/test-cases') ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : ''}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Test Cases
-              </Button>
-              <Button
-                variant={isActive('/applications') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/applications')}
-                className={isActive('/applications') ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : ''}
-              >
-                <Package className="mr-2 h-4 w-4" />
-                Applications
-              </Button>
-              <Button
-                variant={isActive('/test-modules') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/test-modules')}
-                className={isActive('/test-modules') ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' : ''}
-              >
-                <Layers className="mr-2 h-4 w-4" />
-                Test Modules
-              </Button>
-              <Button
-                variant={isActive('/test-runs') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/test-runs')}
-                className={isActive('/test-runs') ? 'bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700' : ''}
-              >
-                <Play className="mr-2 h-4 w-4" />
-                Test Runs
-              </Button>
-              <Button
-                variant={isActive('/metrics') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/metrics')}
-                className={isActive('/metrics') ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' : ''}
-              >
-                <TrendingUp className="mr-2 h-4 w-4" />
-                Metrics
-              </Button>
-              <Button
-                variant={isActive('/reports') ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => navigate('/reports')}
-                className={isActive('/reports') ? 'bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' : ''}
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Reports
-              </Button>
-            </nav>
+            ))}
+          </nav>
 
-            {/* User Profile */}
-            <div className="hidden sm:flex items-center gap-3 ml-4 pl-4 border-l border-gray-200 dark:border-gray-700">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
-                <span className="text-blue-700 dark:text-blue-300 font-bold text-sm">
+          {/* Right Section */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* User Profile - Hidden on small screens */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
+                <span className="text-blue-700 dark:text-blue-300 font-bold text-xs">
                   {user?.username?.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <div className="text-sm">
-                <p className="font-semibold text-gray-900 dark:text-white">{user?.username}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
+              <div className="text-xs">
+                <p className="font-semibold text-gray-900 dark:text-white leading-tight">{user?.username}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
               </div>
             </div>
 
@@ -156,13 +120,66 @@ export default function Navigation() {
               variant="outline"
               size="sm"
               onClick={logout}
-              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hidden md:flex"
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <LogOut className="h-4 w-4 sm:mr-2" />
+              <span className="hidden lg:inline text-sm">Logout</span>
+            </Button>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 space-y-2 animate-in slide-in-from-top">
+            {navItems.map(({ path, icon: Icon, label, gradient }) => (
+              <button
+                key={path}
+                onClick={() => handleNavClick(path)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive(path)
+                    ? 'bg-gradient-to-r ' + gradient + ' text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="font-medium">{label}</span>
+              </button>
+            ))}
+
+            {/* Mobile User Info */}
+            <div className="px-4 py-3 mt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
+                  <span className="text-blue-700 dark:text-blue-300 font-bold">
+                    {user?.username?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white">{user?.username}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                onClick={logout}
+                className="w-full justify-center"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -9,6 +9,19 @@ import {
   BarChart3, TrendingUp, Target, CheckCircle2, AlertCircle,
   Activity, FileText, Layers, Box
 } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 
 export default function Metrics() {
   const { user, logout } = useAuth();
@@ -365,6 +378,128 @@ export default function Metrics() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Graphical Views */}
+                  <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                    {/* Bar Chart - Automation Coverage Overview */}
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          Automation Coverage Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <BarChart
+                            data={[
+                              ...applicationMetrics.map(m => ({
+                                name: m.entityName,
+                                Total: m.totalTestCases,
+                                Automated: m.automatedTestCases,
+                                Manual: m.totalTestCases - m.automatedTestCases
+                              })),
+                              {
+                                name: 'Total',
+                                Total: applicationMetrics.reduce((sum, m) => sum + m.totalTestCases, 0),
+                                Automated: applicationMetrics.reduce((sum, m) => sum + m.automatedTestCases, 0),
+                                Manual: applicationMetrics.reduce((sum, m) => sum + (m.totalTestCases - m.automatedTestCases), 0)
+                              }
+                            ]}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-gray-300 dark:stroke-gray-600" />
+                            <XAxis
+                              dataKey="name"
+                              className="text-xs fill-gray-600 dark:fill-gray-400"
+                              angle={-45}
+                              textAnchor="end"
+                              height={80}
+                            />
+                            <YAxis className="text-xs fill-gray-600 dark:fill-gray-400" />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                              }}
+                            />
+                            <Legend
+                              wrapperStyle={{ fontSize: '12px' }}
+                              iconType="rect"
+                            />
+                            <Bar dataKey="Total" fill="#3b82f6" name="Total" />
+                            <Bar dataKey="Automated" fill="#f97316" name="Automated" />
+                            <Bar dataKey="Manual" fill="#9ca3af" name="Manual" />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pie Chart - Overall Test Distribution */}
+                    <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          Test Distribution
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                            <Pie
+                              data={[
+                                {
+                                  name: 'Automated',
+                                  value: applicationMetrics.reduce((sum, m) => sum + m.automatedTestCases, 0),
+                                  percentage: (() => {
+                                    const total = applicationMetrics.reduce((sum, m) => sum + m.totalTestCases, 0);
+                                    const automated = applicationMetrics.reduce((sum, m) => sum + m.automatedTestCases, 0);
+                                    return total > 0 ? Math.round((automated * 100.0 / total)) : 0;
+                                  })()
+                                },
+                                {
+                                  name: 'Manual',
+                                  value: applicationMetrics.reduce((sum, m) => sum + (m.totalTestCases - m.automatedTestCases), 0),
+                                  percentage: (() => {
+                                    const total = applicationMetrics.reduce((sum, m) => sum + m.totalTestCases, 0);
+                                    const manual = applicationMetrics.reduce((sum, m) => sum + (m.totalTestCases - m.automatedTestCases), 0);
+                                    return total > 0 ? Math.round((manual * 100.0 / total)) : 0;
+                                  })()
+                                }
+                              ]}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={100}
+                              paddingAngle={2}
+                              dataKey="value"
+                              label={({ name, percentage, value }) => `${percentage}%`}
+                              labelLine={false}
+                            >
+                              <Cell fill="#f97316" />
+                              <Cell fill="#9ca3af" />
+                            </Pie>
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                border: '1px solid #e5e7eb',
+                                borderRadius: '8px',
+                                fontSize: '12px'
+                              }}
+                              formatter={(value, name) => {
+                                const total = applicationMetrics.reduce((sum, m) => sum + m.totalTestCases, 0);
+                                const percentage = total > 0 ? Math.round((value * 100.0 / total)) : 0;
+                                return [`${value} (${percentage}%)`, name];
+                              }}
+                            />
+                            <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   {/* Card View (Optional - can be toggled) */}
                   <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">

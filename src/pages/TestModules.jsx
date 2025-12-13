@@ -56,8 +56,8 @@ export default function TestModules() {
   }, [location]);
 
   useEffect(() => {
-    // Only load modules if projects are loaded (or if user is admin)
-    if (projects.length > 0 || user?.role === 'ADMIN') {
+    // Load modules whenever filters change or projects are loaded
+    if (projects.length > 0) {
       loadModules();
     }
   }, [filters.projectId, filters.applicationId, projects]);
