@@ -1,19 +1,14 @@
 package com.pramana.manager.service;
 
-import com.pramana.manager.dto.OverallStatsDTO;
-import com.pramana.manager.dto.ProjectStatsDTO;
-import com.pramana.manager.dto.TestRunReportDTO;
-import com.pramana.manager.dto.TestRunDetailDTO;
-import com.pramana.manager.entity.Project;
-import com.pramana.manager.entity.TestExecution;
-import com.pramana.manager.entity.TestRun;
-import com.pramana.manager.entity.TestCase;
-import com.pramana.manager.entity.User;
+import com.pramana.manager.dto.*;
+import com.pramana.manager.entity.*;
 import com.pramana.manager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +32,9 @@ public class ReportService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ReportTemplateRepository reportTemplateRepository;
 
     public OverallStatsDTO getOverallStats(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
@@ -185,5 +183,108 @@ public class ReportService {
         report.setTestCases(testCaseDetails);
 
         return report;
+    }
+
+    // Trend Analysis
+    public List<TrendDataDTO> getTrendAnalysis(Long projectId, Integer limit) {
+        List<TestRun> testRuns = testRunRepository.findByProjectId(projectId).stream()
+            .filter(tr -> "COMPLETED".equals(tr.getStatus()))
+            .sorted(Comparator.comparing(TestRun::getEndDate).reversed())
+            .limit(limit != null ? limit : 10)
+            .collect(Collectors.toList());
+
+        List<TrendDataDTO> trendData = new ArrayList<>();
+
+        for (TestRun testRun : testRuns) {
+            List<TestExecution> executions = testExecutionRepository.findByTestRunId(testRun.getId());
+
+            long total = executions.size();
+            long passed = executions.stream().filter(e -> "PASS".equals(e.getStatus())).count();
+            long failed = executions.stream().filter(e -> "FAIL".equals(e.getStatus()) || "BLOCKED".equals(e.getStatus())).count();
+            long skipped = executions.stream().filter(e -> "SKIPPED".equals(e.getStatus()) || "NOT_EXECUTED".equals(e.getStatus())).count();
+
+            double passRate = total > 0 ? (passed * 100.0 / total) : 0.0;
+
+            TrendDataDTO data = new TrendDataDTO(
+                testRun.getEndDate(),
+                testRun.getName(),
+                testRun.getId(),
+                total,
+                passed,
+                failed,
+                skipped,
+                passRate
+            );
+            trendData.add(data);
+        }
+
+        // Reverse to get chronological order
+        java.util.Collections.reverse(trendData);
+        return trendData;
+    }
+
+    // Report Template CRUD
+    @Transactional
+    public ReportTemplateDTO createTemplate(ReportTemplateDTO dto, Long userId) {
+        ReportTemplate template = new ReportTemplate();
+        template.setName(dto.getName());
+        template.setDescription(dto.getDescription());
+        template.setCreatedByUserId(userId);
+        template.setProjectId(dto.getProjectId());
+        template.setIncludeOverallStats(dto.getIncludeOverallStats());
+        template.setIncludeProjectStats(dto.getIncludeProjectStats());
+        template.setIncludeTestRunDetails(dto.getIncludeTestRunDetails());
+        template.setIncludeTrendAnalysis(dto.getIncludeTrendAnalysis());
+        template.setIncludeCharts(dto.getIncludeCharts());
+        template.setExportFormat(dto.getExportFormat());
+
+        template = reportTemplateRepository.save(template);
+        return convertTemplateToDTO(template);
+    }
+
+    public List<ReportTemplateDTO> getUserTemplates(Long userId) {
+        return reportTemplateRepository.findByCreatedByUserId(userId).stream()
+            .map(this::convertTemplateToDTO)
+            .collect(Collectors.toList());
+    }
+
+    public ReportTemplateDTO getTemplateById(Long id) {
+        ReportTemplate template = reportTemplateRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Template not found"));
+        return convertTemplateToDTO(template);
+    }
+
+    @Transactional
+    public void deleteTemplate(Long id) {
+        reportTemplateRepository.deleteById(id);
+    }
+
+    private ReportTemplateDTO convertTemplateToDTO(ReportTemplate template) {
+        ReportTemplateDTO dto = new ReportTemplateDTO();
+        dto.setId(template.getId());
+        dto.setName(template.getName());
+        dto.setDescription(template.getDescription());
+        dto.setCreatedByUserId(template.getCreatedByUserId());
+        dto.setProjectId(template.getProjectId());
+        dto.setIncludeOverallStats(template.getIncludeOverallStats());
+        dto.setIncludeProjectStats(template.getIncludeProjectStats());
+        dto.setIncludeTestRunDetails(template.getIncludeTestRunDetails());
+        dto.setIncludeTrendAnalysis(template.getIncludeTrendAnalysis());
+        dto.setIncludeCharts(template.getIncludeCharts());
+        dto.setExportFormat(template.getExportFormat());
+        dto.setCreatedAt(template.getCreatedAt());
+        dto.setUpdatedAt(template.getUpdatedAt());
+
+        // Set username
+        userRepository.findById(template.getCreatedByUserId())
+            .ifPresent(user -> dto.setCreatedByUsername(user.getUsername()));
+
+        // Set project name
+        if (template.getProjectId() != null) {
+            projectRepository.findById(template.getProjectId())
+                .ifPresent(project -> dto.setProjectName(project.getName()));
+        }
+
+        return dto;
     }
 }

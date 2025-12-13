@@ -6,8 +6,8 @@ import { Button } from '../components/ui/Button';
 import { reportsAPI } from '../api/reports';
 import { projectsAPI } from '../services/api';
 import { testRunsAPI } from '../services/testRuns';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, FileText, Filter } from 'lucide-react';
+import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Download, FileText, Filter, TrendingUp, Save, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -25,9 +25,29 @@ const Reports = () => {
   const [testRunReport, setTestRunReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
 
+  // Trend analysis state
+  const [trendData, setTrendData] = useState([]);
+  const [selectedTrendProject, setSelectedTrendProject] = useState('');
+  const [loadingTrend, setLoadingTrend] = useState(false);
+
+  // Template state
+  const [templates, setTemplates] = useState([]);
+  const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+  const [templateConfig, setTemplateConfig] = useState({
+    includeOverallStats: true,
+    includeProjectStats: true,
+    includeTestRunDetails: true,
+    includeTrendAnalysis: false,
+    includeCharts: true,
+    exportFormat: 'PDF'
+  });
+
   useEffect(() => {
     loadStats();
     loadProjects();
+    loadTemplates();
   }, []);
 
   const loadStats = async () => {
@@ -97,6 +117,115 @@ const Reports = () => {
       loadTestRunReport(testRunId);
     } else {
       setTestRunReport(null);
+    }
+  };
+
+  const loadTrendAnalysis = async (projectId) => {
+    try {
+      setLoadingTrend(true);
+      const response = await reportsAPI.getTrendAnalysis(projectId, 10);
+      setTrendData(response.data);
+      setError('');
+    } catch (err) {
+      console.error('Load trend analysis error:', err);
+      setError('Failed to load trend analysis');
+      setTrendData([]);
+    } finally {
+      setLoadingTrend(false);
+    }
+  };
+
+  const handleTrendProjectChange = (e) => {
+    const projectId = e.target.value;
+    setSelectedTrendProject(projectId);
+    if (projectId) {
+      loadTrendAnalysis(projectId);
+    } else {
+      setTrendData([]);
+    }
+  };
+
+  const loadTemplates = async () => {
+    try {
+      const response = await reportsAPI.getUserTemplates();
+      setTemplates(response.data);
+    } catch (err) {
+      console.error('Load templates error:', err);
+    }
+  };
+
+  const handleSaveTemplate = async () => {
+    try {
+      if (!templateName.trim()) {
+        setError('Template name is required');
+        return;
+      }
+
+      const templateData = {
+        name: templateName,
+        description: templateDescription,
+        projectId: selectedProject || null,
+        ...templateConfig
+      };
+
+      await reportsAPI.createTemplate(templateData);
+      setTemplateName('');
+      setTemplateDescription('');
+      setTemplateConfig({
+        includeOverallStats: true,
+        includeProjectStats: true,
+        includeTestRunDetails: true,
+        includeTrendAnalysis: false,
+        includeCharts: true,
+        exportFormat: 'PDF'
+      });
+      setShowTemplateForm(false);
+      loadTemplates();
+      setError('');
+    } catch (err) {
+      console.error('Save template error:', err);
+      setError('Failed to save template');
+    }
+  };
+
+  const handleDeleteTemplate = async (templateId) => {
+    if (!window.confirm('Are you sure you want to delete this template?')) {
+      return;
+    }
+
+    try {
+      await reportsAPI.deleteTemplate(templateId);
+      loadTemplates();
+      setError('');
+    } catch (err) {
+      console.error('Delete template error:', err);
+      setError('Failed to delete template');
+    }
+  };
+
+  const handleLoadTemplate = async (templateId) => {
+    try {
+      const response = await reportsAPI.getTemplateById(templateId);
+      const template = response.data;
+
+      setTemplateConfig({
+        includeOverallStats: template.includeOverallStats,
+        includeProjectStats: template.includeProjectStats,
+        includeTestRunDetails: template.includeTestRunDetails,
+        includeTrendAnalysis: template.includeTrendAnalysis,
+        includeCharts: template.includeCharts,
+        exportFormat: template.exportFormat
+      });
+
+      if (template.projectId) {
+        setSelectedProject(template.projectId.toString());
+        loadTestRuns(template.projectId);
+      }
+
+      setError('');
+    } catch (err) {
+      console.error('Load template error:', err);
+      setError('Failed to load template');
     }
   };
 
@@ -514,9 +643,262 @@ const Reports = () => {
             </>
           )}
 
-          {/* Divider */}
+          {/* Trend Analysis Section */}
           {!testRunReport && (
-            <div className="my-12 border-t border-gray-300 dark:border-gray-600"></div>
+            <>
+              <div className="my-12 border-t border-gray-300 dark:border-gray-600"></div>
+
+              <Card className="mb-8 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-700 border-2 border-purple-200 dark:border-purple-900">
+                <CardHeader>
+                  <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Trend Analysis Over Time
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Visualize test execution trends across multiple test runs
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Select Project
+                    </label>
+                    <select
+                      value={selectedTrendProject}
+                      onChange={handleTrendProjectChange}
+                      className="w-full md:w-1/2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    >
+                      <option value="">-- Select a project --</option>
+                      {projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {loadingTrend && (
+                    <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+                      Loading trend data...
+                    </div>
+                  )}
+
+                  {!loadingTrend && trendData.length > 0 && (
+                    <div className="mt-6">
+                      <ResponsiveContainer width="100%" height={350}>
+                        <LineChart data={trendData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="testRunName"
+                            angle={-45}
+                            textAnchor="end"
+                            height={100}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Legend />
+                          <Line
+                            type="monotone"
+                            dataKey="passRate"
+                            stroke="#10b981"
+                            strokeWidth={2}
+                            name="Pass Rate (%)"
+                            dot={{ r: 5 }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="totalTests"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                            name="Total Tests"
+                            dot={{ r: 5 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+
+                  {!loadingTrend && selectedTrendProject && trendData.length === 0 && (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      No trend data available for this project
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Custom Report Templates Section */}
+              <Card className="mb-8 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-700 border-2 border-amber-200 dark:border-amber-900">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                        <Save className="w-5 h-5" />
+                        Custom Report Templates
+                      </CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                        Save and reuse your report configurations
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => setShowTemplateForm(!showTemplateForm)}
+                      className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                    >
+                      {showTemplateForm ? 'Cancel' : 'New Template'}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {showTemplateForm && (
+                    <div className="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create New Template</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Template Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={templateName}
+                            onChange={(e) => setTemplateName(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            placeholder="e.g., Weekly Status Report"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Description
+                          </label>
+                          <textarea
+                            value={templateDescription}
+                            onChange={(e) => setTemplateDescription(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            rows="2"
+                            placeholder="Optional description"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={templateConfig.includeOverallStats}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, includeOverallStats: e.target.checked })}
+                                className="rounded"
+                              />
+                              Include Overall Stats
+                            </label>
+                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={templateConfig.includeProjectStats}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, includeProjectStats: e.target.checked })}
+                                className="rounded"
+                              />
+                              Include Project Stats
+                            </label>
+                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={templateConfig.includeTestRunDetails}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, includeTestRunDetails: e.target.checked })}
+                                className="rounded"
+                              />
+                              Include Test Run Details
+                            </label>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={templateConfig.includeTrendAnalysis}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, includeTrendAnalysis: e.target.checked })}
+                                className="rounded"
+                              />
+                              Include Trend Analysis
+                            </label>
+                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                              <input
+                                type="checkbox"
+                                checked={templateConfig.includeCharts}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, includeCharts: e.target.checked })}
+                                className="rounded"
+                              />
+                              Include Charts
+                            </label>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Export Format
+                              </label>
+                              <select
+                                value={templateConfig.exportFormat}
+                                onChange={(e) => setTemplateConfig({ ...templateConfig, exportFormat: e.target.value })}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                              >
+                                <option value="PDF">PDF</option>
+                                <option value="EXCEL">Excel</option>
+                                <option value="BOTH">Both</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={handleSaveTemplate}
+                          className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                        >
+                          Save Template
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {templates.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {templates.map((template) => (
+                        <div
+                          key={template.id}
+                          className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{template.name}</h4>
+                            <button
+                              onClick={() => handleDeleteTemplate(template.id)}
+                              className="text-red-600 hover:text-red-700 dark:text-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          {template.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{template.description}</p>
+                          )}
+                          <div className="text-xs text-gray-500 dark:text-gray-500 mb-3">
+                            <div>Format: {template.exportFormat}</div>
+                            {template.projectName && <div>Project: {template.projectName}</div>}
+                          </div>
+                          <Button
+                            onClick={() => handleLoadTemplate(template.id)}
+                            variant="outline"
+                            className="w-full text-sm"
+                          >
+                            Load Template
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      No templates saved yet. Create your first template above.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div className="my-12 border-t border-gray-300 dark:border-gray-600"></div>
+            </>
           )}
 
           {stats && !testRunReport && (
