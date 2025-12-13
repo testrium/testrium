@@ -49,6 +49,10 @@ public class TestCaseDTO {
 
     private LocalDateTime updatedAt;
 
+    private Boolean isAutomated;
+
+    private Boolean isRegression;
+
     public TestCaseDTO() {
     }
 
@@ -187,5 +191,21 @@ public class TestCaseDTO {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getIsAutomated() {
+        return isAutomated;
+    }
+
+    public void setIsAutomated(Boolean isAutomated) {
+        this.isAutomated = isAutomated;
+    }
+
+    public Boolean getIsRegression() {
+        return isRegression;
+    }
+
+    public void setIsRegression(Boolean isRegression) {
+        this.isRegression = isRegression;
     }
 }

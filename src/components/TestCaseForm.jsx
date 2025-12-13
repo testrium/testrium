@@ -29,7 +29,9 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
     status: 'ACTIVE',
     type: 'FUNCTIONAL',
     projectId: '',
-    moduleId: ''
+    moduleId: '',
+    isAutomated: false,
+    isRegression: false
   });
 
   useEffect(() => {
@@ -45,7 +47,9 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
           status: testCase.status || 'ACTIVE',
           type: testCase.type || 'FUNCTIONAL',
           projectId: testCase.projectId?.toString() || '',
-          moduleId: testCase.moduleId?.toString() || ''
+          moduleId: testCase.moduleId?.toString() || '',
+          isAutomated: testCase.isAutomated || false,
+          isRegression: testCase.isRegression || false
         });
         if (testCase.projectId) {
           loadModulesByProject(testCase.projectId);
@@ -73,8 +77,11 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -117,7 +124,9 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       status: 'ACTIVE',
       type: 'FUNCTIONAL',
       projectId: '',
-      moduleId: ''
+      moduleId: '',
+      isAutomated: false,
+      isRegression: false
     });
     setError('');
   };
@@ -305,6 +314,37 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
                 rows={5}
                 required
               />
+            </div>
+
+            {/* Automation and Regression Flags */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <input
+                  type="checkbox"
+                  id="isAutomated"
+                  name="isAutomated"
+                  checked={formData.isAutomated}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isAutomated" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  Automated Test
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <input
+                  type="checkbox"
+                  id="isRegression"
+                  name="isRegression"
+                  checked={formData.isRegression}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="isRegression" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                  Regression Test
+                </label>
+              </div>
             </div>
 
             {/* Expected Result */}

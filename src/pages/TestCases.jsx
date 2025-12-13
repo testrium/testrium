@@ -32,7 +32,9 @@ export default function TestCases() {
     moduleId: '',
     status: '',
     priority: '',
-    search: ''
+    search: '',
+    automationStatus: '', // ALL, AUTOMATED, MANUAL
+    regressionStatus: ''  // ALL, REGRESSION, NON_REGRESSION
   });
 
   // Reload data whenever this component mounts or location changes
@@ -141,16 +143,29 @@ export default function TestCases() {
       moduleId: '',
       status: '',
       priority: '',
-      search: ''
+      search: '',
+      automationStatus: '',
+      regressionStatus: ''
     });
   };
 
   const filteredTestCases = testCases.filter(tc => {
+    // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      return tc.title.toLowerCase().includes(searchLower) ||
+      const matchesSearch = tc.title.toLowerCase().includes(searchLower) ||
              tc.description?.toLowerCase().includes(searchLower);
+      if (!matchesSearch) return false;
     }
+
+    // Automation filter
+    if (filters.automationStatus === 'AUTOMATED' && !tc.isAutomated) return false;
+    if (filters.automationStatus === 'MANUAL' && tc.isAutomated) return false;
+
+    // Regression filter
+    if (filters.regressionStatus === 'REGRESSION' && !tc.isRegression) return false;
+    if (filters.regressionStatus === 'NON_REGRESSION' && tc.isRegression) return false;
+
     return true;
   });
 
@@ -231,6 +246,74 @@ export default function TestCases() {
             </Button>
           </div>
 
+          {/* Summary Metrics */}
+          {filteredTestCases.length > 0 && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="border-0 shadow-md bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Tests</p>
+                      <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{filteredTestCases.length}</p>
+                    </div>
+                    <FileText className="h-8 w-8 text-blue-500 opacity-50" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-md bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-600 dark:text-green-400">Automated</p>
+                      <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                        {filteredTestCases.filter(tc => tc.isAutomated).length}
+                        <span className="text-sm font-normal text-green-600 dark:text-green-400 ml-2">
+                          ({filteredTestCases.length > 0 ? Math.round((filteredTestCases.filter(tc => tc.isAutomated).length / filteredTestCases.length) * 100) : 0}%)
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-3xl">🤖</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-md bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Manual</p>
+                      <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                        {filteredTestCases.filter(tc => !tc.isAutomated).length}
+                        <span className="text-sm font-normal text-purple-600 dark:text-purple-400 ml-2">
+                          ({filteredTestCases.length > 0 ? Math.round((filteredTestCases.filter(tc => !tc.isAutomated).length / filteredTestCases.length) * 100) : 0}%)
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-3xl">👤</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-md bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Regression</p>
+                      <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                        {filteredTestCases.filter(tc => tc.isRegression).length}
+                        <span className="text-sm font-normal text-orange-600 dark:text-orange-400 ml-2">
+                          ({filteredTestCases.length > 0 ? Math.round((filteredTestCases.filter(tc => tc.isRegression).length / filteredTestCases.length) * 100) : 0}%)
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-3xl">🔄</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Filters Section */}
           <Card className="border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
             <CardHeader>
@@ -239,7 +322,7 @@ export default function TestCases() {
                   <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                {(filters.projectId || filters.moduleId || filters.status || filters.priority || filters.search) && (
+                {(filters.projectId || filters.moduleId || filters.status || filters.priority || filters.search || filters.automationStatus || filters.regressionStatus) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     Clear All
                   </Button>
@@ -247,7 +330,7 @@ export default function TestCases() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
                     Search
@@ -322,6 +405,34 @@ export default function TestCases() {
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
                     <option value="CRITICAL">Critical</option>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Automation
+                  </label>
+                  <Select
+                    value={filters.automationStatus}
+                    onChange={(e) => setFilters(prev => ({ ...prev, automationStatus: e.target.value }))}
+                  >
+                    <option value="">All</option>
+                    <option value="AUTOMATED">🤖 Automated</option>
+                    <option value="MANUAL">👤 Manual</option>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Regression
+                  </label>
+                  <Select
+                    value={filters.regressionStatus}
+                    onChange={(e) => setFilters(prev => ({ ...prev, regressionStatus: e.target.value }))}
+                  >
+                    <option value="">All</option>
+                    <option value="REGRESSION">🔄 Regression</option>
+                    <option value="NON_REGRESSION">Non-Regression</option>
                   </Select>
                 </div>
               </div>
@@ -400,7 +511,7 @@ export default function TestCases() {
                                 <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
                                   {testCase.title}
                                 </h4>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <span className={`px-2 py-0.5 text-xs font-semibold rounded-full flex items-center gap-1 ${getPriorityColor(testCase.priority)}`}>
                                     {testCase.priority}
                                   </span>
@@ -408,6 +519,16 @@ export default function TestCases() {
                                     {getStatusIcon(testCase.status)}
                                     {testCase.status}
                                   </span>
+                                  {testCase.isAutomated && (
+                                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                      🤖 Automated
+                                    </span>
+                                  )}
+                                  {testCase.isRegression && (
+                                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+                                      🔄 Regression
+                                    </span>
+                                  )}
                                 </div>
                               </div>
 

@@ -90,6 +90,8 @@ public class TestCaseService {
         testCase.setType(dto.getType());
         testCase.setProject(project);
         testCase.setCreatedBy(currentUser);
+        testCase.setIsAutomated(dto.getIsAutomated() != null ? dto.getIsAutomated() : false);
+        testCase.setIsRegression(dto.getIsRegression() != null ? dto.getIsRegression() : false);
 
         if (dto.getModuleId() != null) {
             TestModule module = testModuleRepository.findById(dto.getModuleId())
@@ -116,6 +118,8 @@ public class TestCaseService {
         testCase.setStatus(dto.getStatus());
         testCase.setType(dto.getType());
         testCase.setUpdatedBy(currentUser);
+        testCase.setIsAutomated(dto.getIsAutomated() != null ? dto.getIsAutomated() : false);
+        testCase.setIsRegression(dto.getIsRegression() != null ? dto.getIsRegression() : false);
 
         if (dto.getModuleId() != null) {
             TestModule module = testModuleRepository.findById(dto.getModuleId())
@@ -161,6 +165,8 @@ public class TestCaseService {
         }
         dto.setCreatedAt(testCase.getCreatedAt());
         dto.setUpdatedAt(testCase.getUpdatedAt());
+        dto.setIsAutomated(testCase.getIsAutomated());
+        dto.setIsRegression(testCase.getIsRegression());
 
         return dto;
     }
