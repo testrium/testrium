@@ -13,18 +13,18 @@ public interface TestCaseRepository extends JpaRepository<TestCase, Long> {
 
     List<TestCase> findByProjectId(Long projectId);
 
-    List<TestCase> findBySuiteId(Long suiteId);
+    List<TestCase> findByModuleId(Long moduleId);
 
     List<TestCase> findByProjectIdAndStatus(Long projectId, TestCase.TestCaseStatus status);
 
     List<TestCase> findByProjectIdAndPriority(Long projectId, TestCase.Priority priority);
 
     @Query("SELECT tc FROM TestCase tc WHERE tc.project.id = :projectId " +
-           "AND (:suiteId IS NULL OR tc.suite.id = :suiteId) " +
+           "AND (:moduleId IS NULL OR tc.module.id = :moduleId) " +
            "AND (:status IS NULL OR tc.status = :status) " +
            "AND (:priority IS NULL OR tc.priority = :priority)")
     List<TestCase> findByFilters(@Param("projectId") Long projectId,
-                                 @Param("suiteId") Long suiteId,
+                                 @Param("moduleId") Long moduleId,
                                  @Param("status") TestCase.TestCaseStatus status,
                                  @Param("priority") TestCase.Priority priority);
 

@@ -8,7 +8,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import TestCases from './pages/TestCases';
 import Applications from './pages/Applications';
-import TestSuites from './pages/TestSuites';
+import TestModules from './pages/TestModules';
 import TestCaseDetails from './pages/TestCaseDetails';
 import TestRuns from './pages/TestRuns';
 import TestRunExecution from './pages/TestRunExecution';
@@ -50,10 +50,10 @@ function App() {
             }
           />
           <Route
-            path="/test-suites"
+            path="/test-modules"
             element={
               <ProtectedRoute>
-                <TestSuites />
+                <TestModules />
               </ProtectedRoute>
             }
           />

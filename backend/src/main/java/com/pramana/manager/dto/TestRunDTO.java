@@ -8,8 +8,8 @@ public class TestRunDTO {
     private String description;
     private Long projectId;
     private String projectName;
-    private Long suiteId;
-    private String suiteName;
+    private Long moduleId;
+    private String moduleName;
     private Long assignedToUserId;
     private String assignedToUsername;
     private String status;
@@ -31,7 +31,7 @@ public class TestRunDTO {
     public TestRunDTO() {}
 
     public TestRunDTO(Long id, String name, String description, Long projectId, String projectName,
-                      Long suiteId, String suiteName, Long assignedToUserId, String assignedToUsername,
+                      Long moduleId, String moduleName, Long assignedToUserId, String assignedToUsername,
                       String status, LocalDateTime startDate, LocalDateTime endDate,
                       Long createdByUserId, String createdByUsername,
                       LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -40,8 +40,8 @@ public class TestRunDTO {
         this.description = description;
         this.projectId = projectId;
         this.projectName = projectName;
-        this.suiteId = suiteId;
-        this.suiteName = suiteName;
+        this.moduleId = moduleId;
+        this.moduleName = moduleName;
         this.assignedToUserId = assignedToUserId;
         this.assignedToUsername = assignedToUsername;
         this.status = status;
@@ -94,20 +94,20 @@ public class TestRunDTO {
         this.projectName = projectName;
     }
 
-    public Long getSuiteId() {
-        return suiteId;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setSuiteId(Long suiteId) {
-        this.suiteId = suiteId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getSuiteName() {
-        return suiteName;
+    public String getModuleName() {
+        return moduleName;
     }
 
-    public void setSuiteName(String suiteName) {
-        this.suiteName = suiteName;
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     public Long getAssignedToUserId() {

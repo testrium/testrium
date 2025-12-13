@@ -170,10 +170,10 @@ export default function TestCaseDetails() {
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Project</p>
                   <p className="text-base text-gray-900 dark:text-white">{testCase.projectName}</p>
                 </div>
-                {testCase.suiteName && (
+                {testCase.moduleName && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Test Suite</p>
-                    <p className="text-base text-gray-900 dark:text-white">{testCase.suiteName}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Test Module</p>
+                    <p className="text-base text-gray-900 dark:text-white">{testCase.moduleName}</p>
                   </div>
                 )}
                 <div>

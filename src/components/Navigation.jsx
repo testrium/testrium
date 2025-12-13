@@ -101,13 +101,13 @@ export default function Navigation() {
                 Applications
               </Button>
               <Button
-                variant={isActive('/test-suites') ? 'default' : 'ghost'}
+                variant={isActive('/test-modules') ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => navigate('/test-suites')}
-                className={isActive('/test-suites') ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' : ''}
+                onClick={() => navigate('/test-modules')}
+                className={isActive('/test-modules') ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' : ''}
               >
                 <Layers className="mr-2 h-4 w-4" />
-                Test Suites
+                Test Modules
               </Button>
               <Button
                 variant={isActive('/test-runs') ? 'default' : 'ghost'}

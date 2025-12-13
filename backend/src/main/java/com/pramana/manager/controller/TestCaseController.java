@@ -24,16 +24,16 @@ public class TestCaseController {
     @GetMapping
     public ResponseEntity<List<TestCaseDTO>> getAllTestCases(
             @RequestParam(required = false) Long projectId,
-            @RequestParam(required = false) Long suiteId,
+            @RequestParam(required = false) Long moduleId,
             @RequestParam(required = false) TestCase.TestCaseStatus status,
             @RequestParam(required = false) TestCase.Priority priority) {
 
-        if (projectId != null && (suiteId != null || status != null || priority != null)) {
-            return ResponseEntity.ok(testCaseService.getTestCasesByFilters(projectId, suiteId, status, priority));
+        if (projectId != null && (moduleId != null || status != null || priority != null)) {
+            return ResponseEntity.ok(testCaseService.getTestCasesByFilters(projectId, moduleId, status, priority));
         } else if (projectId != null) {
             return ResponseEntity.ok(testCaseService.getTestCasesByProject(projectId));
-        } else if (suiteId != null) {
-            return ResponseEntity.ok(testCaseService.getTestCasesBySuite(suiteId));
+        } else if (moduleId != null) {
+            return ResponseEntity.ok(testCaseService.getTestCasesByModule(moduleId));
         } else {
             return ResponseEntity.ok(testCaseService.getAllTestCases());
         }

@@ -4,7 +4,7 @@ import {
   Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
-import { projectsAPI, testSuitesAPI, testCasesAPI, projectMembersAPI } from '../services/api';
+import { projectsAPI, testModulesAPI, testCasesAPI, projectMembersAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
@@ -28,7 +28,7 @@ export default function TestRuns() {
   const { user } = useAuth();
   const [testRuns, setTestRuns] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [suites, setSuites] = useState([]);
+  const [modules, setModules] = useState([]);
   const [testCases, setTestCases] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ export default function TestRuns() {
     name: '',
     description: '',
     projectId: '',
-    suiteId: '',
+    moduleId: '',
     assignedToUserId: '',
     testCaseIds: []
   });
@@ -61,19 +61,19 @@ export default function TestRuns() {
 
   useEffect(() => {
     if (newTestRun.projectId) {
-      loadSuitesForProject(newTestRun.projectId);
+      loadModulesForProject(newTestRun.projectId);
       loadTestCasesForProject(newTestRun.projectId);
       loadProjectMembers(newTestRun.projectId);
     }
   }, [newTestRun.projectId]);
 
   useEffect(() => {
-    if (newTestRun.suiteId) {
-      loadTestCasesForSuite(newTestRun.suiteId);
+    if (newTestRun.moduleId) {
+      loadTestCasesForModule(newTestRun.moduleId);
     } else if (newTestRun.projectId) {
       loadTestCasesForProject(newTestRun.projectId);
     }
-  }, [newTestRun.suiteId]);
+  }, [newTestRun.moduleId]);
 
   const loadData = async () => {
     try {
@@ -138,10 +138,10 @@ export default function TestRuns() {
     }
   };
 
-  const loadSuitesForProject = async (projectId) => {
+  const loadModulesForProject = async (projectId) => {
     try {
-      const response = await testSuitesAPI.getByProject(projectId);
-      setSuites(response.data);
+      const response = await testModulesAPI.getByProject(projectId);
+      setModules(response.data);
     } catch (err) {
       console.error('Load suites error:', err);
     }
@@ -156,9 +156,9 @@ export default function TestRuns() {
     }
   };
 
-  const loadTestCasesForSuite = async (suiteId) => {
+  const loadTestCasesForModule = async (moduleId) => {
     try {
-      const response = await testCasesAPI.getAll({ suiteId });
+      const response = await testCasesAPI.getAll({ moduleId });
       setTestCases(response.data);
     } catch (err) {
       console.error('Load test cases error:', err);
@@ -187,7 +187,7 @@ export default function TestRuns() {
         name: '',
         description: '',
         projectId: '',
-        suiteId: '',
+        moduleId: '',
         assignedToUserId: '',
         testCaseIds: []
       });
@@ -442,7 +442,7 @@ export default function TestRuns() {
                 name: '',
                 description: '',
                 projectId: '',
-                suiteId: '',
+                moduleId: '',
                 assignedToUserId: '',
                 testCaseIds: []
               });
@@ -489,7 +489,7 @@ export default function TestRuns() {
                   </label>
                   <Select
                     value={newTestRun.projectId}
-                    onChange={(e) => setNewTestRun({ ...newTestRun, projectId: e.target.value, suiteId: '', testCaseIds: [] })}
+                    onChange={(e) => setNewTestRun({ ...newTestRun, projectId: e.target.value, moduleId: '', testCaseIds: [] })}
                   >
                     <option value="">Select project</option>
                     {projects.map(project => (
@@ -501,16 +501,16 @@ export default function TestRuns() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Suite (Optional)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test Module (Optional)</label>
                   <Select
-                    value={newTestRun.suiteId}
-                    onChange={(e) => setNewTestRun({ ...newTestRun, suiteId: e.target.value, testCaseIds: [] })}
+                    value={newTestRun.moduleId}
+                    onChange={(e) => setNewTestRun({ ...newTestRun, moduleId: e.target.value, testCaseIds: [] })}
                     disabled={!newTestRun.projectId}
                   >
                     <option value="">All test cases in project</option>
-                    {suites.map(suite => (
-                      <option key={suite.id} value={suite.id}>
-                        {suite.name}
+                    {modules.map(module => (
+                      <option key={module.id} value={module.id}>
+                        {module.name}
                       </option>
                     ))}
                   </Select>
@@ -590,7 +590,7 @@ export default function TestRuns() {
                     name: '',
                     description: '',
                     projectId: '',
-                    suiteId: '',
+                    moduleId: '',
                     assignedToUserId: '',
                     testCaseIds: []
                   });

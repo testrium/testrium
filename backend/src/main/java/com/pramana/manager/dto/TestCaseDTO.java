@@ -35,9 +35,9 @@ public class TestCaseDTO {
     @NotNull(message = "Project ID is required")
     private Long projectId;
 
-    private Long suiteId;
+    private Long moduleId;
 
-    private String suiteName;
+    private String moduleName;
 
     private String projectName;
 
@@ -133,20 +133,20 @@ public class TestCaseDTO {
         this.projectId = projectId;
     }
 
-    public Long getSuiteId() {
-        return suiteId;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setSuiteId(Long suiteId) {
-        this.suiteId = suiteId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
-    public String getSuiteName() {
-        return suiteName;
+    public String getModuleName() {
+        return moduleName;
     }
 
-    public void setSuiteName(String suiteName) {
-        this.suiteName = suiteName;
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
     public String getProjectName() {

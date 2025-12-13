@@ -281,7 +281,7 @@ export default function Dashboard() {
             </Card>
 
             <Card
-              onClick={() => navigate('/test-suites')}
+              onClick={() => navigate('/test-modules')}
               className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-800 cursor-pointer hover:scale-105"
             >
               <CardContent className="p-6">
@@ -290,7 +290,7 @@ export default function Dashboard() {
                     <Layers className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Test Suites</h3>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Test Modules</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Organize test suites</p>
                   </div>
                 </div>

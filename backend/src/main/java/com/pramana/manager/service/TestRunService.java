@@ -25,7 +25,7 @@ public class TestRunService {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private TestSuiteRepository testSuiteRepository;
+    private TestModuleRepository testModuleRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -39,11 +39,11 @@ public class TestRunService {
         Project project = projectRepository.findById(request.getProjectId())
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        // Validate suite if provided
-        TestSuite suite = null;
-        if (request.getSuiteId() != null) {
-            suite = testSuiteRepository.findById(request.getSuiteId())
-                    .orElseThrow(() -> new RuntimeException("Test suite not found"));
+        // Validate module if provided
+        TestModule module = null;
+        if (request.getModuleId() != null) {
+            module = testModuleRepository.findById(request.getModuleId())
+                    .orElseThrow(() -> new RuntimeException("Test module not found"));
         }
 
         // Validate assigned user if provided
@@ -58,7 +58,7 @@ public class TestRunService {
         testRun.setName(request.getName());
         testRun.setDescription(request.getDescription());
         testRun.setProjectId(request.getProjectId());
-        testRun.setSuiteId(request.getSuiteId());
+        testRun.setModuleId(request.getModuleId());
         testRun.setAssignedToUserId(request.getAssignedToUserId());
         testRun.setStatus("NOT_STARTED");
         testRun.setCreatedByUserId(createdByUserId);
@@ -146,7 +146,7 @@ public class TestRunService {
         dto.setName(testRun.getName());
         dto.setDescription(testRun.getDescription());
         dto.setProjectId(testRun.getProjectId());
-        dto.setSuiteId(testRun.getSuiteId());
+        dto.setModuleId(testRun.getModuleId());
         dto.setAssignedToUserId(testRun.getAssignedToUserId());
         dto.setStatus(testRun.getStatus());
         dto.setStartDate(testRun.getStartDate());
@@ -159,10 +159,10 @@ public class TestRunService {
         projectRepository.findById(testRun.getProjectId())
                 .ifPresent(project -> dto.setProjectName(project.getName()));
 
-        // Set suite name
-        if (testRun.getSuiteId() != null) {
-            testSuiteRepository.findById(testRun.getSuiteId())
-                    .ifPresent(suite -> dto.setSuiteName(suite.getName()));
+        // Set module name
+        if (testRun.getModuleId() != null) {
+            testModuleRepository.findById(testRun.getModuleId())
+                    .ifPresent(module -> dto.setModuleName(module.getName()));
         }
 
         // Set assigned user name

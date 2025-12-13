@@ -180,7 +180,7 @@ const TestRunExecution = () => {
                 <h1 className="text-2xl font-bold text-gray-900">{testRun?.name}</h1>
                 <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
                   <span>{testRun?.projectName}</span>
-                  {testRun?.suiteName && <span>• {testRun.suiteName}</span>}
+                  {testRun?.moduleName && <span>• {testRun.moduleName}</span>}
                   {testRun?.assignedToUsername && (
                     <span className="flex items-center">
                       <User className="w-4 h-4 mr-1" />

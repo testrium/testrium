@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { testCasesAPI, projectsAPI, testSuitesAPI, projectMembersAPI } from '../services/api';
+import { testCasesAPI, projectsAPI, testModulesAPI, projectMembersAPI } from '../services/api';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -20,7 +20,7 @@ export default function TestCases() {
   const location = useLocation();
   const [testCases, setTestCases] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [suites, setSuites] = useState([]);
+  const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -29,7 +29,7 @@ export default function TestCases() {
   // Filters
   const [filters, setFilters] = useState({
     projectId: '',
-    suiteId: '',
+    moduleId: '',
     status: '',
     priority: '',
     search: ''
@@ -42,10 +42,10 @@ export default function TestCases() {
 
   useEffect(() => {
     if (filters.projectId) {
-      loadSuitesByProject(filters.projectId);
+      loadModulesByProject(filters.projectId);
     } else {
-      setSuites([]);
-      setFilters(prev => ({ ...prev, suiteId: '' }));
+      setModules([]);
+      setFilters(prev => ({ ...prev, moduleId: '' }));
     }
   }, [filters.projectId]);
 
@@ -54,7 +54,7 @@ export default function TestCases() {
     if (projects.length > 0 || user?.role === 'ADMIN') {
       loadTestCases();
     }
-  }, [filters.projectId, filters.suiteId, filters.status, filters.priority, projects]);
+  }, [filters.projectId, filters.moduleId, filters.status, filters.priority, projects]);
 
   const loadData = async () => {
     try {
@@ -92,7 +92,7 @@ export default function TestCases() {
     try {
       const params = {};
       if (filters.projectId) params.projectId = filters.projectId;
-      if (filters.suiteId) params.suiteId = filters.suiteId;
+      if (filters.moduleId) params.moduleId = filters.moduleId;
       if (filters.status) params.status = filters.status;
       if (filters.priority) params.priority = filters.priority;
 
@@ -114,12 +114,12 @@ export default function TestCases() {
     }
   };
 
-  const loadSuitesByProject = async (projectId) => {
+  const loadModulesByProject = async (projectId) => {
     try {
-      const response = await testSuitesAPI.getByProject(projectId);
-      setSuites(response.data);
+      const response = await testModulesAPI.getByProject(projectId);
+      setModules(response.data);
     } catch (err) {
-      console.error('Load suites error:', err);
+      console.error('Load modules error:', err);
     }
   };
 
@@ -138,7 +138,7 @@ export default function TestCases() {
   const clearFilters = () => {
     setFilters({
       projectId: '',
-      suiteId: '',
+      moduleId: '',
       status: '',
       priority: '',
       search: ''
@@ -154,30 +154,30 @@ export default function TestCases() {
     return true;
   });
 
-  // Group test cases by suite when no suite filter is selected
+  // Group test cases by module when no module filter is selected
   const groupedTestCases = () => {
-    if (filters.suiteId) {
-      // If a specific suite is selected, return as is
-      return [{ suiteName: null, testCases: filteredTestCases }];
+    if (filters.moduleId) {
+      // If a specific module is selected, return as is
+      return [{ moduleName: null, testCases: filteredTestCases }];
     }
 
-    // Group by suite
+    // Group by module
     const groups = {};
     filteredTestCases.forEach(tc => {
-      const suiteKey = tc.suiteName || 'No Suite';
-      if (!groups[suiteKey]) {
-        groups[suiteKey] = [];
+      const moduleKey = tc.moduleName || 'No Module';
+      if (!groups[moduleKey]) {
+        groups[moduleKey] = [];
       }
-      groups[suiteKey].push(tc);
+      groups[moduleKey].push(tc);
     });
 
-    // Convert to array and sort: "No Suite" last, others alphabetically
+    // Convert to array and sort: "No Module" last, others alphabetically
     return Object.entries(groups)
-      .map(([suiteName, testCases]) => ({ suiteName, testCases }))
+      .map(([moduleName, testCases]) => ({ moduleName, testCases }))
       .sort((a, b) => {
-        if (a.suiteName === 'No Suite') return 1;
-        if (b.suiteName === 'No Suite') return -1;
-        return a.suiteName.localeCompare(b.suiteName);
+        if (a.moduleName === 'No Module') return 1;
+        if (b.moduleName === 'No Module') return -1;
+        return a.moduleName.localeCompare(b.moduleName);
       });
   };
 
@@ -239,7 +239,7 @@ export default function TestCases() {
                   <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                {(filters.projectId || filters.suiteId || filters.status || filters.priority || filters.search) && (
+                {(filters.projectId || filters.moduleId || filters.status || filters.priority || filters.search) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     Clear All
                   </Button>
@@ -280,16 +280,16 @@ export default function TestCases() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                    Test Suite
+                    Test Module
                   </label>
                   <Select
-                    value={filters.suiteId}
-                    onChange={(e) => setFilters(prev => ({ ...prev, suiteId: e.target.value }))}
+                    value={filters.moduleId}
+                    onChange={(e) => setFilters(prev => ({ ...prev, moduleId: e.target.value }))}
                     disabled={!filters.projectId}
                   >
-                    <option value="">All Suites</option>
-                    {suites.map(suite => (
-                      <option key={suite.id} value={suite.id}>{suite.name}</option>
+                    <option value="">All Modules</option>
+                    {modules.map(module => (
+                      <option key={module.id} value={module.id}>{module.name}</option>
                     ))}
                   </Select>
                 </div>
@@ -374,13 +374,13 @@ export default function TestCases() {
               <div className="space-y-6">
                 {groupedTestCases().map((group, groupIndex) => (
                   <div key={groupIndex} className="space-y-3">
-                    {/* Suite Header - only show if not filtering by specific suite */}
-                    {!filters.suiteId && (
+                    {/* Module Header - only show if not filtering by specific module */}
+                    {!filters.moduleId && (
                       <div className="flex items-center gap-3 mb-3">
                         <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 rounded-lg border border-purple-200 dark:border-purple-800">
                           <Layers className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           <span className="font-semibold text-purple-900 dark:text-purple-300">
-                            {group.suiteName}
+                            {group.moduleName}
                           </span>
                           <span className="text-xs text-purple-600 dark:text-purple-400">
                             ({group.testCases.length} {group.testCases.length === 1 ? 'test' : 'tests'})
@@ -423,11 +423,11 @@ export default function TestCases() {
                                   <span className="font-medium">Project:</span>
                                   <span>{testCase.projectName}</span>
                                 </div>
-                                {testCase.suiteName && (
+                                {testCase.moduleName && (
                                   <div className="flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                                    <span className="font-medium">Suite:</span>
-                                    <span>{testCase.suiteName}</span>
+                                    <span className="font-medium">Module:</span>
+                                    <span>{testCase.moduleName}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-1.5">

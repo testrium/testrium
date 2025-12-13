@@ -19,8 +19,8 @@ public class TestRun {
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
-    @Column(name = "suite_id")
-    private Long suiteId;
+    @Column(name = "module_id")
+    private Long moduleId;
 
     @Column(name = "assigned_to_user_id")
     private Long assignedToUserId;
@@ -57,12 +57,12 @@ public class TestRun {
     // Constructors
     public TestRun() {}
 
-    public TestRun(String name, String description, Long projectId, Long suiteId,
+    public TestRun(String name, String description, Long projectId, Long moduleId,
                    Long assignedToUserId, Long createdByUserId) {
         this.name = name;
         this.description = description;
         this.projectId = projectId;
-        this.suiteId = suiteId;
+        this.moduleId = moduleId;
         this.assignedToUserId = assignedToUserId;
         this.createdByUserId = createdByUserId;
     }
@@ -100,12 +100,12 @@ public class TestRun {
         this.projectId = projectId;
     }
 
-    public Long getSuiteId() {
-        return suiteId;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setSuiteId(Long suiteId) {
-        this.suiteId = suiteId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     public Long getAssignedToUserId() {

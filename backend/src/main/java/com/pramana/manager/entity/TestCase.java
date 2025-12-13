@@ -54,8 +54,8 @@ public class TestCase {
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "suite_id")
-    private TestSuite suite;
+    @JoinColumn(name = "module_id")
+    private TestModule module;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
@@ -156,12 +156,12 @@ public class TestCase {
         this.project = project;
     }
 
-    public TestSuite getSuite() {
-        return suite;
+    public TestModule getModule() {
+        return module;
     }
 
-    public void setSuite(TestSuite suite) {
-        this.suite = suite;
+    public void setModule(TestModule module) {
+        this.module = module;
     }
 
     public User getCreatedBy() {

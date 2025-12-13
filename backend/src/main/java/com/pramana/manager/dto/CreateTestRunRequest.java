@@ -6,7 +6,7 @@ public class CreateTestRunRequest {
     private String name;
     private String description;
     private Long projectId;
-    private Long suiteId;
+    private Long moduleId;
     private Long assignedToUserId;
     private List<Long> testCaseIds;
 
@@ -34,12 +34,12 @@ public class CreateTestRunRequest {
         this.projectId = projectId;
     }
 
-    public Long getSuiteId() {
-        return suiteId;
+    public Long getModuleId() {
+        return moduleId;
     }
 
-    public void setSuiteId(Long suiteId) {
-        this.suiteId = suiteId;
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
     }
 
     public Long getAssignedToUserId() {

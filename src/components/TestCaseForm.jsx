@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { testCasesAPI, projectsAPI, testSuitesAPI } from '../services/api';
+import { testCasesAPI, projectsAPI, testModulesAPI } from '../services/api';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Textarea } from './ui/Textarea';
@@ -17,7 +17,7 @@ import { AlertCircle } from 'lucide-react';
 export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = null, projects = [] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [suites, setSuites] = useState([]);
+  const [modules, setModules] = useState([]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -29,7 +29,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
     status: 'ACTIVE',
     type: 'FUNCTIONAL',
     projectId: '',
-    suiteId: ''
+    moduleId: ''
   });
 
   useEffect(() => {
@@ -45,10 +45,10 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
           status: testCase.status || 'ACTIVE',
           type: testCase.type || 'FUNCTIONAL',
           projectId: testCase.projectId?.toString() || '',
-          suiteId: testCase.suiteId?.toString() || ''
+          moduleId: testCase.moduleId?.toString() || ''
         });
         if (testCase.projectId) {
-          loadSuitesByProject(testCase.projectId);
+          loadModulesByProject(testCase.projectId);
         }
       }
     }
@@ -56,19 +56,19 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
 
   useEffect(() => {
     if (formData.projectId) {
-      loadSuitesByProject(formData.projectId);
+      loadModulesByProject(formData.projectId);
     } else {
-      setSuites([]);
-      setFormData(prev => ({ ...prev, suiteId: '' }));
+      setModules([]);
+      setFormData(prev => ({ ...prev, moduleId: '' }));
     }
   }, [formData.projectId]);
 
-  const loadSuitesByProject = async (projectId) => {
+  const loadModulesByProject = async (projectId) => {
     try {
-      const response = await testSuitesAPI.getByProject(projectId);
-      setSuites(response.data);
+      const response = await testModulesAPI.getByProject(projectId);
+      setModules(response.data);
     } catch (err) {
-      console.error('Load suites error:', err);
+      console.error('Load modules error:', err);
     }
   };
 
@@ -86,7 +86,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       const payload = {
         ...formData,
         projectId: parseInt(formData.projectId),
-        suiteId: formData.suiteId ? parseInt(formData.suiteId) : null
+        moduleId: formData.moduleId ? parseInt(formData.moduleId) : null
       };
 
       if (testCase) {
@@ -117,7 +117,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       status: 'ACTIVE',
       type: 'FUNCTIONAL',
       projectId: '',
-      suiteId: ''
+      moduleId: ''
     });
     setError('');
   };
@@ -166,7 +166,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
               />
             </div>
 
-            {/* Project and Suite */}
+            {/* Project and Module */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
@@ -189,18 +189,18 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
 
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
-                  Test Suite
+                  Test Module
                 </label>
                 <Select
-                  name="suiteId"
-                  value={formData.suiteId}
+                  name="moduleId"
+                  value={formData.moduleId}
                   onChange={handleChange}
                   disabled={!formData.projectId}
                 >
-                  <option value="">No Suite</option>
-                  {suites.map(suite => (
-                    <option key={suite.id} value={suite.id}>
-                      {suite.name}
+                  <option value="">No Module</option>
+                  {modules.map(module => (
+                    <option key={module.id} value={module.id}>
+                      {module.name}
                     </option>
                   ))}
                 </Select>
