@@ -7,7 +7,7 @@ echo Starting servers...
 echo.
 
 REM Start backend JAR
-start "Pramana Backend" cmd /k "cd backend\target && java -jar pramana-manager-1.0.0.jar"
+start "Pramana Backend" cmd /k "cd backend\target && java -jar pramana-manager-1.3.0.jar"
 
 echo Waiting for backend (20 seconds)...
 timeout /t 20 /nobreak > nul
