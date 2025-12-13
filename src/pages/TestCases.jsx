@@ -40,6 +40,13 @@ export default function TestCases() {
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadData();
+
+    // Check if there's an edit query parameter
+    const searchParams = new URLSearchParams(location.search);
+    const editId = searchParams.get('edit');
+    if (editId) {
+      loadTestCaseForEdit(editId);
+    }
   }, [location]);
 
   useEffect(() => {
@@ -122,6 +129,18 @@ export default function TestCases() {
       setModules(response.data);
     } catch (err) {
       console.error('Load modules error:', err);
+    }
+  };
+
+  const loadTestCaseForEdit = async (testCaseId) => {
+    try {
+      const response = await testCasesAPI.getById(testCaseId);
+      setEditingTestCase(response.data);
+      // Clear the query parameter from URL
+      navigate('/test-cases', { replace: true });
+    } catch (err) {
+      console.error('Load test case for edit error:', err);
+      setError('Failed to load test case for editing');
     }
   };
 
