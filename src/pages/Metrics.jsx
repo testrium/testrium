@@ -430,7 +430,7 @@ export default function Metrics() {
                               iconType="rect"
                             />
                             <Bar dataKey="Total" fill="#3b82f6" name="Total" />
-                            <Bar dataKey="Automated" fill="#f97316" name="Automated" />
+                            <Bar dataKey="Automated" fill="#61BF3D" name="Automated" />
                             <Bar dataKey="Manual" fill="#9ca3af" name="Manual" />
                           </BarChart>
                         </ResponsiveContainer>
@@ -478,7 +478,7 @@ export default function Metrics() {
                               label={({ name, percentage, value }) => `${percentage}%`}
                               labelLine={false}
                             >
-                              <Cell fill="#f97316" />
+                              <Cell fill="#61BF3D" />
                               <Cell fill="#9ca3af" />
                             </Pie>
                             <Tooltip
