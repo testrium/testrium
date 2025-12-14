@@ -1,0 +1,31 @@
+{
+  "version": "1.7.0",
+  "environment": "test",
+  "database": {
+    "host": "localhost",
+    "port": 3306,
+    "name": "pramana_test",
+    "username": "root",
+    "password": "test123"
+  },
+  "backend": {
+    "port": 8080,
+    "url": "http://localhost:8080"
+  },
+  "frontend": {
+    "port": 5173,
+    "url": "http://localhost:5173"
+  },
+  "testUsers": [
+    {
+      "email": "admin@test.com",
+      "password": "Admin@123",
+      "role": "ADMIN"
+    },
+    {
+      "email": "tester@test.com",
+      "password": "Test@123",
+      "role": "USER"
+    }
+  ]
+}
