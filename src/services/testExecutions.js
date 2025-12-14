@@ -25,5 +25,14 @@ export const testExecutionsAPI = {
     return axios.put(`${API_BASE_URL}/test-executions/${id}`, executionData, {
       headers: getAuthHeader()
     });
+  },
+
+  bulkUpdate: (executionIds, updateRequest) => {
+    return axios.put(`${API_BASE_URL}/test-executions/bulk-update`, {
+      executionIds,
+      updateRequest
+    }, {
+      headers: getAuthHeader()
+    });
   }
 };

@@ -1,21 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { reportsAPI } from '../api/reports';
-import { projectsAPI } from '../services/api';
+import { projectsAPI, projectMembersAPI } from '../services/api';
 import { testRunsAPI } from '../services/testRuns';
+import { useAuth } from '../contexts/AuthContext';
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Download, FileText, Filter, TrendingUp, Save, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import html2canvas from 'html2canvas';
 
 const Reports = () => {
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const pieChartRef = useRef(null);
 
   // Filter state
   const [projects, setProjects] = useState([]);
@@ -24,6 +28,7 @@ const Reports = () => {
   const [selectedTestRun, setSelectedTestRun] = useState('');
   const [testRunReport, setTestRunReport] = useState(null);
   const [loadingReport, setLoadingReport] = useState(false);
+  const [reportName, setReportName] = useState('');
 
   // Trend analysis state
   const [trendData, setTrendData] = useState([]);
@@ -66,8 +71,25 @@ const Reports = () => {
 
   const loadProjects = async () => {
     try {
-      const response = await projectsAPI.getAll();
-      setProjects(response.data);
+      // Load projects based on user role
+      let userProjects = [];
+      if (user?.role === 'ADMIN') {
+        const projectsRes = await projectsAPI.getAll();
+        userProjects = projectsRes.data;
+      } else if (user?.id) {
+        // Get projects user is member of
+        const membershipResponse = await projectMembersAPI.getUserProjects(user.id);
+        const memberships = membershipResponse.data;
+
+        // Get unique project IDs
+        const projectIds = [...new Set(memberships.map(m => m.projectId))];
+
+        // Fetch all projects and filter to only those user is member of
+        const allProjectsResponse = await projectsAPI.getAll();
+        userProjects = allProjectsResponse.data.filter(p => projectIds.includes(p.id));
+      }
+
+      setProjects(userProjects);
     } catch (err) {
       console.error('Load projects error:', err);
     }
@@ -235,12 +257,13 @@ const Reports = () => {
     return 'text-red-600 dark:text-red-400';
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     const doc = new jsPDF();
 
-    // Title
+    // Title - Use custom report name if provided, otherwise use default
+    const pdfTitle = reportName.trim() || 'Test Execution Report';
     doc.setFontSize(18);
-    doc.text('Test Execution Report', 14, 22);
+    doc.text(pdfTitle, 14, 22);
 
     // Date
     doc.setFontSize(11);
@@ -268,7 +291,39 @@ const Reports = () => {
         body: summaryData,
       });
 
-      // Test Cases Details
+      // Add Pie Chart Image
+      if (pieChartRef.current) {
+        try {
+          const canvas = await html2canvas(pieChartRef.current, {
+            backgroundColor: '#ffffff',
+            scale: 2
+          });
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = 180;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          const yPosition = doc.lastAutoTable.finalY + 15;
+
+          // Add a new page if there's not enough space
+          if (yPosition + imgHeight > 280) {
+            doc.addPage();
+            doc.setFontSize(12);
+            doc.text('Execution Distribution', 14, 22);
+            doc.addImage(imgData, 'PNG', 15, 30, imgWidth, imgHeight);
+          } else {
+            doc.setFontSize(12);
+            doc.text('Execution Distribution', 14, yPosition);
+            doc.addImage(imgData, 'PNG', 15, yPosition + 8, imgWidth, imgHeight);
+          }
+        } catch (error) {
+          console.error('Error capturing pie chart:', error);
+        }
+      }
+
+      // Test Cases Details - on new page
+      doc.addPage();
+      doc.setFontSize(14);
+      doc.text('Test Case Execution Details', 14, 22);
+
       const testCaseData = testRunReport.testCases.map(tc => [
         tc.testCaseName,
         tc.priority || 'N/A',
@@ -278,12 +333,15 @@ const Reports = () => {
       ]);
 
       autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 10,
+        startY: 30,
         head: [['Test Case', 'Priority', 'Status', 'Executed By', 'Execution Date']],
         body: testCaseData,
       });
 
-      doc.save(`test-run-${testRunReport.testRunName.replace(/\s+/g, '-')}-report.pdf`);
+      const fileName = reportName.trim()
+        ? `${reportName.trim().replace(/\s+/g, '-')}.pdf`
+        : `test-run-${testRunReport.testRunName.replace(/\s+/g, '-')}-report.pdf`;
+      doc.save(fileName);
     } else if (stats) {
       // Overall Stats
       doc.setFontSize(14);
@@ -371,7 +429,10 @@ const Reports = () => {
       const ws2 = XLSX.utils.aoa_to_sheet(testCaseData);
       XLSX.utils.book_append_sheet(wb, ws2, 'Test Cases');
 
-      XLSX.writeFile(wb, `test-run-${testRunReport.testRunName.replace(/\s+/g, '-')}-report.xlsx`);
+      const fileName = reportName.trim()
+        ? `${reportName.trim().replace(/\s+/g, '-')}.xlsx`
+        : `test-run-${testRunReport.testRunName.replace(/\s+/g, '-')}-report.xlsx`;
+      XLSX.writeFile(wb, fileName);
     } else if (stats) {
       // Overall Stats Sheet
       const overallData = [
@@ -490,7 +551,7 @@ const Reports = () => {
               </p>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Select Project *
@@ -533,6 +594,24 @@ const Reports = () => {
                   )}
                 </div>
               </div>
+
+              {testRunReport && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Report Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={reportName}
+                    onChange={(e) => setReportName(e.target.value)}
+                    placeholder="Enter custom report name (defaults to test run name)"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    This name will be used for exported PDF and Excel files
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -552,7 +631,7 @@ const Reports = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Total Test Cases</div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">{testRunReport.totalTestCases}</div>
@@ -576,6 +655,51 @@ const Reports = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Pie Chart for Test Run Results */}
+                  <div ref={pieChartRef} className="mb-6 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Execution Distribution</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Passed', value: testRunReport.passedExecutions, color: '#2B9600' },
+                            { name: 'Failed', value: testRunReport.failedExecutions, color: '#ef4444' },
+                            { name: 'Skipped', value: testRunReport.skippedExecutions, color: '#f59e0b' }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent, value }) => value > 0 ? `${name}: ${value} (${(percent * 100).toFixed(1)}%)` : ''}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          <Cell fill="#2B9600" />
+                          <Cell fill="#ef4444" />
+                          <Cell fill="#f59e0b" />
+                        </Pie>
+                        <Tooltip
+                          formatter={(value, name) => [`${value} tests`, name]}
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            padding: '8px 12px'
+                          }}
+                        />
+                        <Legend
+                          verticalAlign="bottom"
+                          height={36}
+                          formatter={(value, entry) => {
+                            const data = entry.payload;
+                            return `${value}: ${data.value} (${((data.value / testRunReport.totalTestCases) * 100).toFixed(1)}%)`;
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead>
@@ -643,8 +767,23 @@ const Reports = () => {
             </>
           )}
 
-          {/* Trend Analysis Section */}
-          {!testRunReport && (
+          {/* Message when no test run is selected */}
+          {!testRunReport && !loadingReport && (
+            <Card className="mb-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardContent className="text-center py-12">
+                <FileText className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  No Test Run Selected
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Please select a project and test run above to view detailed statistics and generate reports
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Trend Analysis Section - Only show when test run report is displayed */}
+          {testRunReport && (
             <>
               <div className="my-12 border-t border-gray-300 dark:border-gray-600"></div>
 
@@ -655,7 +794,7 @@ const Reports = () => {
                     Trend Analysis Over Time
                   </CardTitle>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Visualize test execution trends across multiple test runs
+                    Visualize test execution trends across multiple test runs for this project
                   </p>
                 </CardHeader>
                 <CardContent>
@@ -901,257 +1040,6 @@ const Reports = () => {
             </>
           )}
 
-          {stats && !testRunReport && (
-            <>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Overall Statistics
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Summary of all test execution across your projects
-                </p>
-              </div>
-
-              {/* Overall Statistics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Total Projects
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {stats.totalProjects}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Total Test Cases
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {stats.totalTestCases}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Total Test Runs
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {stats.totalTestRuns}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Overall Pass Rate
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-3xl font-bold ${getStatusColor(stats.overallPassRate)}`}>
-                      {stats.overallPassRate.toFixed(1)}%
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Charts Row */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* Pie Chart */}
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">
-                      Execution Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={pieData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {pieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                {/* Bar Chart */}
-                <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 dark:text-white">
-                      Project-wise Results
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={barData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="Passed" fill="#10b981" />
-                        <Bar dataKey="Failed" fill="#ef4444" />
-                        <Bar dataKey="Skipped" fill="#f59e0b" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Execution Summary */}
-              <Card className="mb-8 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">
-                    Execution Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Executions</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {stats.totalExecutions}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Passed</div>
-                      <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {stats.passedExecutions}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Failed</div>
-                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                        {stats.failedExecutions}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Skipped</div>
-                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-                        {stats.skippedExecutions}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  {stats.totalExecutions > 0 && (
-                    <div className="mt-6">
-                      <div className="flex h-4 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                        <div
-                          className="bg-green-500 dark:bg-green-600"
-                          style={{ width: `${(stats.passedExecutions / stats.totalExecutions) * 100}%` }}
-                        />
-                        <div
-                          className="bg-red-500 dark:bg-red-600"
-                          style={{ width: `${(stats.failedExecutions / stats.totalExecutions) * 100}%` }}
-                        />
-                        <div
-                          className="bg-yellow-500 dark:bg-yellow-600"
-                          style={{ width: `${(stats.skippedExecutions / stats.totalExecutions) * 100}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between mt-2 text-xs text-gray-600 dark:text-gray-400">
-                        <span>Passed: {((stats.passedExecutions / stats.totalExecutions) * 100).toFixed(1)}%</span>
-                        <span>Failed: {((stats.failedExecutions / stats.totalExecutions) * 100).toFixed(1)}%</span>
-                        <span>Skipped: {((stats.skippedExecutions / stats.totalExecutions) * 100).toFixed(1)}%</span>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Project-wise Statistics */}
-              <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-gray-900 dark:text-white">
-                    Project-wise Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-900">
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Project
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Test Cases
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Test Runs
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Executions
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Pass Rate
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {stats.projectStats.map((project) => (
-                          <tr key={project.projectId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                              {project.projectName}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                              {project.totalTestCases}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                              {project.totalTestRuns}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                              <div>
-                                <div className="font-medium">{project.totalExecutions} total</div>
-                                <div className="text-xs">
-                                  <span className="text-green-600 dark:text-green-400">{project.passedExecutions}P</span>
-                                  {' / '}
-                                  <span className="text-red-600 dark:text-red-400">{project.failedExecutions}F</span>
-                                  {' / '}
-                                  <span className="text-yellow-600 dark:text-yellow-400">{project.skippedExecutions}S</span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <span className={`font-semibold ${getStatusColor(project.passRate)}`}>
-                                {project.passRate.toFixed(1)}%
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          )}
         </div>
       </main>
 

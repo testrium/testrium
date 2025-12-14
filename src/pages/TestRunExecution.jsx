@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, CheckCircle2, XCircle, AlertCircle, MinusCircle, Clock,
-  Play, ChevronRight, FileText, Save, Calendar, User, Bug
+  Play, ChevronRight, FileText, Save, Calendar, User, Bug, Square, CheckSquare
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
 import { testExecutionsAPI } from '../services/testExecutions';
@@ -23,6 +23,11 @@ const TestRunExecution = () => {
     executionTimeMinutes: '',
     defectReference: ''
   });
+
+  // Bulk update state
+  const [selectedExecutionIds, setSelectedExecutionIds] = useState([]);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [bulkUpdateStatus, setBulkUpdateStatus] = useState('PASS');
 
   // JIRA bug creation state
   const [showJiraBugModal, setShowJiraBugModal] = useState(false);
@@ -195,6 +200,64 @@ const TestRunExecution = () => {
     setJiraResult(null);
   };
 
+  // Bulk update handlers
+  const handleToggleSelection = (executionId) => {
+    setSelectedExecutionIds(prev => {
+      if (prev.includes(executionId)) {
+        return prev.filter(id => id !== executionId);
+      } else {
+        return [...prev, executionId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedExecutionIds.length === executions.length) {
+      setSelectedExecutionIds([]);
+    } else {
+      setSelectedExecutionIds(executions.map(e => e.id));
+    }
+  };
+
+  const handleSelectByModule = () => {
+    if (!testRun?.moduleName) {
+      setError('No module associated with this test run');
+      return;
+    }
+    // Since all tests in this run are from the same module, select all
+    setSelectedExecutionIds(executions.map(e => e.id));
+  };
+
+  const handleBulkUpdate = async () => {
+    if (selectedExecutionIds.length === 0) {
+      setError('Please select at least one test to update');
+      return;
+    }
+
+    try {
+      await testExecutionsAPI.bulkUpdate(selectedExecutionIds, {
+        status: bulkUpdateStatus
+      });
+
+      // Reload data
+      await loadExecutions();
+      await loadTestRun();
+
+      // Clear selection
+      setSelectedExecutionIds([]);
+      setShowBulkUpdate(false);
+      setError('');
+    } catch (err) {
+      console.error('Bulk update error:', err);
+      setError('Failed to update test executions');
+    }
+  };
+
+  const handleCancelBulkUpdate = () => {
+    setSelectedExecutionIds([]);
+    setShowBulkUpdate(false);
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'PASS':
@@ -323,23 +386,105 @@ const TestRunExecution = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Bulk Action Toolbar */}
+        {selectedExecutionIds.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="font-medium text-blue-900">
+                  {selectedExecutionIds.length} test{selectedExecutionIds.length !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  onClick={handleCancelBulkUpdate}
+                  className="text-sm text-blue-700 hover:text-blue-900 underline"
+                >
+                  Clear Selection
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={bulkUpdateStatus}
+                  onChange={(e) => setBulkUpdateStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="PASS">Pass</option>
+                  <option value="FAIL">Fail</option>
+                  <option value="BLOCKED">Blocked</option>
+                  <option value="SKIPPED">Skipped</option>
+                  <option value="NOT_EXECUTED">Not Executed</option>
+                </select>
+                <button
+                  onClick={handleBulkUpdate}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Update Selected
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-12 gap-6">
           {/* Test Cases List */}
           <div className="col-span-4 bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Test Cases ({executions.length})</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-gray-900">Test Cases ({executions.length})</h2>
+                <button
+                  onClick={handleSelectAll}
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-700"
+                >
+                  {selectedExecutionIds.length === executions.length ? (
+                    <>
+                      <CheckSquare className="w-4 h-4 mr-1" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <Square className="w-4 h-4 mr-1" />
+                      Select All
+                    </>
+                  )}
+                </button>
+              </div>
+              {testRun?.moduleName && (
+                <button
+                  onClick={handleSelectByModule}
+                  className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                >
+                  <CheckSquare className="w-4 h-4 mr-1" />
+                  Select All in Module: {testRun.moduleName}
+                </button>
+              )}
             </div>
             <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
               {executions.map((execution, index) => (
                 <div
                   key={execution.id}
-                  onClick={() => setSelectedExecution(execution)}
-                  className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
+                  className={`p-4 border-b border-gray-200 hover:bg-gray-50 ${
                     selectedExecution?.id === execution.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
                   } ${getStatusColor(execution.status)}`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                  <div className="flex items-start gap-3">
+                    {/* Checkbox */}
+                    <div className="flex-shrink-0 mt-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedExecutionIds.includes(execution.id)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleToggleSelection(execution.id);
+                        }}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Test case info - clickable */}
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() => setSelectedExecution(execution)}
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs text-gray-500">#{index + 1}</span>
                         {getStatusIcon(execution.status)}
@@ -348,7 +493,11 @@ const TestRunExecution = () => {
                         {execution.testCaseTitle}
                       </h3>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+
+                    <ChevronRight
+                      className="w-4 h-4 text-gray-400 flex-shrink-0 mt-1 cursor-pointer"
+                      onClick={() => setSelectedExecution(execution)}
+                    />
                   </div>
                 </div>
               ))}

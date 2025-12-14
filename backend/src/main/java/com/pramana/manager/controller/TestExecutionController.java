@@ -68,4 +68,48 @@ public class TestExecutionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+    @PutMapping("/bulk-update")
+    public ResponseEntity<?> bulkUpdateExecutions(
+            @RequestBody BulkUpdateRequest bulkRequest,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+            List<TestExecutionDTO> executions = testExecutionService.bulkUpdateExecutions(
+                    bulkRequest.getExecutionIds(),
+                    bulkRequest.getUpdateRequest(),
+                    currentUser.getId()
+            );
+            return ResponseEntity.ok(executions);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    // Inner class for bulk update request
+    public static class BulkUpdateRequest {
+        private List<Long> executionIds;
+        private UpdateTestExecutionRequest updateRequest;
+
+        public List<Long> getExecutionIds() {
+            return executionIds;
+        }
+
+        public void setExecutionIds(List<Long> executionIds) {
+            this.executionIds = executionIds;
+        }
+
+        public UpdateTestExecutionRequest getUpdateRequest() {
+            return updateRequest;
+        }
+
+        public void setUpdateRequest(UpdateTestExecutionRequest updateRequest) {
+            this.updateRequest = updateRequest;
+        }
+    }
 }

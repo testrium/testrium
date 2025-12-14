@@ -88,6 +88,44 @@ public class TestExecutionService {
         return convertToDTO(execution);
     }
 
+    @Transactional
+    public List<TestExecutionDTO> bulkUpdateExecutions(List<Long> executionIds, UpdateTestExecutionRequest request, Long executedByUserId) {
+        List<TestExecution> executions = testExecutionRepository.findAllById(executionIds);
+
+        if (executions.isEmpty()) {
+            throw new RuntimeException("No test executions found");
+        }
+
+        for (TestExecution execution : executions) {
+            // Update fields
+            if (request.getStatus() != null) {
+                execution.setStatus(request.getStatus());
+            }
+            if (request.getActualResult() != null) {
+                execution.setActualResult(request.getActualResult());
+            }
+            if (request.getComments() != null) {
+                execution.setComments(request.getComments());
+            }
+            if (request.getExecutionTimeMinutes() != null) {
+                execution.setExecutionTimeMinutes(request.getExecutionTimeMinutes());
+            }
+            if (request.getDefectReference() != null) {
+                execution.setDefectReference(request.getDefectReference());
+            }
+
+            execution.setExecutedByUserId(executedByUserId);
+            execution.setExecutedAt(LocalDateTime.now());
+            execution.setUpdatedAt(LocalDateTime.now());
+        }
+
+        List<TestExecution> savedExecutions = testExecutionRepository.saveAll(executions);
+
+        return savedExecutions.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     private TestExecutionDTO convertToDTO(TestExecution execution) {
         TestExecutionDTO dto = new TestExecutionDTO();
         dto.setId(execution.getId());

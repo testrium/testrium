@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle
+  Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle, ChevronLeft, ChevronRight, Eye
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
 import { projectsAPI, testModulesAPI, testCasesAPI, projectMembersAPI } from '../services/api';
@@ -47,6 +47,10 @@ export default function TestRuns() {
     assignedToUserId: '',
     testCaseIds: []
   });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
@@ -272,165 +276,321 @@ export default function TestRuns() {
     testRun.projectName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTestRuns.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedData = filteredTestRuns.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filters.projectId, filters.status]);
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       <Navigation />
 
-      <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Test Runs</h1>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Execute and track test case results</p>
+      <main className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Play className="mr-3 h-8 w-8" />
+                Test Runs
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                Execute and track test case results
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              New Test Run
+            </Button>
           </div>
 
           {error && (
-            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
-              <span className="text-red-700 dark:text-red-300">{error}</span>
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-4">
+              {error}
             </div>
           )}
 
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Search test runs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                icon={Search}
-              />
-            </div>
+          {/* Search and Filters Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+              {/* Search Field */}
+              <div className="lg:col-span-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search test runs by name or project..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
 
-            <div className="flex gap-2">
-              <Select
-                value={filters.projectId}
-                onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
-              >
-                <option value="">All Projects</option>
-                {projects.map(project => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </Select>
+              {/* Project Filter */}
+              <div className="lg:col-span-3">
+                <Select
+                  value={filters.projectId}
+                  onChange={(e) => setFilters({ ...filters, projectId: e.target.value })}
+                  className="w-full"
+                >
+                  <option value="">All Projects</option>
+                  {projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
 
-              <Select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              >
-                <option value="">All Status</option>
-                <option value="NOT_STARTED">Not Started</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="COMPLETED">Completed</option>
-              </Select>
-
-              <Button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 whitespace-nowrap"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                New Test Run
-              </Button>
+              {/* Status Filter */}
+              <div className="lg:col-span-3">
+                <Select
+                  value={filters.status}
+                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  className="w-full"
+                >
+                  <option value="">All Status</option>
+                  <option value="NOT_STARTED">Not Started</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="COMPLETED">Completed</option>
+                </Select>
+              </div>
             </div>
           </div>
 
+          {/* Test Runs Table */}
           {loading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <p className="mt-2 text-gray-600 dark:text-gray-400">Loading test runs...</p>
             </div>
           ) : filteredTestRuns.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <Clock className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600" />
-                <CardTitle className="mt-4">No test runs found</CardTitle>
-                <CardDescription className="mt-2">Get started by creating a new test run.</CardDescription>
-                <Button
-                  onClick={() => setShowCreateModal(true)}
-                  className="mt-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Test Run
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <Clock className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400 mb-4">No test runs found. Create your first test run.</p>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Test Run
+              </Button>
+            </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredTestRuns.map(testRun => (
-                <Card
-                  key={testRun.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate(`/test-runs/${testRun.id}`)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{testRun.name}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{testRun.projectName}</p>
-                      </div>
-                      {getStatusIcon(testRun.status)}
-                    </div>
-
-                    {testRun.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{testRun.description}</p>
-                    )}
-
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        {testRun.startDate ? new Date(testRun.startDate).toLocaleDateString() : 'Not started'}
-                      </div>
-                      {testRun.assignedToUsername && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                          <User className="w-4 h-4 mr-2" />
-                          {testRun.assignedToUsername}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mb-4">
-                      <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        <span>Progress</span>
-                        <span>{calculateProgress(testRun)}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all"
-                          style={{ width: `${calculateProgress(testRun)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 text-center text-xs mb-4">
-                      <div>
-                        <div className="text-green-600 dark:text-green-400 font-semibold">{testRun.passedCount || 0}</div>
-                        <div className="text-gray-500 dark:text-gray-400">Passed</div>
-                      </div>
-                      <div>
-                        <div className="text-red-600 dark:text-red-400 font-semibold">{testRun.failedCount || 0}</div>
-                        <div className="text-gray-500 dark:text-gray-400">Failed</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 dark:text-gray-300 font-semibold">{testRun.totalTestCases || 0}</div>
-                        <div className="text-gray-500 dark:text-gray-400">Total</div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                      {getStatusBadge(testRun.status)}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteTestRun(testRun.id);
-                        }}
-                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Project
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Progress
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Results
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Assigned To
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Start Date
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {paginatedData.map(testRun => (
+                      <tr
+                        key={testRun.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/test-runs/${testRun.id}`)}
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-gray-900 dark:text-white">{testRun.name}</div>
+                          {testRun.description && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                              {testRun.description}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-white">{testRun.projectName}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(testRun.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div
+                                className="bg-blue-600 h-2 rounded-full transition-all"
+                                style={{ width: `${calculateProgress(testRun)}%` }}
+                              />
+                            </div>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{calculateProgress(testRun)}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-4 text-xs">
+                            <div className="text-center">
+                              <div className="text-green-600 dark:text-green-400 font-semibold">{testRun.passedCount || 0}</div>
+                              <div className="text-gray-500 dark:text-gray-400">Pass</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-red-600 dark:text-red-400 font-semibold">{testRun.failedCount || 0}</div>
+                              <div className="text-gray-500 dark:text-gray-400">Fail</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-gray-600 dark:text-gray-300 font-semibold">{testRun.totalTestCases || 0}</div>
+                              <div className="text-gray-500 dark:text-gray-400">Total</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                          {testRun.assignedToUsername || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                          {testRun.startDate ? new Date(testRun.startDate).toLocaleDateString() : 'Not started'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/test-runs/${testRun.id}`);
+                              }}
+                              className="p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTestRun(testRun.id);
+                              }}
+                              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* Page Size Selector */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Rows per page:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                      className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
+                  {/* Pagination Info */}
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
+                    Showing {filteredTestRuns.length === 0 ? 0 : startIndex + 1} to {Math.min(endIndex, filteredTestRuns.length)} of {filteredTestRuns.length} results
+                  </div>
+
+                  {/* Page Navigation */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      title="Previous page"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page => {
+                          return (
+                            page === 1 ||
+                            page === totalPages ||
+                            (page >= currentPage - 1 && page <= currentPage + 1)
+                          );
+                        })
+                        .map((page, index, array) => {
+                          const previousPage = array[index - 1];
+                          const showEllipsis = previousPage && page - previousPage > 1;
+
+                          return (
+                            <div key={page} className="flex items-center gap-1">
+                              {showEllipsis && (
+                                <span className="px-2 text-gray-500 dark:text-gray-400">...</span>
+                              )}
+                              <button
+                                onClick={() => handlePageChange(page)}
+                                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                  currentPage === page
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            </div>
+                          );
+                        })}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="p-2 rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      title="Next page"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
