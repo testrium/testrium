@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI, projectMembersAPI, usersAPI } from '../services/api';
+import { jiraAPI } from '../api/jira';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProjectMembersModal from '../components/ProjectMembersModal';
@@ -18,7 +19,7 @@ import {
   ModalContent,
   ModalFooter
 } from '../components/ui/Modal';
-import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users } from 'lucide-react';
+import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -46,6 +47,20 @@ export default function Dashboard() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [memberRole, setMemberRole] = useState('MEMBER');
   const [membersLoading, setMembersLoading] = useState(false);
+
+  // JIRA configuration state
+  const [showJiraModal, setShowJiraModal] = useState(false);
+  const [jiraProject, setJiraProject] = useState(null);
+  const [jiraLoading, setJiraLoading] = useState(false);
+  const [jiraFormData, setJiraFormData] = useState({
+    jiraUrl: '',
+    jiraProjectKey: '',
+    jiraUsername: '',
+    jiraApiToken: '',
+    defaultIssueType: 'Bug',
+    defaultPriority: 'Medium',
+    isEnabled: true
+  });
 
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
@@ -234,6 +249,85 @@ export default function Dashboard() {
     setAvailableUsers([]);
     setSelectedUserIds([]);
     setMemberRole('MEMBER');
+    setError('');
+  };
+
+  const handleJiraSettings = async (project) => {
+    setJiraProject(project);
+    setShowJiraModal(true);
+    setJiraLoading(true);
+
+    try {
+      const response = await jiraAPI.getConfigByProject(project.id);
+      const config = response.data;
+
+      setJiraFormData({
+        id: config.id,
+        jiraUrl: config.jiraUrl || '',
+        jiraProjectKey: config.jiraProjectKey || '',
+        jiraUsername: config.jiraUsername || '',
+        jiraApiToken: '', // Don't populate encrypted token
+        defaultIssueType: config.defaultIssueType || 'Bug',
+        defaultPriority: config.defaultPriority || 'Medium',
+        isEnabled: config.isEnabled !== undefined ? config.isEnabled : true
+      });
+      setError('');
+    } catch (err) {
+      if (err.response?.status === 404) {
+        // No configuration exists yet - reset form
+        setJiraFormData({
+          jiraUrl: '',
+          jiraProjectKey: '',
+          jiraUsername: '',
+          jiraApiToken: '',
+          defaultIssueType: 'Bug',
+          defaultPriority: 'Medium',
+          isEnabled: true
+        });
+      } else {
+        console.error('Error loading JIRA configuration:', err);
+        setError('Failed to load JIRA configuration');
+      }
+    } finally {
+      setJiraLoading(false);
+    }
+  };
+
+  const handleSaveJiraConfig = async (e) => {
+    e.preventDefault();
+    setError('');
+    setJiraLoading(true);
+
+    try {
+      const configData = {
+        ...jiraFormData,
+        projectId: jiraProject.id
+      };
+
+      await jiraAPI.saveConfiguration(configData);
+      setShowJiraModal(false);
+      setError('');
+      alert('JIRA configuration saved successfully!');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save JIRA configuration');
+      console.error('Save JIRA config error:', err);
+    } finally {
+      setJiraLoading(false);
+    }
+  };
+
+  const handleCloseJiraModal = () => {
+    setShowJiraModal(false);
+    setJiraProject(null);
+    setJiraFormData({
+      jiraUrl: '',
+      jiraProjectKey: '',
+      jiraUsername: '',
+      jiraApiToken: '',
+      defaultIssueType: 'Bug',
+      defaultPriority: 'Medium',
+      isEnabled: true
+    });
     setError('');
   };
 
@@ -452,6 +546,15 @@ export default function Dashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleJiraSettings(project)}
+                              className="hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400"
+                              title="JIRA Settings"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleManageMembers(project)}
                               className="hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400"
                               title="Manage Members"
@@ -601,6 +704,180 @@ export default function Dashboard() {
         loading={membersLoading}
         error={error}
       />
+
+      {/* JIRA Configuration Modal */}
+      <Modal isOpen={showJiraModal} onClose={handleCloseJiraModal} className="max-w-3xl">
+        <form onSubmit={handleSaveJiraConfig}>
+          <ModalHeader onClose={handleCloseJiraModal}>
+            <div>
+              <ModalTitle>
+                JIRA Configuration - {jiraProject?.name}
+              </ModalTitle>
+              <ModalDescription>
+                Configure JIRA integration for defect tracking. Use a service account for authentication.
+              </ModalDescription>
+            </div>
+          </ModalHeader>
+
+          <ModalContent>
+            {error && (
+              <div className="mb-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm p-3 rounded-md border border-red-200 dark:border-red-800 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+
+            {jiraLoading && !error ? (
+              <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+                Loading JIRA configuration...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* JIRA URL */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    JIRA URL <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="url"
+                    value={jiraFormData.jiraUrl}
+                    onChange={(e) => setJiraFormData(prev => ({ ...prev, jiraUrl: e.target.value }))}
+                    placeholder="https://yourcompany.atlassian.net"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Your JIRA instance URL
+                  </p>
+                </div>
+
+                {/* JIRA Project Key */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    JIRA Project Key <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    value={jiraFormData.jiraProjectKey}
+                    onChange={(e) => setJiraFormData(prev => ({ ...prev, jiraProjectKey: e.target.value.toUpperCase() }))}
+                    placeholder="BUG"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    The project key where bugs will be created (e.g., BUG, PROJ)
+                  </p>
+                </div>
+
+                {/* JIRA Username */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    JIRA Username (Service Account) <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={jiraFormData.jiraUsername}
+                    onChange={(e) => setJiraFormData(prev => ({ ...prev, jiraUsername: e.target.value }))}
+                    placeholder="bot@yourcompany.com"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Service account email for JIRA integration
+                  </p>
+                </div>
+
+                {/* JIRA API Token */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    JIRA API Token {!jiraFormData.id && <span className="text-red-500">*</span>}
+                  </label>
+                  <Input
+                    type="password"
+                    value={jiraFormData.jiraApiToken}
+                    onChange={(e) => setJiraFormData(prev => ({ ...prev, jiraApiToken: e.target.value }))}
+                    placeholder={jiraFormData.id ? "Leave blank to keep existing token" : "Enter API token"}
+                    required={!jiraFormData.id}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    API token for the service account. {jiraFormData.id && "Leave blank to keep existing."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Default Issue Type */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                      Default Issue Type
+                    </label>
+                    <Select
+                      value={jiraFormData.defaultIssueType}
+                      onChange={(e) => setJiraFormData(prev => ({ ...prev, defaultIssueType: e.target.value }))}
+                    >
+                      <option value="Bug">Bug</option>
+                      <option value="Defect">Defect</option>
+                      <option value="Task">Task</option>
+                      <option value="Story">Story</option>
+                    </Select>
+                  </div>
+
+                  {/* Default Priority */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                      Default Priority
+                    </label>
+                    <Select
+                      value={jiraFormData.defaultPriority}
+                      onChange={(e) => setJiraFormData(prev => ({ ...prev, defaultPriority: e.target.value }))}
+                    >
+                      <option value="Highest">Highest</option>
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                      <option value="Lowest">Lowest</option>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Enable/Disable Toggle */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="jiraEnabled"
+                    checked={jiraFormData.isEnabled}
+                    onChange={(e) => setJiraFormData(prev => ({ ...prev, isEnabled: e.target.checked }))}
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <label htmlFor="jiraEnabled" className="text-sm text-gray-700 dark:text-gray-300">
+                    Enable JIRA integration for this project
+                  </label>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                  <p className="text-xs text-blue-800 dark:text-blue-300">
+                    <strong>Note:</strong> This configuration uses a service account approach. All bugs created will use these credentials.
+                    The reporter's identity will be included in the bug description.
+                  </p>
+                </div>
+              </div>
+            )}
+          </ModalContent>
+
+          <ModalFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCloseJiraModal}
+              disabled={jiraLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={jiraLoading}
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+            >
+              {jiraLoading ? 'Saving...' : 'Save Configuration'}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
     </div>
   );
 }/* Force rebuild Mon, Nov 10, 2025 12:51:40 PM */

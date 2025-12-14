@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, CheckCircle2, XCircle, AlertCircle, MinusCircle, Clock,
-  Play, ChevronRight, FileText, Save, Calendar, User
+  Play, ChevronRight, FileText, Save, Calendar, User, Bug
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
 import { testExecutionsAPI } from '../services/testExecutions';
+import { jiraAPI } from '../api/jira';
 
 const TestRunExecution = () => {
   const { id } = useParams();
@@ -22,6 +23,17 @@ const TestRunExecution = () => {
     executionTimeMinutes: '',
     defectReference: ''
   });
+
+  // JIRA bug creation state
+  const [showJiraBugModal, setShowJiraBugModal] = useState(false);
+  const [jiraLoading, setJiraLoading] = useState(false);
+  const [jiraBugData, setJiraBugData] = useState({
+    summary: '',
+    description: '',
+    issueType: 'Bug',
+    priority: 'Medium'
+  });
+  const [jiraResult, setJiraResult] = useState(null);
 
   useEffect(() => {
     loadTestRun();
@@ -118,6 +130,69 @@ const TestRunExecution = () => {
     if (currentIndex < executions.length - 1) {
       setSelectedExecution(executions[currentIndex + 1]);
     }
+  };
+
+  const handleOpenJiraBugModal = () => {
+    // Pre-populate with test case title
+    setJiraBugData({
+      summary: `Test Failed: ${selectedExecution.testCaseTitle}`,
+      description: `Test execution failed.\n\nActual Result: ${executionData.actualResult || 'Not specified'}`,
+      issueType: 'Bug',
+      priority: 'Medium'
+    });
+    setJiraResult(null);
+    setShowJiraBugModal(true);
+  };
+
+  const handleCreateJiraBug = async (e) => {
+    e.preventDefault();
+    setJiraLoading(true);
+    setError('');
+
+    try {
+      const issueData = {
+        testExecutionId: selectedExecution.id,
+        summary: jiraBugData.summary,
+        description: jiraBugData.description,
+        issueType: jiraBugData.issueType,
+        priority: jiraBugData.priority
+      };
+
+      const response = await jiraAPI.createIssue(issueData, testRun.projectId);
+      setJiraResult(response.data);
+
+      if (response.data.status === 'Created') {
+        // Update execution data with JIRA key
+        setExecutionData(prev => ({
+          ...prev,
+          defectReference: response.data.jiraIssueKey
+        }));
+
+        // Reload executions to show updated defect reference
+        setTimeout(() => {
+          loadExecutions();
+        }, 1000);
+      }
+    } catch (err) {
+      console.error('Create JIRA bug error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
+      const errorMsg = err.response?.data?.errorMessage || err.response?.data?.message || 'Failed to create JIRA bug';
+      setError(errorMsg);
+    } finally {
+      setJiraLoading(false);
+    }
+  };
+
+  const handleCloseJiraBugModal = () => {
+    setShowJiraBugModal(false);
+    setJiraBugData({
+      summary: '',
+      description: '',
+      issueType: 'Bug',
+      priority: 'Medium'
+    });
+    setJiraResult(null);
   };
 
   const getStatusIcon = (status) => {
@@ -400,13 +475,26 @@ const TestRunExecution = () => {
                       </div>
 
                       <div className="flex justify-between pt-4">
-                        <button
-                          onClick={handleSaveExecution}
-                          className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                        >
-                          <Save className="w-4 h-4 mr-2" />
-                          Save & Continue
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleSaveExecution}
+                            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
+                            <Save className="w-4 h-4 mr-2" />
+                            Save & Continue
+                          </button>
+
+                          {(executionData.status === 'FAIL' || executionData.status === 'BLOCKED') && (
+                            <button
+                              onClick={handleOpenJiraBugModal}
+                              className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                              title="Create JIRA Bug"
+                            >
+                              <Bug className="w-4 h-4 mr-2" />
+                              Create JIRA Bug
+                            </button>
+                          )}
+                        </div>
 
                         {executions.findIndex(e => e.id === selectedExecution.id) < executions.length - 1 && (
                           <button
@@ -433,6 +521,163 @@ const TestRunExecution = () => {
           </div>
         </div>
       </div>
+
+      {/* JIRA Bug Creation Modal */}
+      {showJiraBugModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <form onSubmit={handleCreateJiraBug}>
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-900">Create JIRA Bug</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create a defect in JIRA for this failed test case
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start">
+                    <AlertCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
+                    <span className="text-red-700">{error}</span>
+                  </div>
+                )}
+
+                {jiraResult && jiraResult.status === 'Created' && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-green-700 font-medium">JIRA bug created successfully!</p>
+                        <p className="text-sm text-green-600 mt-1">
+                          Issue Key: <strong>{jiraResult.jiraIssueKey}</strong>
+                        </p>
+                        <a
+                          href={jiraResult.jiraIssueUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline mt-1 inline-block"
+                        >
+                          View in JIRA →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {jiraResult && jiraResult.status === 'Failed' && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <XCircle className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-red-700 font-medium">Failed to create JIRA bug</p>
+                        <p className="text-sm text-red-600 mt-1">{jiraResult.errorMessage}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!jiraResult && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Summary <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={jiraBugData.summary}
+                        onChange={(e) => setJiraBugData({ ...jiraBugData, summary: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        required
+                        disabled={jiraLoading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        value={jiraBugData.description}
+                        onChange={(e) => setJiraBugData({ ...jiraBugData, description: e.target.value })}
+                        rows="6"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                        disabled={jiraLoading}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Test details will be automatically added to the description
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Issue Type
+                        </label>
+                        <select
+                          value={jiraBugData.issueType}
+                          onChange={(e) => setJiraBugData({ ...jiraBugData, issueType: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          disabled={jiraLoading}
+                        >
+                          <option value="Bug">Bug</option>
+                          <option value="Defect">Defect</option>
+                          <option value="Task">Task</option>
+                          <option value="Story">Story</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Priority
+                        </label>
+                        <select
+                          value={jiraBugData.priority}
+                          onChange={(e) => setJiraBugData({ ...jiraBugData, priority: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                          disabled={jiraLoading}
+                        >
+                          <option value="Highest">Highest</option>
+                          <option value="High">High</option>
+                          <option value="Medium">Medium</option>
+                          <option value="Low">Low</option>
+                          <option value="Lowest">Lowest</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs text-blue-800">
+                        <strong>Note:</strong> The bug will include test case details, expected vs actual results,
+                        and will be linked to this test execution.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="p-6 border-t border-gray-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseJiraBugModal}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  disabled={jiraLoading}
+                >
+                  {jiraResult ? 'Close' : 'Cancel'}
+                </button>
+                {!jiraResult && (
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                    disabled={jiraLoading}
+                  >
+                    {jiraLoading ? 'Creating...' : 'Create Bug'}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
