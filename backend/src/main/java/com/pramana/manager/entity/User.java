@@ -21,6 +21,9 @@ public class User {
     @Column(nullable = false)
     private String role = "USER";
 
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
+
     public User() {}
 
     public User(Long id, String username, String email, String password, String role) {
@@ -41,4 +44,6 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public boolean isEmailVerified() { return emailVerified; }
+    public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
 }

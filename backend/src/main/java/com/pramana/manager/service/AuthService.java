@@ -1,11 +1,13 @@
 package com.pramana.manager.service;
 
+import com.pramana.manager.config.ClientConfig;
 import com.pramana.manager.dto.*;
 import com.pramana.manager.entity.TokenBlacklist;
 import com.pramana.manager.entity.User;
 import com.pramana.manager.repository.TokenBlacklistRepository;
 import com.pramana.manager.repository.UserRepository;
 import com.pramana.manager.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +18,24 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final TokenBlacklistRepository tokenBlacklistRepository;
+    private final EmailVerificationService emailVerificationService;
+    private final ClientConfig clientConfig;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, TokenBlacklistRepository tokenBlacklistRepository) {
+    @Value("${registration.email.verification.required:false}")
+    private boolean emailVerificationRequired;
+
+    public AuthService(UserRepository userRepository,
+                      PasswordEncoder passwordEncoder,
+                      JwtUtil jwtUtil,
+                      TokenBlacklistRepository tokenBlacklistRepository,
+                      EmailVerificationService emailVerificationService,
+                      ClientConfig clientConfig) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistRepository = tokenBlacklistRepository;
+        this.emailVerificationService = emailVerificationService;
+        this.clientConfig = clientConfig;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -37,10 +51,10 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
+        user.setEmailVerified(true);
 
         user = userRepository.save(user);
         String token = jwtUtil.generateToken(user.getEmail());
-
         return new AuthResponse(token, toUserDTO(user));
     }
 
@@ -73,6 +87,27 @@ public class AuthService {
 
     public boolean isTokenBlacklisted(String token) {
         return tokenBlacklistRepository.existsByToken(token);
+    }
+
+    public boolean verifyEmail(String token) {
+        boolean verified = emailVerificationService.verifyToken(token);
+        if (verified) {
+            String email = emailVerificationService.getEmailByToken(token);
+            userRepository.findByEmail(email).ifPresent(user -> {
+                user.setEmailVerified(true);
+                userRepository.save(user);
+            });
+        }
+        return verified;
+    }
+
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.isEmailVerified()) {
+            throw new RuntimeException("Email already verified");
+        }
+        emailVerificationService.createVerificationToken(email);
     }
 
     private UserDTO toUserDTO(User user) {

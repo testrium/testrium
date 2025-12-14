@@ -3,6 +3,7 @@ package com.pramana.manager.controller;
 import com.pramana.manager.entity.User;
 import com.pramana.manager.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -24,35 +25,43 @@ public class AdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Value("${admin.default.email:admin@pramana.com}")
+    private String adminEmail;
+
+    @Value("${admin.default.password:admin123}")
+    private String adminPassword;
+
     /**
-     * Create initial admin user
-     * This endpoint is intentionally open to allow creating the first admin user
-     * Call this once to create admin account, then disable this endpoint
+     * Create initial admin user from configuration
+     * Uses credentials from client-config.properties
      */
     @PostMapping("/create-admin")
     public ResponseEntity<?> createAdmin() {
+        // Extract username from email
+        String username = adminEmail.substring(0, adminEmail.indexOf("@"));
+
         // Check if admin already exists
-        if (userRepository.findByUsername("admin").isPresent()) {
+        if (userRepository.findByEmail(adminEmail).isPresent()) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Admin user already exists");
-            response.put("username", "admin");
+            response.put("email", adminEmail);
             return ResponseEntity.badRequest().body(response);
         }
 
-        // Create admin user
+        // Create admin user with configured credentials
         User admin = new User();
-        admin.setUsername("admin");
-        admin.setEmail("admin@pramana.com");
-        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setUsername(username);
+        admin.setEmail(adminEmail);
+        admin.setPassword(passwordEncoder.encode(adminPassword));
         admin.setRole("ADMIN");
+        admin.setEmailVerified(true);
 
         userRepository.save(admin);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "Admin user created successfully");
-        response.put("username", "admin");
-        response.put("password", "admin123");
-        response.put("email", "admin@pramana.com");
+        response.put("email", adminEmail);
+        response.put("username", username);
         response.put("warning", "Please change the password after first login");
 
         return ResponseEntity.ok(response);
