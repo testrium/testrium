@@ -21,7 +21,7 @@ public class User {
     @Column(nullable = false)
     private String role = "USER";
 
-    @Column(name = "email_verified")
+    @Column(name = "email_verified", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean emailVerified = false;
 
     public User() {}
