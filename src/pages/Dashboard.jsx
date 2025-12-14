@@ -19,7 +19,7 @@ import {
   ModalContent,
   ModalFooter
 } from '../components/ui/Modal';
-import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings } from 'lucide-react';
+import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -409,6 +409,23 @@ export default function Dashboard() {
                   <div>
                     <h3 className="font-bold text-lg text-gray-900 dark:text-white">Projects</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">View projects below</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card
+              onClick={() => navigate('/test-data?projectId=' + (projects[0]?.id || 1))}
+              className="border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-gray-800 dark:to-gray-800 cursor-pointer hover:scale-105"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                    <Database className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900 dark:text-white">Test Data</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Manage test data sets</p>
                   </div>
                 </div>
               </CardContent>

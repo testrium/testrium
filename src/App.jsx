@@ -12,6 +12,7 @@ import TestModules from './pages/TestModules';
 import TestCaseDetails from './pages/TestCaseDetails';
 import TestRuns from './pages/TestRuns';
 import TestRunExecution from './pages/TestRunExecution';
+import TestData from './pages/TestData';
 import Reports from './pages/Reports';
 import Metrics from './pages/Metrics';
 
@@ -82,6 +83,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/test-data" element={<ProtectedRoute><TestData /></ProtectedRoute>} />
           <Route
             path="/reports"
             element={
