@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { testCasesAPI, projectsAPI, testModulesAPI, projectMembersAPI } from '../services/api';
+import { testCasesAPI, projectsAPI, applicationsAPI, testModulesAPI, projectMembersAPI } from '../services/api';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
@@ -21,6 +21,7 @@ export default function TestCases() {
   const location = useLocation();
   const [testCases, setTestCases] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,6 +32,7 @@ export default function TestCases() {
   // Filters
   const [filters, setFilters] = useState({
     projectId: '',
+    applicationId: '',
     moduleId: '',
     status: '',
     priority: '',
@@ -53,12 +55,21 @@ export default function TestCases() {
 
   useEffect(() => {
     if (filters.projectId) {
-      loadModulesByProject(filters.projectId);
+      loadApplicationsByProject(filters.projectId);
+    } else {
+      setApplications([]);
+      setFilters(prev => ({ ...prev, applicationId: '', moduleId: '' }));
+    }
+  }, [filters.projectId]);
+
+  useEffect(() => {
+    if (filters.applicationId) {
+      loadModulesByApplication(filters.applicationId);
     } else {
       setModules([]);
       setFilters(prev => ({ ...prev, moduleId: '' }));
     }
-  }, [filters.projectId]);
+  }, [filters.applicationId]);
 
   useEffect(() => {
     // Only load test cases if projects are loaded (or if user is admin)
@@ -125,10 +136,20 @@ export default function TestCases() {
     }
   };
 
-  const loadModulesByProject = async (projectId) => {
+  const loadApplicationsByProject = async (projectId) => {
     try {
-      const response = await testModulesAPI.getByProject(projectId);
-      setModules(response.data);
+      const response = await applicationsAPI.getByProject(projectId);
+      setApplications(response.data);
+    } catch (err) {
+      console.error('Load applications error:', err);
+    }
+  };
+
+  const loadModulesByApplication = async (applicationId) => {
+    try {
+      const response = await testModulesAPI.getAll();
+      const filtered = response.data.filter(m => m.applicationId === applicationId);
+      setModules(filtered);
     } catch (err) {
       console.error('Load modules error:', err);
     }
@@ -161,6 +182,7 @@ export default function TestCases() {
   const clearFilters = () => {
     setFilters({
       projectId: '',
+      applicationId: '',
       moduleId: '',
       status: '',
       priority: '',
@@ -353,7 +375,7 @@ export default function TestCases() {
                   <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                {(filters.projectId || filters.moduleId || filters.status || filters.priority || filters.search || filters.automationStatus || filters.regressionStatus) && (
+                {(filters.projectId || filters.applicationId || filters.moduleId || filters.status || filters.priority || filters.search || filters.automationStatus || filters.regressionStatus) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     Clear All
                   </Button>
@@ -394,12 +416,28 @@ export default function TestCases() {
 
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Application
+                  </label>
+                  <Select
+                    value={filters.applicationId}
+                    onChange={(e) => setFilters(prev => ({ ...prev, applicationId: e.target.value }))}
+                    disabled={!filters.projectId}
+                  >
+                    <option value="">All Applications</option>
+                    {applications.map(app => (
+                      <option key={app.id} value={app.id}>{app.name}</option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
                     Test Module
                   </label>
                   <Select
                     value={filters.moduleId}
                     onChange={(e) => setFilters(prev => ({ ...prev, moduleId: e.target.value }))}
-                    disabled={!filters.projectId}
+                    disabled={!filters.applicationId}
                   >
                     <option value="">All Modules</option>
                     {modules.map(module => (
