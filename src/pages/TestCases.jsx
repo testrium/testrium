@@ -9,9 +9,10 @@ import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
 import TestCaseForm from '../components/TestCaseForm';
+import BulkImportModal from '../components/BulkImportModal';
 import {
   Plus, Search, Filter, ChevronRight,
-  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers
+  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload
 } from 'lucide-react';
 
 export default function TestCases() {
@@ -24,6 +25,7 @@ export default function TestCases() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [editingTestCase, setEditingTestCase] = useState(null);
 
   // Filters
@@ -256,13 +258,23 @@ export default function TestCases() {
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Test Cases</h2>
               <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and organize your test cases</p>
             </div>
-            <Button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              New Test Case
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowBulkImportModal(true)}
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Import
+              </Button>
+              <Button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New Test Case
+              </Button>
+            </div>
           </div>
 
           {/* Summary Metrics */}
@@ -630,6 +642,13 @@ export default function TestCases() {
         onSuccess={loadTestCases}
         testCase={editingTestCase}
         projects={projects}
+      />
+
+      {/* Bulk Import Modal */}
+      <BulkImportModal
+        isOpen={showBulkImportModal}
+        onClose={() => setShowBulkImportModal(false)}
+        onImportComplete={loadTestCases}
       />
 
       <Footer />

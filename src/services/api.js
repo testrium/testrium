@@ -66,6 +66,14 @@ export const testCasesAPI = {
   create: (data) => api.post('/test-cases', data),
   update: (id, data) => api.put(`/test-cases/${id}`, data),
   delete: (id) => api.delete(`/test-cases/${id}`),
+  bulkImport: (formData) => {
+    return axios.post(`${API_BASE_URL}/test-cases/bulk/import`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+  },
 };
 
 // Test Modules API
@@ -92,6 +100,11 @@ export const projectMembersAPI = {
   addMembers: (projectId, data) => api.post(`/project-members/project/${projectId}`, data),
   removeMember: (memberId) => api.delete(`/project-members/${memberId}`),
   updateMemberRole: (memberId, role) => api.put(`/project-members/${memberId}/role`, { role }),
+};
+
+// Applications API
+export const applicationsAPI = {
+  getByProject: (projectId) => api.get('/applications', { params: { projectId } }),
 };
 
 // Metrics API

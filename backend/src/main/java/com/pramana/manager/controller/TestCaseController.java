@@ -1,13 +1,19 @@
 package com.pramana.manager.controller;
 
+import com.pramana.manager.dto.BulkImportResult;
 import com.pramana.manager.dto.TestCaseDTO;
 import com.pramana.manager.entity.TestCase;
+import com.pramana.manager.service.TestCaseBulkImportService;
 import com.pramana.manager.service.TestCaseService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -16,9 +22,11 @@ import java.util.List;
 public class TestCaseController {
 
     private final TestCaseService testCaseService;
+    private final TestCaseBulkImportService bulkImportService;
 
-    public TestCaseController(TestCaseService testCaseService) {
+    public TestCaseController(TestCaseService testCaseService, TestCaseBulkImportService bulkImportService) {
         this.testCaseService = testCaseService;
+        this.bulkImportService = bulkImportService;
     }
 
     @GetMapping
@@ -60,5 +68,53 @@ public class TestCaseController {
     public ResponseEntity<Void> deleteTestCase(@PathVariable Long id) {
         testCaseService.deleteTestCase(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Bulk import test cases from Excel or CSV file
+     * @param file Excel (.xlsx, .xls) or CSV (.csv) file
+     * @param projectId Target project ID
+     * @param applicationId Target application ID
+     * @return Import result with success/failure details
+     */
+    @PostMapping("/bulk/import")
+    public ResponseEntity<BulkImportResult> bulkImport(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("projectId") Long projectId,
+            @RequestParam("applicationId") Long applicationId) {
+        try {
+            BulkImportResult result = bulkImportService.importFromFile(file, projectId, applicationId);
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            BulkImportResult errorResult = new BulkImportResult();
+            errorResult.setMessage("Error reading file: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResult);
+        } catch (Exception e) {
+            BulkImportResult errorResult = new BulkImportResult();
+            errorResult.setMessage("Error processing import: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResult);
+        }
+    }
+
+    /**
+     * Download Excel template for bulk import
+     * @return Excel file with headers and sample data
+     */
+    @GetMapping("/bulk/template")
+    public ResponseEntity<byte[]> downloadTemplate() {
+        try {
+            byte[] template = bulkImportService.generateTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "TestCase_Import_Template.xlsx");
+            headers.setContentLength(template.length);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(template);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

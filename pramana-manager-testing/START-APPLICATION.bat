@@ -1,13 +1,13 @@
 @echo off
 echo ========================================
-echo   PRAMANA MANAGER v1.7.0
+echo   PRAMANA MANAGER v1.9.0
 echo ========================================
 echo.
 echo Starting servers...
 echo.
 
 REM Start backend JAR
-start "Pramana Backend" cmd /k "cd backend\target && java -jar pramana-manager-1.7.0.jar"
+start "Pramana Backend" cmd /k "cd backend\target && java -jar pramana-manager-1.9.0.jar"
 
 echo Waiting for backend (20 seconds)...
 timeout /t 20 /nobreak > nul
