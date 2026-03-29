@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Testrium',
   description: 'The open-source test case management system built for QA teams.',
-  base: '/',
+  base: '/testrium/',
   ignoreDeadLinks: [/^http:\/\/localhost/],
 
   head: [
