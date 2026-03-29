@@ -21,7 +21,7 @@ cp .env.example .env
 
 Open `.env` and update at minimum:
 
-```env
+```bash
 # Strong random string — required for security
 JWT_SECRET=replace_this_with_a_long_random_string_at_least_32_chars
 
@@ -81,7 +81,7 @@ docker compose pull && docker compose up -d
 
 To run on a different port, set `APP_PORT` in your `.env`:
 
-```env
+```bash
 APP_PORT=3000
 ```
 

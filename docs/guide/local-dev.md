@@ -54,7 +54,7 @@ The Vite dev server proxies API calls to `http://localhost:8080` automatically v
 
 Create a `.env` file in the project root:
 
-```env
+```bash
 VITE_API_BASE_URL=http://localhost:8080/api
 VITE_APP_NAME=Testrium
 VITE_APP_VERSION=1.7.0

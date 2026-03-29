@@ -49,7 +49,7 @@ Required only if `EMAIL_VERIFICATION_REQUIRED=true` or you want password reset e
 
 ## Example `.env`
 
-```env
+```bash
 # Database
 MYSQL_ROOT_PASSWORD=str0ng_r00t_pass
 MYSQL_DATABASE=testrium
