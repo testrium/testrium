@@ -261,7 +261,7 @@ const terminalLines = [
               </svg>
             </button>
             <div class="faq-body" :style="{ height: faqHeight(i) }">
-              <div class="faq-answer" :ref="(el) => { if (el) faqRefs[i] = el as HTMLElement }">
+              <div class="faq-answer" :ref="(el) => { if (el) faqRefs.value[i] = el as HTMLElement }">
                 <p>{{ item.a }}</p>
               </div>
             </div>
