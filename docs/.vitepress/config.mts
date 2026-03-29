@@ -7,7 +7,7 @@ export default defineConfig({
   ignoreDeadLinks: [/^http:\/\/localhost/],
 
   head: [
-    ['link', { rel: 'icon', type: 'image/x-icon', href: '/testrium/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/testrium/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#6366f1' }],
     ['meta', { property: 'og:title', content: 'Testrium — Test Case Management for QA Teams' }],
     ['meta', { property: 'og:description', content: 'Plan, execute, and report on test cases with ease. Open-source, self-hosted, Docker-ready.' }],
