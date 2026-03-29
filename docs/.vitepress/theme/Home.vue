@@ -247,17 +247,15 @@ const terminalLines = [
             class="faq-item"
             :class="{ open: openFaq === i }"
           >
-            <button class="faq-q" @click="toggleFaq(i)" :aria-expanded="openFaq === i">
+            <button class="faq-q" @click="toggleFaq(i)">
               <span>{{ item.q }}</span>
-              <svg class="chevron" :style="{ transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', color: openFaq === i ? 'var(--brand)' : '' }" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <svg class="chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.8"
                       stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="faq-body" :style="{ maxHeight: openFaq === i ? '400px' : '0px' }">
-              <div class="faq-answer">
-                <p>{{ item.a }}</p>
-              </div>
+            <div v-show="openFaq === i" class="faq-answer">
+              <p>{{ item.a }}</p>
             </div>
           </div>
         </div>
@@ -793,16 +791,6 @@ const terminalLines = [
   transition: transform 0.32s cubic-bezier(0.22,1,0.36,1), color 0.18s;
 }
 .open .chevron { transform: rotate(180deg); color: var(--brand); }
-
-/* Smooth height accordion */
-.faq-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.38s cubic-bezier(0.22,1,0.36,1);
-}
-.faq-item.open .faq-body {
-  max-height: 400px;
-}
 
 .faq-answer { padding: 0 20px 18px; }
 .faq-answer p { margin: 0; font-size: 0.9rem; line-height: 1.72; color: var(--vp-c-text-2); }
