@@ -29,11 +29,6 @@ function setupObserver() {
     .forEach((el) => observer!.observe(el))
 }
 
-// ── FAQ accordion ─────────────────────────────────────────────
-const openFaq = ref<number | null>(null)
-function toggleFaq(i: number) {
-  openFaq.value = openFaq.value === i ? null : i
-}
 
 // ── Lifecycle ─────────────────────────────────────────────────
 onMounted(() => {
@@ -241,23 +236,22 @@ const terminalLines = [
         <h2 class="section-heading">Frequently asked questions</h2>
 
         <div class="faq-list">
-          <div
+          <details
             v-for="(item, i) in faqs"
             :key="i"
             class="faq-item"
-            :class="{ open: openFaq === i }"
           >
-            <button class="faq-q" @click="toggleFaq(i)">
+            <summary class="faq-q">
               <span>{{ item.q }}</span>
               <svg class="chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.8"
                       stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-            </button>
-            <div v-show="openFaq === i" class="faq-answer">
+            </summary>
+            <div class="faq-answer">
               <p>{{ item.a }}</p>
             </div>
-          </div>
+          </details>
         </div>
       </div>
     </section>
@@ -762,7 +756,7 @@ const terminalLines = [
   opacity: 1;
   transform: translateY(0);
 }
-.faq-item.open {
+.faq-item[open] {
   border-color: var(--brand);
   box-shadow: 0 0 0 1px var(--brand), 0 4px 20px rgba(99,102,241,0.14);
 }
@@ -775,14 +769,15 @@ const terminalLines = [
   gap: 14px;
   padding: 18px 20px;
   background: none;
-  border: none;
   cursor: pointer;
   text-align: left;
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--vp-c-text-1);
   transition: color 0.18s;
+  list-style: none;
 }
+.faq-q::-webkit-details-marker { display: none; }
 .faq-q:hover { color: var(--brand); }
 
 .chevron {
@@ -790,7 +785,7 @@ const terminalLines = [
   color: var(--vp-c-text-3);
   transition: transform 0.32s cubic-bezier(0.22,1,0.36,1), color 0.18s;
 }
-.open .chevron { transform: rotate(180deg); color: var(--brand); }
+.faq-item[open] .chevron { transform: rotate(180deg); color: var(--brand); }
 
 .faq-answer { padding: 0 20px 18px; }
 .faq-answer p { margin: 0; font-size: 0.9rem; line-height: 1.72; color: var(--vp-c-text-2); }
