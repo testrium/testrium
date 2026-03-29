@@ -6,12 +6,12 @@ hero:
   text: "Test Case Management Built for QA Teams"
   tagline: Plan, execute, and report on your software testing — all in one place. Self-hosted, Docker-ready, and free to use.
   image:
-    src: /logo.svg
+    src: /testrium/hero.png
     alt: Testrium
   actions:
     - theme: brand
       text: Get Started
-      link: /guide/
+      link: /testrium/guide/
     - theme: alt
       text: View on GitHub
       link: https://github.com/testrium/testrium
@@ -77,17 +77,80 @@ Testrium is **self-hosted**, **open-source**, and designed to be up and running 
 
 ## Who Is It For?
 
-### QA Engineers
-Manage your test cases, track runs, and report results without needing expensive tools or approvals.
+<details>
+<summary><strong>👩‍💻 I'm a QA Engineer managing test cases manually</strong></summary>
 
-### Development Teams
-Integrate test execution into your workflow. Use the Automation API to push results from CI/CD pipelines.
+Testrium replaces your spreadsheets with a proper test management system. Create structured test cases with steps, priorities, and expected results. Execute test runs, record actual results, and generate reports — all in one place, with no per-seat fees.
 
-### QA Managers
-Get a real-time view of test coverage, pass rates, and execution trends across all projects.
+</details>
 
-### Automation Engineers
-Use the REST API to fetch test data and post execution results from Selenium, RestAssured, or Playwright frameworks.
+<details>
+<summary><strong>🧑‍💼 I'm a QA Manager who needs visibility across projects</strong></summary>
+
+Get a real-time dashboard of pass rates, execution trends, and team activity across all your projects and modules. Generate PDF or Excel reports to share with stakeholders in minutes.
+
+</details>
+
+<details>
+<summary><strong>🤖 I'm an Automation Engineer integrating with test frameworks</strong></summary>
+
+Use the REST API to fetch environment-specific test data and post execution results from Selenium, RestAssured, Playwright, or Cypress. No more hardcoded credentials in scripts — store everything in Testrium's test data store.
+
+</details>
+
+<details>
+<summary><strong>🧑‍🔧 I'm a Developer who wants testing integrated into CI/CD</strong></summary>
+
+Post test execution results directly from your pipeline using the Automation API. Track automated test runs alongside manual ones in a single view.
+
+</details>
+
+<details>
+<summary><strong>💰 Is Testrium free?</strong></summary>
+
+Yes. Testrium is completely free to self-host. There are no per-user fees, no seat limits, and no feature paywalls. You run it on your own infrastructure.
+
+</details>
+
+<details>
+<summary><strong>🔓 Is it open source?</strong></summary>
+
+Yes. The full source code is available on [GitHub](https://github.com/testrium/testrium). You can inspect it, fork it, and contribute to it.
+
+</details>
+
+<details>
+<summary><strong>☁️ Do I need cloud infrastructure to run it?</strong></summary>
+
+No. Testrium runs anywhere Docker runs — your laptop, a local server, a VPS, or cloud VMs (AWS EC2, Azure VM, GCP Compute). It's a single Docker image with MySQL as the only external dependency.
+
+</details>
+
+<details>
+<summary><strong>🔒 Is my data safe?</strong></summary>
+
+Your data never leaves your infrastructure. Testrium is fully self-hosted — there are no external telemetry calls or third-party data sharing. You own everything.
+
+</details>
+
+<details>
+<summary><strong>🔁 Can I migrate from another tool?</strong></summary>
+
+Yes. Use the bulk import feature to import test cases from Excel or CSV files. Most test management tools support exporting to Excel, making migration straightforward.
+
+</details>
+
+<details>
+<summary><strong>📦 How do I update to a newer version?</strong></summary>
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Your database volume is preserved across updates.
+
+</details>
 
 ---
 
@@ -102,4 +165,4 @@ docker compose up -d
 
 Open **http://localhost:8080** → login → start testing.
 
-[Full setup guide →](/guide/docker-setup)
+[Full setup guide →](/testrium/guide/docker-setup)
