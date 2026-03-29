@@ -249,12 +249,12 @@ const terminalLines = [
           >
             <button class="faq-q" @click="toggleFaq(i)" :aria-expanded="openFaq === i">
               <span>{{ item.q }}</span>
-              <svg class="chevron" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <svg class="chevron" :style="{ transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', color: openFaq === i ? 'var(--brand)' : '' }" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M4.5 7l4.5 4.5L13.5 7" stroke="currentColor" stroke-width="1.8"
                       stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="faq-body">
+            <div class="faq-body" :style="{ maxHeight: openFaq === i ? '400px' : '0px' }">
               <div class="faq-answer">
                 <p>{{ item.a }}</p>
               </div>
