@@ -31,14 +31,8 @@ function setupObserver() {
 
 // ── FAQ accordion ─────────────────────────────────────────────
 const openFaq = ref<number | null>(null)
-const faqRefs = ref<HTMLElement[]>([])
 function toggleFaq(i: number) {
   openFaq.value = openFaq.value === i ? null : i
-}
-function faqHeight(i: number): string {
-  if (openFaq.value !== i) return '0px'
-  const el = faqRefs.value[i]
-  return el ? el.scrollHeight + 'px' : '0px'
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────
@@ -260,8 +254,8 @@ const terminalLines = [
                       stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="faq-body" :style="{ height: faqHeight(i) }">
-              <div class="faq-answer" :ref="(el) => { if (el) faqRefs.value[i] = el as HTMLElement }">
+            <div class="faq-body">
+              <div class="faq-answer">
                 <p>{{ item.a }}</p>
               </div>
             </div>
@@ -801,9 +795,12 @@ const terminalLines = [
 
 /* Smooth height accordion */
 .faq-body {
-  height: 0;
+  max-height: 0;
   overflow: hidden;
-  transition: height 0.38s cubic-bezier(0.22,1,0.36,1);
+  transition: max-height 0.38s cubic-bezier(0.22,1,0.36,1);
+}
+.faq-item.open .faq-body {
+  max-height: 400px;
 }
 
 .faq-answer { padding: 0 20px 18px; }
