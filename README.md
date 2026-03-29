@@ -95,8 +95,8 @@ Open `http://localhost` — login with `admin@testrium.com` / `Admin@123` (chang
 
 | Image | Docker Hub |
 |-------|-----------|
-| Backend | `panjatancoders/testrium-backend:latest` |
-| Frontend | `panjatancoders/testrium-frontend:latest` |
+| Backend | `sddmhossain/testrium-backend:latest` |
+| Frontend | `sddmhossain/testrium-frontend:latest` |
 
 ---
 
@@ -323,10 +323,10 @@ For local dev, set in `backend/src/main/resources/application.properties` (H2 us
 
 ```bash
 # Backend
-docker build -t panjatancoders/testrium-backend:latest ./backend
+docker build -t sddmhossain/testrium-backend:latest ./backend
 
 # Frontend
-docker build -t panjatancoders/testrium-frontend:latest .
+docker build -t sddmhossain/testrium-frontend:latest .
 ```
 
 ### Run with Docker Compose

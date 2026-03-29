@@ -18,7 +18,7 @@ services:
       - testrium-network
 
   backend:
-    image: panjatancoders/testrium-backend:latest
+    image: sddmhossain/testrium-backend:latest
     container_name: testrium-backend
     depends_on:
       mysql:
@@ -44,7 +44,7 @@ services:
       - testrium-network
 
   frontend:
-    image: panjatancoders/testrium-frontend:latest
+    image: sddmhossain/testrium-frontend:latest
     container_name: testrium-frontend
     depends_on:
       - backend
