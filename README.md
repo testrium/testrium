@@ -65,53 +65,66 @@ Full dark mode support across the application.
 
 ---
 
-## Quick Start
+## Quick Start (Docker — Recommended)
+
+The easiest way to run Testrium is with Docker Compose. No Java or Node.js required.
+
+### 1. Download the compose file
+
+```bash
+curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/docker-compose.yml
+curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/.env.example
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+# Edit .env and set your JWT_SECRET, DB passwords, and admin credentials
+```
+
+### 3. Run
+
+```bash
+docker compose up -d
+```
+
+Open `http://localhost` — login with `admin@testrium.com` / `Admin@123` (change after first login).
+
+### Docker Images
+
+| Image | Docker Hub |
+|-------|-----------|
+| Backend | `panjatancoders/testrium-backend:latest` |
+| Frontend | `panjatancoders/testrium-frontend:latest` |
+
+---
+
+## Local Development Setup
 
 ### Prerequisites
 
 - Java JDK 17+
 - Node.js 18+
-- MySQL 8.0+
-- Maven 3.9+ (optional)
+- Maven 3.9+
 
-### 1. Database Setup
-
-```sql
-CREATE DATABASE testrium;
-```
-
-### 2. Backend Setup
+### 1. Backend
 
 ```bash
 cd backend
-
-# Update database credentials in application.properties
-# spring.datasource.username=root
-# spring.datasource.password=your_password
-
-# Build and run
 mvn spring-boot:run
 ```
 
-Backend will start at `http://localhost:8080`
+Backend starts at `http://localhost:8080` (uses H2 file DB by default).
 
-### 3. Frontend Setup
+### 2. Frontend
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-Frontend will start at `http://localhost:5173`
-
-### 4. Access Application
-
-- Open browser: `http://localhost:5173`
-- Register a new account or login
-- Start creating projects and test cases!
+Frontend starts at `http://localhost:5173`
 
 ---
 
@@ -268,59 +281,72 @@ For complete API documentation, see [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_G
 
 ## Configuration
 
-### Backend Configuration
+### Docker Configuration (via `.env`)
 
-Edit `backend/src/main/resources/application.properties`:
+All settings are controlled through environment variables. Copy `.env.example` to `.env`:
 
-```properties
+```env
 # Database
-spring.datasource.url=jdbc:mysql://localhost:3306/testrium
-spring.datasource.username=root
-spring.datasource.password=your_password
+MYSQL_ROOT_PASSWORD=changeme_root
+MYSQL_DATABASE=testrium
+MYSQL_USER=testrium
+MYSQL_PASSWORD=changeme_db
 
-# JWT
-jwt.secret=YourSuperSecretKeyMinimum256BitsLong
-jwt.expiration=86400000
+# JWT (min 32 chars, use a strong random string)
+JWT_SECRET=REPLACE_WITH_A_LONG_RANDOM_SECRET_STRING_HERE
 
-# Server
-server.port=8080
+# JIRA encryption key (must be exactly 16 characters)
+JIRA_ENCRYPTION_KEY=TestriumJiraKey1
 
-# JIRA (Optional)
-jira.base.url=https://your-domain.atlassian.net
-jira.api.token=your_token
-jira.email=your-email@example.com
+# CORS (your public domain in production)
+CORS_ALLOWED_ORIGINS=http://localhost
+
+# Admin account
+ADMIN_EMAIL=admin@testrium.com
+ADMIN_PASSWORD=Admin@123
+
+# Optional: email / SMTP
+MAIL_SMTP_HOST=smtp.gmail.com
+MAIL_SMTP_USERNAME=
+MAIL_SMTP_PASSWORD=
 ```
 
-### Frontend Configuration
+### Local Dev Configuration
 
-Create `.env` file:
-
-```properties
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_APP_NAME=Testrium
-VITE_APP_VERSION=1.7.0
-```
+For local dev, set in `backend/src/main/resources/application.properties` (H2 used by default, no MySQL needed).
 
 ---
 
 ## Building for Production
 
-### Backend
+### Build Docker Images Locally
 
 ```bash
-cd backend
-mvn clean package -DskipTests
-java -jar target/testrium-1.7.0.jar
+# Backend
+docker build -t panjatancoders/testrium-backend:latest ./backend
+
+# Frontend
+docker build -t panjatancoders/testrium-frontend:latest .
 ```
 
-### Frontend
+### Run with Docker Compose
 
 ```bash
+docker compose up -d
+```
+
+### Manual Build (without Docker)
+
+```bash
+# Backend
+cd backend
+mvn clean package -DskipTests
+java -jar target/testrium-2.0.0.jar
+
+# Frontend
 npm run build
 npm run preview
 ```
-
-The production build will be in the `dist/` directory.
 
 ---
 

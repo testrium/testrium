@@ -9,6 +9,7 @@ import com.testrium.manager.dto.JiraIssueDTO;
 import com.testrium.manager.entity.*;
 import com.testrium.manager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,12 +46,13 @@ public class JiraService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Simple encryption key - In production, use proper key management
-    private static final String ENCRYPTION_KEY = "PramanaJiraKey16"; // 16 chars for AES-128
+    @Value("${jira.encryption.key:TestriumJiraKey1}")
+    private String encryptionKey;
 
     // Encrypt API token before storing
     public String encryptApiToken(String apiToken) {
         try {
-            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
+            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey.getBytes(StandardCharsets.UTF_8), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] encrypted = cipher.doFinal(apiToken.getBytes(StandardCharsets.UTF_8));
@@ -63,7 +65,7 @@ public class JiraService {
     // Decrypt API token when using
     private String decryptApiToken(String encryptedToken) {
         try {
-            SecretKeySpec secretKey = new SecretKeySpec(ENCRYPTION_KEY.getBytes(StandardCharsets.UTF_8), "AES");
+            SecretKeySpec secretKey = new SecretKeySpec(encryptionKey.getBytes(StandardCharsets.UTF_8), "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, secretKey);
             byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encryptedToken));

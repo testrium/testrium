@@ -40,6 +40,10 @@ public class ClientConfig {
         if (email == null || !email.contains("@")) {
             return false;
         }
+        // If no domains configured, allow all
+        if (allowedEmailDomains == null || allowedEmailDomains.isEmpty()) {
+            return true;
+        }
         String emailDomain = email.substring(email.lastIndexOf("@") + 1).toLowerCase();
         return allowedEmailDomains.stream()
                 .anyMatch(allowed -> allowed.equalsIgnoreCase(emailDomain));
