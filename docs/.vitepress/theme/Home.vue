@@ -756,12 +756,13 @@ const terminalLines = [
   overflow: hidden;
   background: var(--home-card-bg);
   backdrop-filter: blur(8px);
-  transition: border-color 0.22s, box-shadow 0.22s;
+  transition: border-color 0.22s, box-shadow 0.22s, opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1);
   opacity: 0;
   transform: translateY(18px);
 }
 .faq-item.is-visible {
-  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.05s both;
+  opacity: 1;
+  transform: translateY(0);
 }
 .faq-item.open {
   border-color: var(--brand);
