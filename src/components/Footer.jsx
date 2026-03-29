@@ -11,17 +11,17 @@ export default function Footer() {
           {/* Left Side - Branding */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
+              <span className="text-white font-bold text-sm">T</span>
             </div>
             <div className="text-sm">
-              <p className="font-semibold text-gray-900 dark:text-white">Pramana Manager</p>
+              <p className="font-semibold text-gray-900 dark:text-white">Testrium</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Test Case Management System</p>
             </div>
           </div>
 
           {/* Center - Copyright */}
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            © {currentYear} Pramana Manager. All rights reserved.
+            © {currentYear} Testrium. All rights reserved.
           </div>
 
           {/* Right Side - Links */}
@@ -36,7 +36,7 @@ export default function Footer() {
               <Github className="h-5 w-5" />
             </a>
             <a
-              href="mailto:support@pramana.com"
+              href="mailto:support@testrium.com"
               className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               title="Email Support"
             >

@@ -71,7 +71,7 @@ export default function Login() {
             <TestTube2 className="h-10 w-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">Welcome Back</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">Sign in to continue to Pramana Manager</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">Sign in to continue to Testrium</p>
         </div>
 
         <Card className="shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">

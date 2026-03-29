@@ -75,13 +75,13 @@ export default function Navigation() {
               onClick={() => navigate('/dashboard')}
               className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 cursor-pointer hover:scale-105 transition-transform"
             >
-              <span className="text-white font-bold text-lg">P</span>
+              <span className="text-white font-bold text-lg">T</span>
             </div>
             <h1
               onClick={() => navigate('/dashboard')}
               className="font-bold text-base sm:text-lg text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden sm:block"
             >
-              Pramana Manager
+              Testrium
             </h1>
           </div>
 

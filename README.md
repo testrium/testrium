@@ -1,4 +1,4 @@
-# Pramana Manager
+# Testrium
 
 **Version:** 1.7.0
 **A Comprehensive Test Case Management System**
@@ -13,19 +13,36 @@
 
 ## Overview
 
-Pramana Manager is a modern, full-stack test case management system designed to streamline test planning, execution, and reporting for QA teams. Built with Spring Boot and React, it provides a comprehensive solution for managing test cases, executing test runs, tracking results, and generating detailed reports.
+Testrium is a modern, full-stack test case management system designed to streamline test planning, execution, and reporting for QA teams. Built with Spring Boot and React, it provides a comprehensive solution for managing test cases, executing test runs, tracking results, and generating detailed reports.
 
 ### Key Features
 
-✅ **Test Case Management** - Create, organize, and maintain test cases with detailed steps and expected results
-✅ **Test Run Execution** - Execute tests individually or in bulk with real-time status tracking
-✅ **Bulk Operations (NEW in 1.7.0)** - Select and update multiple test results at once
-✅ **JIRA Integration** - Create bugs directly from failed test executions
-✅ **Test Data Management** - Centralized test data with environment-specific configurations
-✅ **Advanced Reporting** - Generate PDF/Excel reports with charts and visualizations
-✅ **Automation API** - RESTful API for integration with automation frameworks
-✅ **Role-Based Access** - Secure access control with user roles and permissions
-✅ **Dark Mode** - Full dark mode support across the application
+✅ **Test Case Management**
+Create, organize, and maintain test cases with detailed steps and expected results.
+
+✅ **Test Run Execution**
+Execute tests individually or in bulk with real-time status tracking.
+
+✅ **Bulk Operations (NEW in 1.7.0)**
+Select and update multiple test results at once.
+
+✅ **JIRA Integration**
+Create bugs directly from failed test executions.
+
+✅ **Test Data Management**
+Centralized test data with environment-specific configurations.
+
+✅ **Advanced Reporting**
+Generate PDF/Excel reports with charts and visualizations.
+
+✅ **Automation API**
+RESTful API for integration with automation frameworks.
+
+✅ **Role-Based Access**
+Secure access control with user roles and permissions.
+
+✅ **Dark Mode**
+Full dark mode support across the application.
 
 ---
 
@@ -60,7 +77,7 @@ Pramana Manager is a modern, full-stack test case management system designed to 
 ### 1. Database Setup
 
 ```sql
-CREATE DATABASE pramana_manager;
+CREATE DATABASE testrium;
 ```
 
 ### 2. Backend Setup
@@ -135,11 +152,11 @@ This feature significantly speeds up test result updates, especially for large t
 ## Project Structure
 
 ```
-pramana-manager/
+testrium/
 ├── backend/                    # Spring Boot backend
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/com/pramana/manager/
+│   │   │   ├── java/com/testrium/
 │   │   │   │   ├── controller/    # REST controllers
 │   │   │   │   ├── service/       # Business logic
 │   │   │   │   ├── repository/    # Data access
@@ -224,7 +241,7 @@ pramana-manager/
 
 ## API Integration
 
-Pramana Manager provides RESTful APIs for integration with automation frameworks like Selenium, RestAssured, Playwright, and more.
+Testrium provides RESTful APIs for integration with automation frameworks like Selenium, RestAssured, Playwright, and more.
 
 ### Example: Fetch Test Data
 
@@ -257,7 +274,7 @@ Edit `backend/src/main/resources/application.properties`:
 
 ```properties
 # Database
-spring.datasource.url=jdbc:mysql://localhost:3306/pramana_manager
+spring.datasource.url=jdbc:mysql://localhost:3306/testrium
 spring.datasource.username=root
 spring.datasource.password=your_password
 
@@ -280,7 +297,7 @@ Create `.env` file:
 
 ```properties
 VITE_API_BASE_URL=http://localhost:8080/api
-VITE_APP_NAME=Pramana Manager
+VITE_APP_NAME=Testrium
 VITE_APP_VERSION=1.7.0
 ```
 
@@ -293,7 +310,7 @@ VITE_APP_VERSION=1.7.0
 ```bash
 cd backend
 mvn clean package -DskipTests
-java -jar target/pramana-manager-1.7.0.jar
+java -jar target/testrium-1.7.0.jar
 ```
 
 ### Frontend
@@ -395,7 +412,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for complete version history.
 **Port 8080 already in use:**
 ```bash
 # Kill process or use different port
-java -jar target/pramana-manager-1.7.0.jar --server.port=8081
+java -jar target/testrium-1.7.0.jar --server.port=8081
 ```
 
 **Database connection failed:**
@@ -416,7 +433,7 @@ For more troubleshooting, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 Contributions are welcome! Please follow these steps:
 
-1. Fork the repository
+1. Fork the repository: https://github.com/PanjatanCoders/testrium.git
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
@@ -435,7 +452,7 @@ Contributions are welcome! Please follow these steps:
 
 ### Reporting Security Issues
 
-If you discover a security vulnerability, please email security@pramana-manager.com instead of using the issue tracker.
+If you discover a security vulnerability, please open an issue at https://github.com/PanjatanCoders/testrium/issues instead of using email.
 
 ### Security Features
 
@@ -452,7 +469,7 @@ If you discover a security vulnerability, please email security@pramana-manager.
 
 For support and questions:
 
-- **Email:** support@pramana-manager.com
+- **GitHub:** https://github.com/PanjatanCoders/testrium
 - **Documentation:** See guides in the repository
 - **Issues:** Use GitHub Issues for bug reports
 
@@ -460,7 +477,7 @@ For support and questions:
 
 ## License
 
-Pramana Manager © 2024. All rights reserved.
+Testrium © 2024. All rights reserved.
 
 This is proprietary software. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
 
@@ -471,16 +488,16 @@ This is proprietary software. Unauthorized copying, modification, distribution, 
 - Spring Boot team for the excellent framework
 - React team for the powerful UI library
 - Tailwind CSS for the utility-first CSS framework
-- All contributors and users of Pramana Manager
+- All contributors and users of Testrium
 
 ---
 
 ## Contact
 
-**Project Maintainer:** Pramana Manager Team
-**Email:** info@pramana-manager.com
+**Project:** Testrium
+**GitHub:** https://github.com/PanjatanCoders/testrium
 **Version:** 1.7.0
-**Last Updated:** December 14, 2024
+**Last Updated:** March 2025
 
 ---
 
