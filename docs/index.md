@@ -6,12 +6,12 @@ hero:
   text: "Test Case Management Built for QA Teams"
   tagline: Plan, execute, and report on your software testing — all in one place. Self-hosted, Docker-ready, and free to use.
   image:
-    src: /testrium/hero.png
+    src: /hero.png
     alt: Testrium
   actions:
     - theme: brand
       text: Get Started
-      link: /testrium/guide/
+      link: /guide/
     - theme: alt
       text: View on GitHub
       link: https://github.com/testrium/testrium
@@ -165,4 +165,4 @@ docker compose up -d
 
 Open **http://localhost:8080** → login → start testing.
 
-[Full setup guide →](/testrium/guide/docker-setup)
+[Full setup guide →](/guide/docker-setup)
