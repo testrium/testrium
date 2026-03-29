@@ -17,9 +17,9 @@ services:
     networks:
       - testrium-network
 
-  backend:
-    image: sddmhossain/testrium-backend:latest
-    container_name: testrium-backend
+  app:
+    image: sddmhossain/testrium:latest
+    container_name: testrium
     depends_on:
       mysql:
         condition: service_healthy
@@ -31,7 +31,6 @@ services:
       DB_DIALECT: org.hibernate.dialect.MySQLDialect
       JWT_SECRET: ${JWT_SECRET:-CHANGE_THIS_TO_A_RANDOM_SECRET_STRING_MIN_32_CHARS}
       JIRA_ENCRYPTION_KEY: ${JIRA_ENCRYPTION_KEY:-TestriumJiraKey1}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
       CLIENT_NAME: ${CLIENT_NAME:-Testrium}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@testrium.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@123}
@@ -40,16 +39,8 @@ services:
       MAIL_SMTP_HOST: ${MAIL_SMTP_HOST:-smtp.gmail.com}
       MAIL_SMTP_USERNAME: ${MAIL_SMTP_USERNAME:-}
       MAIL_SMTP_PASSWORD: ${MAIL_SMTP_PASSWORD:-}
-    networks:
-      - testrium-network
-
-  frontend:
-    image: sddmhossain/testrium-frontend:latest
-    container_name: testrium-frontend
-    depends_on:
-      - backend
     ports:
-      - "${APP_PORT:-80}:80"
+      - "${APP_PORT:-8080}:8080"
     networks:
       - testrium-network
 

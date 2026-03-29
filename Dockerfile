@@ -1,6 +1,6 @@
-# Stage 1: Build
-FROM node:18-alpine AS build
-WORKDIR /app
+# Stage 1: Build frontend
+FROM node:18-alpine AS frontend-build
+WORKDIR /frontend
 COPY package*.json ./
 RUN npm ci
 COPY . .
@@ -12,9 +12,18 @@ ENV VITE_APP_NAME=$VITE_APP_NAME
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
 RUN npm run build
 
-# Stage 2: Serve with nginx
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Stage 2: Build backend (with frontend static files injected)
+FROM maven:3.9.6-eclipse-temurin-17 AS backend-build
+WORKDIR /app
+COPY backend/pom.xml .
+RUN mvn dependency:go-offline -B
+COPY backend/src ./src
+COPY --from=frontend-build /frontend/dist ./src/main/resources/static
+RUN mvn clean package -DskipTests -B
+
+# Stage 3: Runtime
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=backend-build /app/target/testrium-2.0.0.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

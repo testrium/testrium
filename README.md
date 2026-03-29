@@ -89,14 +89,13 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Open `http://localhost` — login with `admin@testrium.com` / `Admin@123` (change after first login).
+Open `http://localhost:8080` — login with `admin@testrium.com` / `Admin@123` (change after first login).
 
-### Docker Images
+### Docker Image
 
 | Image | Docker Hub |
 |-------|-----------|
-| Backend | `sddmhossain/testrium-backend:latest` |
-| Frontend | `sddmhossain/testrium-frontend:latest` |
+| Testrium (all-in-one) | `sddmhossain/testrium:latest` |
 
 ---
 
@@ -319,14 +318,10 @@ For local dev, set in `backend/src/main/resources/application.properties` (H2 us
 
 ## Building for Production
 
-### Build Docker Images Locally
+### Build Docker Image Locally
 
 ```bash
-# Backend
-docker build -t sddmhossain/testrium-backend:latest ./backend
-
-# Frontend
-docker build -t sddmhossain/testrium-frontend:latest .
+docker build -t sddmhossain/testrium:latest .
 ```
 
 ### Run with Docker Compose
