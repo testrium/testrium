@@ -10,8 +10,8 @@ Built with Spring Boot + React. One Docker image. Runs in minutes.
 
 ```bash
 # 1. Download compose file and config template
-curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/docker-compose.yml
-curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/.env.example
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/docker-compose.yml
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
 
 # 2. Configure
 cp .env.example .env
@@ -70,7 +70,7 @@ A single all-in-one image:
 
 ## Source Code
 
-GitHub: [https://github.com/PanjatanCoders/testrium](https://github.com/PanjatanCoders/testrium)
+GitHub: [https://github.com/testrium/testrium](https://github.com/testrium/testrium)
 
 ---
 

@@ -72,8 +72,8 @@ The easiest way to run Testrium is with Docker Compose. No Java or Node.js requi
 ### 1. Download the compose file
 
 ```bash
-curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/docker-compose.yml
-curl -O https://raw.githubusercontent.com/PanjatanCoders/testrium/master/.env.example
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/docker-compose.yml
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
 ```
 
 ### 2. Configure environment
@@ -454,7 +454,7 @@ For more troubleshooting, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 Contributions are welcome! Please follow these steps:
 
-1. Fork the repository: https://github.com/PanjatanCoders/testrium.git
+1. Fork the repository: https://github.com/testrium/testrium.git
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
@@ -473,7 +473,7 @@ Contributions are welcome! Please follow these steps:
 
 ### Reporting Security Issues
 
-If you discover a security vulnerability, please open an issue at https://github.com/PanjatanCoders/testrium/issues instead of using email.
+If you discover a security vulnerability, please open an issue at https://github.com/testrium/testrium/issues instead of using email.
 
 ### Security Features
 
@@ -490,7 +490,7 @@ If you discover a security vulnerability, please open an issue at https://github
 
 For support and questions:
 
-- **GitHub:** https://github.com/PanjatanCoders/testrium
+- **GitHub:** https://github.com/testrium/testrium
 - **Documentation:** See guides in the repository
 - **Issues:** Use GitHub Issues for bug reports
 
@@ -516,7 +516,7 @@ This is proprietary software. Unauthorized copying, modification, distribution, 
 ## Contact
 
 **Project:** Testrium
-**GitHub:** https://github.com/PanjatanCoders/testrium
+**GitHub:** https://github.com/testrium/testrium
 **Version:** 1.7.0
 **Last Updated:** March 2025
 
