@@ -2,6 +2,7 @@ package com.testrium.manager.controller;
 
 import com.testrium.manager.entity.User;
 import com.testrium.manager.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,24 @@ public class AdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${admin.default.email:admin@pramana.com}")
+    @Value("${admin.default.email:admin@testrium.com}")
     private String adminEmail;
 
-    @Value("${admin.default.password:admin123}")
+    @Value("${admin.default.password:Admin@123}")
     private String adminPassword;
+
+    @PostConstruct
+    public void initAdmin() {
+        if (userRepository.findByEmail(adminEmail).isPresent()) return;
+        String username = adminEmail.substring(0, adminEmail.indexOf("@"));
+        User admin = new User();
+        admin.setUsername(username);
+        admin.setEmail(adminEmail);
+        admin.setPassword(passwordEncoder.encode(adminPassword));
+        admin.setRole("ADMIN");
+        admin.setEmailVerified(true);
+        userRepository.save(admin);
+    }
 
     /**
      * Create initial admin user from configuration
