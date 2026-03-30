@@ -16,6 +16,7 @@ import TestData from './pages/TestData';
 import Reports from './pages/Reports';
 import Metrics from './pages/Metrics';
 import ChangePassword from './pages/ChangePassword';
+import Help from './pages/Help';
 
 function App() {
   return (
@@ -103,6 +104,7 @@ function App() {
           />
 
           <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

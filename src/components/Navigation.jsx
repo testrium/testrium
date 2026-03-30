@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X, KeyRound, ChevronDown } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X, KeyRound, ChevronDown, BookOpen } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -135,6 +135,13 @@ export default function Navigation() {
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
                   <button
+                    onClick={() => { setUserMenuOpen(false); navigate('/help'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <BookOpen className="h-4 w-4 text-green-500" />
+                    Help & Guide
+                  </button>
+                  <button
                     onClick={() => { setUserMenuOpen(false); navigate('/change-password'); }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
@@ -196,6 +203,14 @@ export default function Navigation() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
                 </div>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => { setMobileMenuOpen(false); navigate('/help'); }}
+                className="w-full justify-center mb-2"
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Help & Guide
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => { setMobileMenuOpen(false); navigate('/change-password'); }}
