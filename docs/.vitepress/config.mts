@@ -82,7 +82,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under a Proprietary License.',
-      copyright: 'Copyright © 2024-present Testrium'
+      copyright: 'Copyright © 2025-present Testrium'
     },
 
     editLink: {
