@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X, KeyRound, ChevronDown, BookOpen } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X, KeyRound, ChevronDown, BookOpen, Users } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -69,7 +69,8 @@ export default function Navigation() {
     { path: '/test-modules', icon: Layers, label: 'Modules', gradient: 'from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' },
     { path: '/test-cases', icon: FileText, label: 'Test Cases', gradient: 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' },
     { path: '/test-runs', icon: Play, label: 'Test Runs', gradient: 'from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700' },
-    { path: '/reports', icon: BarChart3, label: 'Reports', gradient: 'from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' }
+    { path: '/reports', icon: BarChart3, label: 'Reports', gradient: 'from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700' },
+    ...(user?.role === 'ADMIN' ? [{ path: '/admin/users', icon: Users, label: 'Users', gradient: 'from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700' }] : []),
   ];
 
   const handleNavClick = (path) => {
