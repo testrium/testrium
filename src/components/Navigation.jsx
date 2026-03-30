@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectMembersAPI } from '../services/api';
 import { Button } from './ui/Button';
-import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X } from 'lucide-react';
+import { Home, FileText, Layers, LogOut, Play, BarChart3, Package, TrendingUp, Menu, X, KeyRound, ChevronDown } from 'lucide-react';
 
 export default function Navigation() {
   const { user, logout } = useAuth();
@@ -11,6 +11,18 @@ export default function Navigation() {
   const location = useLocation();
   const [displayRole, setDisplayRole] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const determineRole = async () => {
@@ -102,29 +114,44 @@ export default function Navigation() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* User Profile - Hidden on small screens */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
-                <span className="text-blue-700 dark:text-blue-300 font-bold text-xs">
-                  {user?.username?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="text-xs">
-                <p className="font-semibold text-gray-900 dark:text-white leading-tight">{user?.username}</p>
-                <p className="text-[10px] text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
-              </div>
-            </div>
+            {/* User Dropdown */}
+            <div className="hidden md:block relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 flex items-center justify-center ring-2 ring-blue-200 dark:ring-blue-800">
+                  <span className="text-blue-700 dark:text-blue-300 font-bold text-xs">
+                    {user?.username?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="text-xs hidden lg:block text-left">
+                  <p className="font-semibold text-gray-900 dark:text-white leading-tight">{user?.username}</p>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
+                </div>
+                <ChevronDown className="h-3 w-3 text-gray-500 hidden lg:block" />
+              </button>
 
-            {/* Logout Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logout}
-              className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hidden md:flex"
-            >
-              <LogOut className="h-4 w-4 sm:mr-2" />
-              <span className="hidden lg:inline text-sm">Logout</span>
-            </Button>
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+                  <button
+                    onClick={() => { setUserMenuOpen(false); navigate('/change-password'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <KeyRound className="h-4 w-4 text-blue-500" />
+                    Change Password
+                  </button>
+                  <div className="border-t border-gray-100 dark:border-gray-700" />
+                  <button
+                    onClick={() => { setUserMenuOpen(false); logout(); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Menu Button */}
             <Button
@@ -169,6 +196,14 @@ export default function Navigation() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">{displayRole || 'User'}</p>
                 </div>
               </div>
+              <Button
+                variant="outline"
+                onClick={() => { setMobileMenuOpen(false); navigate('/change-password'); }}
+                className="w-full justify-center mb-2"
+              >
+                <KeyRound className="mr-2 h-4 w-4" />
+                Change Password
+              </Button>
               <Button
                 variant="outline"
                 onClick={logout}

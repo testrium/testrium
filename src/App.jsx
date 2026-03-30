@@ -15,6 +15,7 @@ import TestRunExecution from './pages/TestRunExecution';
 import TestData from './pages/TestData';
 import Reports from './pages/Reports';
 import Metrics from './pages/Metrics';
+import ChangePassword from './pages/ChangePassword';
 
 function App() {
   return (
@@ -100,6 +101,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

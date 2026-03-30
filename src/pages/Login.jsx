@@ -82,19 +82,6 @@ export default function Login() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">Default Admin Credentials</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400">Email: <span className="font-mono font-bold">admin@testrium.com</span></p>
-              <p className="text-xs text-blue-600 dark:text-blue-400">Password: <span className="font-mono font-bold">Admin@123</span></p>
-              <button
-                type="button"
-                onClick={() => setFormData({ email: 'admin@testrium.com', password: 'Admin@123' })}
-                className="mt-2 text-xs text-blue-700 dark:text-blue-300 underline hover:no-underline"
-              >
-                Click to fill
-              </button>
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               {errors.general && (
                 <div className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 text-sm p-3 rounded-md border border-red-200 dark:border-red-800">
