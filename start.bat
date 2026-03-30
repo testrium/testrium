@@ -16,25 +16,45 @@ if %errorlevel% == 0 (
         pause
         exit /b 1
     )
+
     echo.
-    echo Testrium is starting up. This may take a minute on first run.
-    echo Open http://localhost:8080 in your browser.
+    echo Waiting for app to be ready...
+    timeout /t 10 /nobreak >nul
+
+    REM Check if app container is actually running
+    docker ps --filter "name=testrium" --filter "status=running" --format "{{.Names}}" | findstr "^testrium$" >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo.
+        echo WARNING: App container did not start. Showing logs...
+        echo.
+        docker compose logs app
+        echo.
+        echo Try running: docker compose logs app
+        pause
+        exit /b 1
+    )
+
+    echo Testrium is running at http://localhost:8080
+    start http://localhost:8080
     goto done
 )
 
 REM ── Docker not available, try Java ────────────
-echo [Docker not found] Falling back to direct Java run...
+echo [Docker not found] Starting directly with Java...
 echo.
 
 java -version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ERROR: Neither Docker nor Java found.
-    echo Please install Docker Desktop or Java 17+.
+    echo ERROR: Neither Docker nor Java 17+ found.
+    echo.
+    echo Install one of:
+    echo   Docker Desktop : https://www.docker.com/products/docker-desktop
+    echo   Java 17+       : https://adoptium.net
     pause
     exit /b 1
 )
 
-REM ── Check if JAR already built ─────────────────
+REM ── Check if JAR exists ────────────────────────
 set JAR=backend\target\testrium-2.0.0.jar
 if not exist "%JAR%" (
     echo JAR not found. Building the application...
@@ -43,7 +63,14 @@ if not exist "%JAR%" (
 
     call mvn -version >nul 2>&1
     if %errorlevel% neq 0 (
-        echo ERROR: Maven not found. Please install Maven or build the JAR manually.
+        echo ERROR: Maven not found. Please install Maven 3.9+.
+        pause
+        exit /b 1
+    )
+
+    node -v >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo ERROR: Node.js not found. Please install Node.js 18+.
         pause
         exit /b 1
     )
@@ -52,18 +79,19 @@ if not exist "%JAR%" (
     call npm install
     call npm run build
 
-    echo Building backend...
+    echo Copying frontend to backend...
     xcopy /E /I /Y dist backend\src\main\resources\static >nul
+
+    echo Building backend...
     cd backend
     call mvn clean package -DskipTests -B
     cd ..
 )
 
-REM ── Run the JAR ────────────────────────────────
-echo Starting Testrium (H2 embedded database)...
-echo Open http://localhost:8080 in your browser.
+echo Starting Testrium on http://localhost:8080
 echo Press Ctrl+C to stop.
 echo.
+start http://localhost:8080
 java -jar "%JAR%"
 
 :done

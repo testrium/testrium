@@ -9,8 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class FallbackController {
 
-    @RequestMapping(value = {"/{path:[^\\.]*}", "/**/{path:[^\\.]*}"})
-    public String forward() {
+    @RequestMapping(value = "/{path:[^\\.]*}")
+    public String forwardRoot() {
+        return "forward:/index.html";
+    }
+
+    @RequestMapping(value = "/{path1:[^\\.]*}/{path2:[^\\.]*}")
+    public String forwardNested() {
+        return "forward:/index.html";
+    }
+
+    @RequestMapping(value = "/{path1:[^\\.]*}/{path2:[^\\.]*}/{path3:[^\\.]*}")
+    public String forwardDeep() {
         return "forward:/index.html";
     }
 }
