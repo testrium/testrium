@@ -59,7 +59,7 @@ function setupObserver() {
     { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
   )
   document
-    .querySelectorAll('.feature-card, .check-row, .faq-item, .quickstart-wrapper, .cta-inner')
+    .querySelectorAll('.feature-card, .how-step, .check-row, .faq-item, .quickstart-wrapper, .cta-inner')
     .forEach((el) => observer!.observe(el))
 }
 
@@ -189,6 +189,60 @@ const terminalLines = [
             <h3 class="card-title">{{ f.title }}</h3>
             <p class="card-desc">{{ f.desc }}</p>
             <div class="card-border" aria-hidden="true" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         HOW IT WORKS
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="section how-section">
+      <div class="inner">
+        <p class="section-label">Simple by design</p>
+        <h2 class="section-heading">How it works</h2>
+        <p class="section-sub">Three steps from zero to full test coverage</p>
+
+        <div class="how-grid">
+          <div class="how-step">
+            <div class="how-icon-wrap">
+              <span class="how-num">1</span>
+              <span class="how-icon">📁</span>
+            </div>
+            <div class="how-connector" aria-hidden="true" />
+            <h3 class="how-title">Organise</h3>
+            <p class="how-desc">
+              Create a project, add test modules to group related features,
+              then write test cases with steps, expected results, and priority.
+              Import existing cases from Excel in seconds.
+            </p>
+          </div>
+
+          <div class="how-step">
+            <div class="how-icon-wrap">
+              <span class="how-num">2</span>
+              <span class="how-icon">▶️</span>
+            </div>
+            <div class="how-connector" aria-hidden="true" />
+            <h3 class="how-title">Execute</h3>
+            <p class="how-desc">
+              Start a test run, work through each case, and log results —
+              Pass, Fail, or Skip — with comments and screenshots. Use bulk
+              actions to update dozens of results at once.
+            </p>
+          </div>
+
+          <div class="how-step">
+            <div class="how-icon-wrap">
+              <span class="how-num">3</span>
+              <span class="how-icon">📊</span>
+            </div>
+            <h3 class="how-title">Report</h3>
+            <p class="how-desc">
+              Generate PDF or Excel reports with pass-rate charts and trend
+              metrics. File bugs straight to JIRA from any failed test, and
+              share results with your team instantly.
+            </p>
           </div>
         </div>
       </div>
@@ -711,6 +765,136 @@ const terminalLines = [
 .card-icon  { font-size: 2rem; margin-bottom: 14px; display: block; }
 .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
 .card-desc  { font-size: 0.875rem; line-height: 1.65; color: var(--vp-c-text-2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   HOW IT WORKS
+═══════════════════════════════════════════════════════════════ */
+.how-section { background: var(--vp-c-bg); }
+
+.how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 56px;
+  position: relative;
+}
+
+@media (max-width: 720px) {
+  .how-grid { grid-template-columns: 1fr; gap: 32px; }
+}
+
+.how-step {
+  position: relative;
+  padding: 0 32px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@media (max-width: 720px) {
+  .how-step { padding: 0; }
+}
+
+/* Connector line between steps */
+.how-connector {
+  display: none;
+}
+
+.how-icon-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.how-num {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #fff;
+  z-index: 1;
+  line-height: 1;
+  padding-top: 1px;
+}
+
+.how-icon {
+  width: 72px;
+  height: 72px;
+  background: var(--home-card-bg);
+  border: 1px solid var(--home-card-border);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+  font-size: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Arrow connector between steps on desktop */
+.how-grid {
+  counter-reset: step;
+}
+
+/* Draw right-pointing arrows between step columns */
+.how-step:not(:last-child)::after {
+  content: '→';
+  position: absolute;
+  right: -4px;
+  top: 20px;
+  font-size: 1.6rem;
+  color: var(--brand);
+  opacity: 0.4;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .how-step:not(:last-child)::after {
+    content: '↓';
+    right: auto;
+    top: auto;
+    position: relative;
+    display: block;
+    margin: 8px 0 0;
+    font-size: 1.4rem;
+  }
+}
+
+.how-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.how-desc {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+}
+
+/* Scroll animation */
+.how-step.is-visible {
+  animation: stepIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.how-step:nth-child(1).is-visible { animation-delay: 0ms; }
+.how-step:nth-child(2).is-visible { animation-delay: 120ms; }
+.how-step:nth-child(3).is-visible { animation-delay: 240ms; }
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ═══════════════════════════════════════════════════════════════
    SCREENSHOTS
