@@ -21,15 +21,12 @@ if %errorlevel% == 0 (
     echo Waiting for app to be ready...
     timeout /t 10 /nobreak >nul
 
-    REM Check if app container is actually running
     docker ps --filter "name=testrium" --filter "status=running" --format "{{.Names}}" | findstr "^testrium$" >nul 2>&1
     if %errorlevel% neq 0 (
         echo.
         echo WARNING: App container did not start. Showing logs...
         echo.
         docker compose logs app
-        echo.
-        echo Try running: docker compose logs app
         pause
         exit /b 1
     )
@@ -39,56 +36,50 @@ if %errorlevel% == 0 (
     goto done
 )
 
-REM ── Docker not available, try Java ────────────
-echo [Docker not found] Starting directly with Java...
+REM ── Docker not available — try Java ───────────
+echo [No Docker] Trying direct Java run...
 echo.
 
 java -version >nul 2>&1
 if %errorlevel% neq 0 (
     echo ERROR: Neither Docker nor Java 17+ found.
     echo.
-    echo Install one of:
+    echo Please install one of:
     echo   Docker Desktop : https://www.docker.com/products/docker-desktop
     echo   Java 17+       : https://adoptium.net
     pause
     exit /b 1
 )
 
-REM ── Check if JAR exists ────────────────────────
-set JAR=backend\target\testrium-2.0.0.jar
-if not exist "%JAR%" (
-    echo JAR not found. Building the application...
-    echo This requires Maven and Node.js installed.
-    echo.
+REM ── Find or download the JAR ──────────────────
+set JAR=testrium.jar
+set VERSION=2.0.0
+set DOWNLOAD_URL=https://github.com/testrium/testrium/releases/download/v%VERSION%/testrium-%VERSION%.jar
 
-    call mvn -version >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo ERROR: Maven not found. Please install Maven 3.9+.
-        pause
-        exit /b 1
-    )
-
-    node -v >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo ERROR: Node.js not found. Please install Node.js 18+.
-        pause
-        exit /b 1
-    )
-
-    echo Building frontend...
-    call npm install
-    call npm run build
-
-    echo Copying frontend to backend...
-    xcopy /E /I /Y dist backend\src\main\resources\static >nul
-
-    echo Building backend...
-    cd backend
-    call mvn clean package -DskipTests -B
-    cd ..
+REM Check current directory first, then backend/target
+if exist "%JAR%" goto run_jar
+if exist "backend\target\testrium-%VERSION%.jar" (
+    set JAR=backend\target\testrium-%VERSION%.jar
+    goto run_jar
 )
 
+REM Download from GitHub Releases
+echo JAR not found locally. Downloading testrium-%VERSION%.jar from GitHub...
+echo.
+curl -L -o "%JAR%" "%DOWNLOAD_URL%"
+if %errorlevel% neq 0 (
+    echo.
+    echo ERROR: Download failed. Check your internet connection or download manually:
+    echo %DOWNLOAD_URL%
+    pause
+    exit /b 1
+)
+echo Download complete.
+echo.
+
+:run_jar
 echo Starting Testrium on http://localhost:8080
+echo Using embedded H2 database ^(data stored in ./data/testrium^)
 echo Press Ctrl+C to stop.
 echo.
 start http://localhost:8080
