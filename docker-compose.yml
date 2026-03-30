@@ -18,7 +18,7 @@ services:
       - testrium-network
 
   app:
-    image: sddmhossain/testrium:latest
+    image: sddmhossain/testrium:${TESTRIUM_VERSION:-latest}
     container_name: testrium
     depends_on:
       mysql:
