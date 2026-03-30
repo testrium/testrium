@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { withBase } from 'vitepress'
 
 // ── Mouse parallax for hero image ────────────────────────────
@@ -9,6 +9,40 @@ function onMouseMove(e: MouseEvent) {
   mouseX.value = (e.clientX / window.innerWidth - 0.5) * 18
   mouseY.value = (e.clientY / window.innerHeight - 0.5) * 18
 }
+
+// ── Screenshots carousel ─────────────────────────────────────
+const screenshots = [
+  { src: '/testrium/screenshots/dashboard.png',             label: 'Dashboard' },
+  { src: '/testrium/screenshots/test_cases.png',            label: 'Test Cases' },
+  { src: '/testrium/screenshots/test_runs.png',             label: 'Test Runs' },
+  { src: '/testrium/screenshots/test_matric_dashboard.png', label: 'Metrics' },
+  { src: '/testrium/screenshots/reports.png',               label: 'Reports' },
+  { src: '/testrium/screenshots/help_guide.png',            label: 'Help & Guide' },
+]
+const activeSlide = ref(0)
+const lightboxOpen = ref(false)
+const lightboxIndex = ref(0)
+let slideTimer: ReturnType<typeof setInterval> | null = null
+
+function startSlideTimer() {
+  slideTimer = setInterval(() => {
+    activeSlide.value = (activeSlide.value + 1) % screenshots.length
+  }, 4000)
+}
+function stopSlideTimer() {
+  if (slideTimer) { clearInterval(slideTimer); slideTimer = null }
+}
+function goSlide(i: number) {
+  stopSlideTimer(); activeSlide.value = i; startSlideTimer()
+}
+function openLightbox(i: number) {
+  lightboxIndex.value = i; lightboxOpen.value = true; stopSlideTimer()
+}
+function closeLightbox() {
+  lightboxOpen.value = false; startSlideTimer()
+}
+function lightboxPrev() { lightboxIndex.value = (lightboxIndex.value - 1 + screenshots.length) % screenshots.length }
+function lightboxNext() { lightboxIndex.value = (lightboxIndex.value + 1) % screenshots.length }
 
 // ── Scroll-triggered animations ──────────────────────────────
 let observer: IntersectionObserver | null = null
@@ -34,10 +68,12 @@ function setupObserver() {
 onMounted(() => {
   window.addEventListener('mousemove', onMouseMove)
   setupObserver()
+  startSlideTimer()
 })
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove)
   observer?.disconnect()
+  stopSlideTimer()
 })
 
 // ── Data ──────────────────────────────────────────────────────
@@ -157,6 +193,81 @@ const terminalLines = [
         </div>
       </div>
     </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SCREENSHOTS
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="section screenshots-section">
+      <div class="inner">
+        <p class="section-label">See it in action</p>
+        <h2 class="section-heading">A look inside Testrium</h2>
+
+        <!-- Carousel -->
+        <div class="carousel">
+          <div class="carousel-track">
+            <div
+              v-for="(shot, i) in screenshots"
+              :key="i"
+              class="carousel-slide"
+              :class="{ active: activeSlide === i }"
+            >
+              <div class="shot-frame" @click="openLightbox(i)">
+                <img :src="shot.src" :alt="shot.label" class="shot-img" loading="lazy" />
+                <div class="shot-overlay">
+                  <span class="shot-zoom">🔍 Click to enlarge</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Label -->
+          <p class="carousel-label">{{ screenshots[activeSlide].label }}</p>
+
+          <!-- Dots -->
+          <div class="carousel-dots">
+            <button
+              v-for="(_, i) in screenshots"
+              :key="i"
+              class="dot"
+              :class="{ active: activeSlide === i }"
+              @click="goSlide(i)"
+              :aria-label="`Go to slide ${i + 1}`"
+            />
+          </div>
+
+          <!-- Arrows -->
+          <button class="carousel-arrow left" @click="goSlide((activeSlide - 1 + screenshots.length) % screenshots.length)" aria-label="Previous">&#8592;</button>
+          <button class="carousel-arrow right" @click="goSlide((activeSlide + 1) % screenshots.length)" aria-label="Next">&#8594;</button>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="thumb-row">
+          <button
+            v-for="(shot, i) in screenshots"
+            :key="i"
+            class="thumb"
+            :class="{ active: activeSlide === i }"
+            @click="goSlide(i)"
+          >
+            <img :src="shot.src" :alt="shot.label" loading="lazy" />
+            <span>{{ shot.label }}</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lightbox -->
+    <Teleport to="body">
+      <div v-if="lightboxOpen" class="lightbox" @click.self="closeLightbox">
+        <button class="lb-close" @click="closeLightbox" aria-label="Close">✕</button>
+        <button class="lb-arrow left" @click="lightboxPrev" aria-label="Previous">&#8592;</button>
+        <div class="lb-img-wrap">
+          <img :src="screenshots[lightboxIndex].src" :alt="screenshots[lightboxIndex].label" class="lb-img" />
+          <p class="lb-label">{{ screenshots[lightboxIndex].label }}</p>
+        </div>
+        <button class="lb-arrow right" @click="lightboxNext" aria-label="Next">&#8594;</button>
+      </div>
+    </Teleport>
 
     <!-- ═══════════════════════════════════════════════════════
          COMPARISON
@@ -600,6 +711,250 @@ const terminalLines = [
 .card-icon  { font-size: 2rem; margin-bottom: 14px; display: block; }
 .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
 .card-desc  { font-size: 0.875rem; line-height: 1.65; color: var(--vp-c-text-2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   SCREENSHOTS
+═══════════════════════════════════════════════════════════════ */
+.screenshots-section { background: var(--vp-c-bg-alt); }
+
+/* Carousel */
+.carousel {
+  position: relative;
+  margin-top: 48px;
+  user-select: none;
+}
+.carousel-track {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  max-height: 520px;
+}
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.carousel-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.shot-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  border: 2px solid var(--home-card-border);
+  box-shadow: 0 8px 40px rgba(99,102,241,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  overflow: hidden;
+  cursor: zoom-in;
+  position: relative;
+  background: var(--vp-c-bg);
+  transition: box-shadow 0.25s, border-color 0.25s;
+}
+.shot-frame:hover {
+  border-color: var(--brand);
+  box-shadow: 0 12px 56px rgba(99,102,241,0.28), 0 2px 12px rgba(0,0,0,0.14);
+}
+.shot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.shot-frame:hover .shot-img { transform: scale(1.015); }
+.shot-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(99,102,241,0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s;
+}
+.shot-frame:hover .shot-overlay { background: rgba(99,102,241,0.08); }
+.shot-zoom {
+  opacity: 0;
+  background: rgba(99,102,241,0.92);
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: opacity 0.25s;
+}
+.shot-frame:hover .shot-zoom { opacity: 1; }
+
+.carousel-label {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vp-c-divider);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  padding: 0;
+}
+.dot.active { background: var(--brand); transform: scale(1.4); }
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--home-card-border);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--vp-c-text-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  z-index: 2;
+}
+.carousel-arrow:hover { background: var(--brand); color: #fff; border-color: var(--brand); transform: translateY(-50%) scale(1.08); }
+.carousel-arrow.left { left: -20px; }
+.carousel-arrow.right { right: -20px; }
+
+/* Thumbnails */
+.thumb-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+.thumb-row::-webkit-scrollbar { display: none; }
+.thumb {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 2px solid var(--vp-c-divider);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 0;
+  width: 130px;
+}
+.thumb img {
+  width: 100%;
+  height: 72px;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+.thumb span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+  padding: 4px 0 6px;
+}
+.thumb.active { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+.thumb.active span { color: var(--brand); }
+.thumb:hover { border-color: var(--brand); }
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.lb-img-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+.lb-img {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  border: 2px solid rgba(99,102,241,0.4);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  object-fit: contain;
+}
+.lb-label {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.8;
+  margin: 0;
+}
+.lb-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lb-close:hover { background: rgba(255,255,255,0.25); }
+.lb-arrow {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.lb-arrow:hover { background: rgba(99,102,241,0.6); }
+
+@media (max-width: 640px) {
+  .carousel-arrow { display: none; }
+  .thumb { width: 100px; }
+  .thumb img { height: 56px; }
+}
 
 /* ═══════════════════════════════════════════════════════════════
    COMPARISON
