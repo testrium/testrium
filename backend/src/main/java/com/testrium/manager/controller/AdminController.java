@@ -2,20 +2,13 @@ package com.testrium.manager.controller;
 
 import com.testrium.manager.entity.User;
 import com.testrium.manager.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Controller for creating admin user
- * WARNING: This endpoint should be disabled or secured in production
- */
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -26,69 +19,54 @@ public class AdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${admin.default.email:admin@testrium.com}")
-    private String adminEmail;
-
-    @Value("${admin.default.password:Admin@123}")
-    private String adminPassword;
-
-    @PostConstruct
-    public void initAdmin() {
-        if (userRepository.findByEmail(adminEmail).isPresent()) return;
-        String username = adminEmail.substring(0, adminEmail.indexOf("@"));
-        User admin = new User();
-        admin.setUsername(username);
-        admin.setEmail(adminEmail);
-        admin.setPassword(passwordEncoder.encode(adminPassword));
-        admin.setRole("ADMIN");
-        admin.setEmailVerified(true);
-        userRepository.save(admin);
-    }
-
     /**
-     * Create initial admin user from configuration
-     * Uses credentials from client-config.properties
-     */
-    @PostMapping("/create-admin")
-    public ResponseEntity<?> createAdmin() {
-        // Extract username from email
-        String username = adminEmail.substring(0, adminEmail.indexOf("@"));
-
-        // Check if admin already exists
-        if (userRepository.findByEmail(adminEmail).isPresent()) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Admin user already exists");
-            response.put("email", adminEmail);
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        // Create admin user with configured credentials
-        User admin = new User();
-        admin.setUsername(username);
-        admin.setEmail(adminEmail);
-        admin.setPassword(passwordEncoder.encode(adminPassword));
-        admin.setRole("ADMIN");
-        admin.setEmailVerified(true);
-
-        userRepository.save(admin);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Admin user created successfully");
-        response.put("email", adminEmail);
-        response.put("username", username);
-        response.put("warning", "Please change the password after first login");
-
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Check if admin exists
+     * Returns whether any admin user has been created yet.
+     * Used by the frontend to decide whether to show the setup screen.
      */
     @GetMapping("/admin-exists")
     public ResponseEntity<?> adminExists() {
-        boolean exists = userRepository.findByUsername("admin").isPresent();
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("exists", exists);
-        return ResponseEntity.ok(response);
+        boolean exists = userRepository.findAll().stream()
+                .anyMatch(u -> "ADMIN".equals(u.getRole()));
+        return ResponseEntity.ok(Map.of("exists", exists));
+    }
+
+    /**
+     * First-time setup: create the initial admin with a custom email and password.
+     * Blocked if any admin already exists.
+     */
+    @PostMapping("/create-admin")
+    public ResponseEntity<?> createAdmin(@RequestBody Map<String, String> body) {
+        boolean adminExists = userRepository.findAll().stream()
+                .anyMatch(u -> "ADMIN".equals(u.getRole()));
+
+        if (adminExists) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Admin already exists"));
+        }
+
+        String email = body.get("email");
+        String password = body.get("password");
+        String username = body.get("username");
+
+        if (email == null || email.isBlank() || password == null || password.length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Valid email and password (min 6 chars) are required"));
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email already in use"));
+        }
+
+        if (username == null || username.isBlank()) {
+            username = email.substring(0, email.indexOf("@"));
+        }
+
+        User admin = new User();
+        admin.setUsername(username);
+        admin.setEmail(email);
+        admin.setPassword(passwordEncoder.encode(password));
+        admin.setRole("ADMIN");
+        admin.setEmailVerified(true);
+        userRepository.save(admin);
+
+        return ResponseEntity.ok(Map.of("message", "Admin created successfully"));
     }
 }

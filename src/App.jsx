@@ -17,6 +17,7 @@ import Reports from './pages/Reports';
 import Metrics from './pages/Metrics';
 import ChangePassword from './pages/ChangePassword';
 import Help from './pages/Help';
+import Setup from './pages/Setup';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Public routes */}
+          <Route path="/setup" element={<Setup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
