@@ -59,7 +59,7 @@ function setupObserver() {
     { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
   )
   document
-    .querySelectorAll('.feature-card, .how-step, .check-row, .faq-item, .quickstart-wrapper, .cta-inner')
+    .querySelectorAll('.feature-card, .how-step, .persona-card, .check-row, .faq-item, .quickstart-wrapper, .nudge-inner, .cta-inner')
     .forEach((el) => observer!.observe(el))
 }
 
@@ -90,13 +90,38 @@ const features = [
 ]
 
 const comparison = [
-  { label: 'Self-hosted',      t: true,  s: true,  x: false },
-  { label: 'Free to use',      t: true,  s: true,  x: false },
-  { label: 'JIRA Integration', t: true,  s: false, x: true  },
-  { label: 'Automation API',   t: true,  s: false, x: true  },
-  { label: 'Reports & Charts', t: true,  s: false, x: true  },
-  { label: 'Bulk Operations',  t: true,  s: false, x: true  },
-  { label: 'Docker Deploy',    t: true,  s: false, x: false },
+  { label: 'Free forever',     t: true,  tr: false, zy: false, ss: true  },
+  { label: 'No seat limits',   t: true,  tr: false, zy: false, ss: true  },
+  { label: 'Open source',      t: true,  tr: false, zy: false, ss: false },
+  { label: 'Self-hosted',      t: true,  tr: true,  zy: false, ss: true  },
+  { label: 'JIRA Integration', t: true,  tr: true,  zy: true,  ss: false },
+  { label: 'Automation API',   t: true,  tr: true,  zy: true,  ss: false },
+  { label: 'Reports & Charts', t: true,  tr: true,  zy: true,  ss: false },
+  { label: 'Docker Deploy',    t: true,  tr: false, zy: false, ss: false },
+]
+
+const personas = [
+  {
+    icon: '🧪',
+    role: 'QA Engineer',
+    tagline: 'Test faster, track everything.',
+    desc: 'Write test cases with steps and expected results, execute runs, log Pass/Fail with comments, and file JIRA bugs — all without leaving one screen.',
+    perks: ['Structured test cases', 'Inline execution tracking', 'One-click JIRA bug filing'],
+  },
+  {
+    icon: '🤖',
+    role: 'Automation Engineer',
+    tagline: 'API-first, pipeline-ready.',
+    desc: 'Fetch test data and push results via REST API. Integrates with Selenium, Playwright, RestAssured, Jenkins, GitHub Actions — any tool in your stack.',
+    perks: ['RESTful Automation API', 'Environment test data (DEV/QA/PROD)', 'CI/CD pipeline compatible'],
+  },
+  {
+    icon: '📋',
+    role: 'QA Manager',
+    tagline: 'Visibility across every release.',
+    desc: 'Track real-time pass rates, view trend metrics across multiple test runs, and share polished PDF or Excel reports with stakeholders in one click.',
+    perks: ['Metrics & trend dashboard', 'PDF and Excel reports', 'Role-based team access'],
+  },
 ]
 
 const faqs = [
@@ -142,22 +167,24 @@ const terminalLines = [
 
       <div class="hero-inner">
         <div class="hero-text">
-          <div class="hero-badge">Open Source · Self-Hosted · Free</div>
+          <div class="hero-badge">Open Source · Self-Hosted · Free Forever</div>
           <h1 class="hero-heading">
-            Test Case Management<br>
-            <span class="grad-text">Built for QA Teams</span>
+            Stop Managing Tests<br>
+            <span class="grad-text">in Spreadsheets.</span>
           </h1>
           <p class="hero-tagline">
-            Plan, execute, and report on your software testing — all in one
-            place. Self-hosted, Docker-ready, and free to use.
+            Testrium gives your QA team a proper test management system —
+            structured cases, live run tracking, JIRA integration, and reports.
+            Self-hosted, Docker-ready, and completely free.
           </p>
           <div class="hero-actions">
-            <a href="/testrium/guide/" class="btn-primary">Get Started →</a>
+            <a href="/testrium/guide/" class="btn-primary">Get Started Free →</a>
             <a href="https://github.com/testrium/testrium"
                class="btn-secondary" target="_blank" rel="noopener">
-              View on GitHub
+              View on GitHub ★
             </a>
           </div>
+          <p class="hero-trust">No account. No credit card. Runs on your own infrastructure.</p>
         </div>
 
         <div
@@ -166,6 +193,33 @@ const terminalLines = [
         >
           <div class="hero-glow" aria-hidden="true" />
           <img :src="withBase('/hero.png')" alt="Testrium dashboard" class="hero-img" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STATS BAR
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="section stats-section" aria-label="Key facts">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <span class="stat-val">$0</span>
+          <span class="stat-label">Forever free, no seat limits</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true" />
+        <div class="stat-item">
+          <span class="stat-val">Open source</span>
+          <span class="stat-label">Full code on GitHub, MIT-style</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true" />
+        <div class="stat-item">
+          <span class="stat-val">Self-hosted</span>
+          <span class="stat-label">Your data, your server, zero telemetry</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true" />
+        <div class="stat-item">
+          <span class="stat-val">1 command</span>
+          <span class="stat-label">docker compose up -d and you're live</span>
         </div>
       </div>
     </section>
@@ -249,6 +303,38 @@ const terminalLines = [
     </section>
 
     <!-- ═══════════════════════════════════════════════════════
+         PERSONAS
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="section personas-section">
+      <div class="inner">
+        <p class="section-label">Made for your whole team</p>
+        <h2 class="section-heading">Every role, covered</h2>
+        <p class="section-sub">Whether you write tests, automate them, or manage the team — Testrium fits into your workflow.</p>
+
+        <div class="personas-grid">
+          <div
+            v-for="(p, i) in personas"
+            :key="p.role"
+            class="persona-card"
+            :style="{ '--pi': i }"
+          >
+            <div class="persona-icon-wrap">
+              <span class="persona-icon">{{ p.icon }}</span>
+            </div>
+            <h3 class="persona-role">{{ p.role }}</h3>
+            <p class="persona-tagline">{{ p.tagline }}</p>
+            <p class="persona-desc">{{ p.desc }}</p>
+            <ul class="persona-perks">
+              <li v-for="perk in p.perks" :key="perk">
+                <span class="perk-check">✓</span> {{ perk }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
          SCREENSHOTS
     ═══════════════════════════════════════════════════════════ -->
     <section class="section screenshots-section">
@@ -324,21 +410,39 @@ const terminalLines = [
     </Teleport>
 
     <!-- ═══════════════════════════════════════════════════════
+         MID-FUNNEL NUDGE
+    ═══════════════════════════════════════════════════════════ -->
+    <section class="section nudge-section">
+      <div class="inner nudge-inner">
+        <div class="nudge-text">
+          <p class="nudge-eyebrow">Ready to make the switch?</p>
+          <p class="nudge-headline">Most teams are up and running in under 5 minutes.</p>
+        </div>
+        <div class="nudge-actions">
+          <a href="/testrium/guide/" class="btn-primary">Start for Free →</a>
+          <a href="/testrium/guide/docker-setup" class="btn-ghost-sm">See setup steps</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
          COMPARISON
     ═══════════════════════════════════════════════════════════ -->
     <section class="section comparison-section">
       <div class="inner">
-        <p class="section-label">Why not spreadsheets?</p>
-        <h2 class="section-heading">Testrium vs. the alternatives</h2>
+        <p class="section-label">How does it stack up?</p>
+        <h2 class="section-heading">Testrium vs. the market</h2>
+        <p class="section-sub">Packed with the features QA teams need — without the per-seat invoice.</p>
 
         <div class="table-wrap">
           <table class="comp-table">
             <thead>
               <tr>
-                <th></th>
-                <th><span class="th-brand">Testrium</span></th>
-                <th>Spreadsheets</th>
-                <th>Heavy SaaS</th>
+                <th class="col-feature"></th>
+                <th class="col-t"><span class="th-brand">Testrium</span></th>
+                <th class="col-tr">TestRail</th>
+                <th class="col-zy">Zephyr</th>
+                <th class="col-ss">Spreadsheets</th>
               </tr>
             </thead>
             <tbody>
@@ -349,13 +453,15 @@ const terminalLines = [
                 :style="{ '--row': i }"
               >
                 <td class="row-label">{{ row.label }}</td>
-                <td><span :class="['chip', row.t ? 'yes' : 'no']"><span class="tick">{{ row.t ? '✓' : '✕' }}</span></span></td>
-                <td><span :class="['chip', row.s ? 'yes' : 'no']"><span class="tick">{{ row.s ? '✓' : '✕' }}</span></span></td>
-                <td><span :class="['chip', row.x ? 'yes' : 'no']"><span class="tick">{{ row.x ? '✓' : '✕' }}</span></span></td>
+                <td><span :class="['chip', row.t  ? 'yes' : 'no']"><span class="tick">{{ row.t  ? '✓' : '✕' }}</span></span></td>
+                <td><span :class="['chip', row.tr ? 'yes' : 'no']"><span class="tick">{{ row.tr ? '✓' : '✕' }}</span></span></td>
+                <td><span :class="['chip', row.zy ? 'yes' : 'no']"><span class="tick">{{ row.zy ? '✓' : '✕' }}</span></span></td>
+                <td><span :class="['chip', row.ss ? 'yes' : 'no']"><span class="tick">{{ row.ss ? '✓' : '✕' }}</span></span></td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p class="comp-note">* Feature availability based on publicly documented plans as of 2025. TestRail and Zephyr are paid tools with per-user pricing.</p>
       </div>
     </section>
 
@@ -430,12 +536,25 @@ const terminalLines = [
         <div class="blob cta-blob-2" />
       </div>
       <div class="inner cta-inner">
-        <h2 class="cta-heading">Start testing smarter today.</h2>
-        <p class="cta-sub">Free. Self-hosted. No limits.</p>
+        <div class="cta-badge">No credit card · No account · No seat limits</div>
+        <h2 class="cta-heading">Your team deserves better<br>than a spreadsheet.</h2>
+        <p class="cta-sub">
+          Testrium is free, open-source, and runs on your own infrastructure.<br>
+          Deploy in minutes. Own your data forever.
+        </p>
         <div class="cta-btns">
           <a href="/testrium/guide/" class="btn-primary btn-lg">Get Started Free →</a>
           <a href="https://github.com/testrium/testrium"
              class="btn-ghost" target="_blank" rel="noopener">Star on GitHub ★</a>
+        </div>
+        <div class="cta-trust-row">
+          <span class="cta-trust-item">🔓 Open source</span>
+          <span class="cta-trust-dot">·</span>
+          <span class="cta-trust-item">🛡️ Self-hosted</span>
+          <span class="cta-trust-dot">·</span>
+          <span class="cta-trust-item">🐳 Docker-ready</span>
+          <span class="cta-trust-dot">·</span>
+          <span class="cta-trust-item">💸 Forever free</span>
         </div>
       </div>
     </section>
@@ -894,6 +1013,273 @@ const terminalLines = [
 @keyframes stepIn {
   from { opacity: 0; transform: translateY(30px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATS BAR
+═══════════════════════════════════════════════════════════════ */
+.stats-section {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 60%, var(--brand-3) 100%);
+  padding: 0;
+}
+
+.stats-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px 48px;
+  gap: 4px;
+}
+
+.stat-val {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .stats-inner { gap: 0; }
+  .stat-item { padding: 12px 24px; }
+  .stat-divider { display: none; }
+}
+
+/* ── Hero trust line ─────────────────────────────────────────── */
+.hero-trust {
+  font-size: 0.8rem;
+  color: var(--vp-c-text-3);
+  margin-top: 16px;
+  margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERSONAS
+═══════════════════════════════════════════════════════════════ */
+.personas-section { background: var(--vp-c-bg-alt); }
+
+.personas-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 52px;
+}
+
+@media (max-width: 860px) { .personas-grid { grid-template-columns: 1fr; gap: 20px; } }
+
+.persona-card {
+  padding: 32px 28px;
+  border-radius: 20px;
+  background: var(--home-card-bg);
+  border: 1px solid var(--home-card-border);
+  box-shadow: var(--home-card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  /* scroll anim */
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+.persona-card.is-visible {
+  animation: cardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--pi) * 90ms) both;
+}
+
+.persona-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.12));
+  border: 1px solid rgba(99,102,241,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.persona-role {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.persona-tagline {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand);
+  margin-bottom: 12px;
+}
+
+.persona-desc {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--vp-c-text-2);
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.persona-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  border-top: 1px solid var(--home-card-border);
+  padding-top: 16px;
+}
+
+.persona-perks li {
+  font-size: 0.825rem;
+  color: var(--vp-c-text-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perk-check {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MID-FUNNEL NUDGE
+═══════════════════════════════════════════════════════════════ */
+.nudge-section {
+  background: var(--vp-c-bg-alt);
+  border-top: 1px solid var(--home-card-border);
+  border-bottom: 1px solid var(--home-card-border);
+}
+
+.nudge-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  /* scroll anim */
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.nudge-inner.is-visible {
+  animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.nudge-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin-bottom: 6px;
+}
+
+.nudge-headline {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.nudge-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.btn-ghost-sm {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+  padding: 8px 0;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-ghost-sm:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPARISON — extended 5-col
+═══════════════════════════════════════════════════════════════ */
+.comp-note {
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CTA SECTION extras
+═══════════════════════════════════════════════════════════════ */
+.cta-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  padding: 5px 16px;
+  margin-bottom: 24px;
+}
+
+.cta-trust-row {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cta-trust-item {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+
+.cta-trust-dot {
+  color: rgba(255,255,255,0.35);
+  font-size: 1rem;
 }
 
 /* ═══════════════════════════════════════════════════════════════
