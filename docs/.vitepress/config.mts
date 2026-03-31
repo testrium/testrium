@@ -28,6 +28,8 @@ export default defineConfig({
         items: [
           { text: 'Changelog', link: 'https://github.com/testrium/testrium/blob/master/CHANGELOG.md' },
           { text: 'Releases', link: 'https://github.com/testrium/testrium/releases' },
+          { text: 'License', link: '/legal/license' },
+          { text: 'Privacy Policy', link: '/legal/privacy' },
         ]
       }
     ],
@@ -72,6 +74,15 @@ export default defineConfig({
             { text: 'Overview', link: '/api/' },
           ]
         }
+      ],
+      '/legal/': [
+        {
+          text: 'Legal',
+          items: [
+            { text: 'License', link: '/legal/license' },
+            { text: 'Privacy Policy', link: '/legal/privacy' },
+          ]
+        }
       ]
     },
 
@@ -81,7 +92,7 @@ export default defineConfig({
     ],
 
     footer: {
-      message: 'Released under a Proprietary License.',
+      message: 'Released under the <a href="/testrium/legal/license">Apache 2.0 License</a>. · <a href="/testrium/legal/privacy">Privacy Policy</a>',
       copyright: 'Copyright © 2025-present Testrium'
     },
 
