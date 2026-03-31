@@ -12,7 +12,7 @@ import TestCaseForm from '../components/TestCaseForm';
 import BulkImportModal from '../components/BulkImportModal';
 import {
   Plus, Search, Filter, ChevronRight,
-  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload
+  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload, Tag
 } from 'lucide-react';
 
 export default function TestCases() {
@@ -37,9 +37,11 @@ export default function TestCases() {
     status: '',
     priority: '',
     search: '',
-    automationStatus: '', // ALL, AUTOMATED, MANUAL
-    regressionStatus: ''  // ALL, REGRESSION, NON_REGRESSION
+    automationStatus: '',
+    regressionStatus: '',
+    tag: ''
   });
+  const [availableTags, setAvailableTags] = useState([]);
 
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
@@ -56,9 +58,13 @@ export default function TestCases() {
   useEffect(() => {
     if (filters.projectId) {
       loadApplicationsByProject(filters.projectId);
+      testCasesAPI.getTagsByProject(filters.projectId)
+        .then(res => setAvailableTags(res.data || []))
+        .catch(() => setAvailableTags([]));
     } else {
       setApplications([]);
-      setFilters(prev => ({ ...prev, applicationId: '', moduleId: '' }));
+      setAvailableTags([]);
+      setFilters(prev => ({ ...prev, applicationId: '', moduleId: '', tag: '' }));
     }
   }, [filters.projectId]);
 
@@ -188,7 +194,8 @@ export default function TestCases() {
       priority: '',
       search: '',
       automationStatus: '',
-      regressionStatus: ''
+      regressionStatus: '',
+      tag: ''
     });
   };
 
@@ -208,6 +215,9 @@ export default function TestCases() {
     // Regression filter
     if (filters.regressionStatus === 'REGRESSION' && !tc.isRegression) return false;
     if (filters.regressionStatus === 'NON_REGRESSION' && tc.isRegression) return false;
+
+    // Tag filter
+    if (filters.tag && !(tc.tags || []).includes(filters.tag)) return false;
 
     return true;
   });
@@ -375,7 +385,7 @@ export default function TestCases() {
                   <Filter className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                {(filters.projectId || filters.applicationId || filters.moduleId || filters.status || filters.priority || filters.search || filters.automationStatus || filters.regressionStatus) && (
+                {(filters.projectId || filters.applicationId || filters.moduleId || filters.status || filters.priority || filters.search || filters.automationStatus || filters.regressionStatus || filters.tag) && (
                   <Button variant="ghost" size="sm" onClick={clearFilters}>
                     Clear All
                   </Button>
@@ -504,6 +514,22 @@ export default function TestCases() {
                     <option value="NON_REGRESSION">Non-Regression</option>
                   </Select>
                 </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">
+                    Tag
+                  </label>
+                  <Select
+                    value={filters.tag}
+                    onChange={(e) => setFilters(prev => ({ ...prev, tag: e.target.value }))}
+                    disabled={availableTags.length === 0}
+                  >
+                    <option value="">All Tags</option>
+                    {availableTags.map(t => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -598,6 +624,16 @@ export default function TestCases() {
                                       🔄 Regression
                                     </span>
                                   )}
+                                  {(testCase.tags || []).map(tag => (
+                                    <button
+                                      key={tag}
+                                      onClick={() => setFilters(prev => ({ ...prev, tag }))}
+                                      className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 transition-colors"
+                                    >
+                                      <Tag className="h-2.5 w-2.5" />
+                                      {tag}
+                                    </button>
+                                  ))}
                                 </div>
                               </div>
 

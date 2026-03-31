@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "test_cases")
@@ -48,6 +50,11 @@ public class TestCase {
 
     @Column
     private Boolean isRegression = false;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "test_case_tags", joinColumns = @JoinColumn(name = "test_case_id"))
+    @Column(name = "tag", length = 50)
+    private Set<String> tags = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
@@ -210,6 +217,14 @@ public class TestCase {
 
     public void setIsRegression(Boolean isRegression) {
         this.isRegression = isRegression;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags == null ? new HashSet<>() : tags;
     }
 
     public enum Priority {

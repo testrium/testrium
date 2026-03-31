@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface TestCaseRepository extends JpaRepository<TestCase, Long> {
@@ -27,6 +28,20 @@ public interface TestCaseRepository extends JpaRepository<TestCase, Long> {
                                  @Param("moduleId") Long moduleId,
                                  @Param("status") TestCase.TestCaseStatus status,
                                  @Param("priority") TestCase.Priority priority);
+
+    @Query("SELECT DISTINCT tc FROM TestCase tc JOIN tc.tags t WHERE tc.project.id = :projectId " +
+           "AND t = :tag " +
+           "AND (:moduleId IS NULL OR tc.module.id = :moduleId) " +
+           "AND (:status IS NULL OR tc.status = :status) " +
+           "AND (:priority IS NULL OR tc.priority = :priority)")
+    List<TestCase> findByFiltersAndTag(@Param("projectId") Long projectId,
+                                       @Param("moduleId") Long moduleId,
+                                       @Param("status") TestCase.TestCaseStatus status,
+                                       @Param("priority") TestCase.Priority priority,
+                                       @Param("tag") String tag);
+
+    @Query("SELECT DISTINCT t FROM TestCase tc JOIN tc.tags t WHERE tc.project.id = :projectId ORDER BY t")
+    List<String> findDistinctTagsByProjectId(@Param("projectId") Long projectId);
 
     long countByProjectId(Long projectId);
 

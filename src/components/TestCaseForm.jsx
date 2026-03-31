@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { testCasesAPI, projectsAPI, testModulesAPI, automationCommentsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/Button';
@@ -13,7 +13,92 @@ import {
   ModalContent,
   ModalFooter
 } from './ui/Modal';
-import { AlertCircle, MessageSquare, History } from 'lucide-react';
+import { AlertCircle, MessageSquare, History, Tag, X } from 'lucide-react';
+
+const SUGGESTED_TAGS = ['smoke', 'regression', 'critical', 'sanity', 'e2e', 'login', 'payment', 'api', 'ui', 'integration'];
+
+function TagInput({ tags, onChange, projectId }) {
+  const [input, setInput] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [projectTags, setProjectTags] = useState([]);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (projectId) {
+      testCasesAPI.getTagsByProject(projectId)
+        .then(res => setProjectTags(res.data || []))
+        .catch(() => {});
+    } else {
+      setProjectTags([]);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    if (!input.trim()) { setSuggestions([]); return; }
+    const term = input.toLowerCase();
+    const allSuggestions = [...new Set([...projectTags, ...SUGGESTED_TAGS])];
+    setSuggestions(
+      allSuggestions.filter(t => t.includes(term) && !tags.includes(t)).slice(0, 6)
+    );
+  }, [input, projectTags, tags]);
+
+  const addTag = (tag) => {
+    const normalized = tag.toLowerCase().trim().replace(/[^a-z0-9-_]/g, '');
+    if (normalized && !tags.includes(normalized) && tags.length < 10) {
+      onChange([...tags, normalized]);
+    }
+    setInput('');
+    setSuggestions([]);
+    inputRef.current?.focus();
+  };
+
+  const removeTag = (tag) => onChange(tags.filter(t => t !== tag));
+
+  const handleKeyDown = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && input.trim()) {
+      e.preventDefault();
+      addTag(input);
+    } else if (e.key === 'Backspace' && !input && tags.length > 0) {
+      removeTag(tags[tags.length - 1]);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-1.5 p-2 min-h-[42px] border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent cursor-text"
+           onClick={() => inputRef.current?.focus()}>
+        {tags.map(tag => (
+          <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+            <Tag className="h-2.5 w-2.5" />
+            {tag}
+            <button type="button" onClick={(e) => { e.stopPropagation(); removeTag(tag); }}
+                    className="hover:text-indigo-900 dark:hover:text-white ml-0.5">
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={tags.length === 0 ? 'Type a tag and press Enter…' : ''}
+          className="flex-1 min-w-[120px] bg-transparent text-sm outline-none text-gray-900 dark:text-white placeholder-gray-400"
+        />
+      </div>
+      {suggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {suggestions.map(s => (
+            <button key={s} type="button" onClick={() => addTag(s)}
+                    className="px-2 py-0.5 rounded-full text-xs border border-dashed border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+              + {s}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = null, projects = [] }) {
   const { user } = useAuth();
@@ -37,7 +122,8 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
     projectId: '',
     moduleId: '',
     isAutomated: false,
-    isRegression: false
+    isRegression: false,
+    tags: []
   });
 
   useEffect(() => {
@@ -55,7 +141,8 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
           projectId: testCase.projectId?.toString() || '',
           moduleId: testCase.moduleId?.toString() || '',
           isAutomated: testCase.isAutomated || false,
-          isRegression: testCase.isRegression || false
+          isRegression: testCase.isRegression || false,
+          tags: testCase.tags || []
         });
         if (testCase.projectId) {
           loadModulesByProject(testCase.projectId);
@@ -173,7 +260,8 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
       projectId: '',
       moduleId: '',
       isAutomated: false,
-      isRegression: false
+      isRegression: false,
+      tags: []
     });
     setAutomationComment('');
     setAutomationStatus('');
@@ -510,6 +598,20 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
                 )}
               </div>
             )}
+
+            {/* Tags */}
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-indigo-500" />
+                Tags
+                <span className="text-xs font-normal text-gray-400">(press Enter or comma to add)</span>
+              </label>
+              <TagInput
+                tags={formData.tags}
+                onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                projectId={formData.projectId}
+              />
+            </div>
 
             {/* Expected Result */}
             <div>

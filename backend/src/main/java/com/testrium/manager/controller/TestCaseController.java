@@ -34,10 +34,11 @@ public class TestCaseController {
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) Long moduleId,
             @RequestParam(required = false) TestCase.TestCaseStatus status,
-            @RequestParam(required = false) TestCase.Priority priority) {
+            @RequestParam(required = false) TestCase.Priority priority,
+            @RequestParam(required = false) String tag) {
 
-        if (projectId != null && (moduleId != null || status != null || priority != null)) {
-            return ResponseEntity.ok(testCaseService.getTestCasesByFilters(projectId, moduleId, status, priority));
+        if (projectId != null && (moduleId != null || status != null || priority != null || tag != null)) {
+            return ResponseEntity.ok(testCaseService.getTestCasesByFilters(projectId, moduleId, status, priority, tag));
         } else if (projectId != null) {
             return ResponseEntity.ok(testCaseService.getTestCasesByProject(projectId));
         } else if (moduleId != null) {
@@ -45,6 +46,11 @@ public class TestCaseController {
         } else {
             return ResponseEntity.ok(testCaseService.getAllTestCases());
         }
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<List<String>> getTagsByProject(@RequestParam Long projectId) {
+        return ResponseEntity.ok(testCaseService.getTagsByProject(projectId));
     }
 
     @GetMapping("/{id}")

@@ -15,7 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,10 +62,17 @@ public class TestCaseService {
     @Transactional(readOnly = true)
     public List<TestCaseDTO> getTestCasesByFilters(Long projectId, Long moduleId,
                                                     TestCase.TestCaseStatus status,
-                                                    TestCase.Priority priority) {
-        return testCaseRepository.findByFilters(projectId, moduleId, status, priority).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                                                    TestCase.Priority priority,
+                                                    String tag) {
+        List<TestCase> results = (tag != null && !tag.isBlank())
+                ? testCaseRepository.findByFiltersAndTag(projectId, moduleId, status, priority, tag.toLowerCase().trim())
+                : testCaseRepository.findByFilters(projectId, moduleId, status, priority);
+        return results.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getTagsByProject(Long projectId) {
+        return testCaseRepository.findDistinctTagsByProjectId(projectId);
     }
 
     @Transactional(readOnly = true)
@@ -92,6 +101,7 @@ public class TestCaseService {
         testCase.setCreatedBy(currentUser);
         testCase.setIsAutomated(dto.getIsAutomated() != null ? dto.getIsAutomated() : false);
         testCase.setIsRegression(dto.getIsRegression() != null ? dto.getIsRegression() : false);
+        testCase.setTags(normalizeTags(dto.getTags()));
 
         if (dto.getModuleId() != null) {
             TestModule module = testModuleRepository.findById(dto.getModuleId())
@@ -120,6 +130,7 @@ public class TestCaseService {
         testCase.setUpdatedBy(currentUser);
         testCase.setIsAutomated(dto.getIsAutomated() != null ? dto.getIsAutomated() : false);
         testCase.setIsRegression(dto.getIsRegression() != null ? dto.getIsRegression() : false);
+        testCase.setTags(normalizeTags(dto.getTags()));
 
         if (dto.getModuleId() != null) {
             TestModule module = testModuleRepository.findById(dto.getModuleId())
@@ -167,8 +178,20 @@ public class TestCaseService {
         dto.setUpdatedAt(testCase.getUpdatedAt());
         dto.setIsAutomated(testCase.getIsAutomated());
         dto.setIsRegression(testCase.getIsRegression());
+        dto.setTags(testCase.getTags() != null
+                ? testCase.getTags().stream().sorted().collect(Collectors.toList())
+                : new java.util.ArrayList<>());
 
         return dto;
+    }
+
+    private Set<String> normalizeTags(List<String> tags) {
+        if (tags == null) return new HashSet<>();
+        return tags.stream()
+                .filter(t -> t != null && !t.isBlank())
+                .map(t -> t.toLowerCase().trim())
+                .filter(t -> t.length() <= 50)
+                .collect(Collectors.toSet());
     }
 
     private User getCurrentUser() {

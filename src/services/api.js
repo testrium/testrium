@@ -66,6 +66,7 @@ export const testCasesAPI = {
   create: (data) => api.post('/test-cases', data),
   update: (id, data) => api.put(`/test-cases/${id}`, data),
   delete: (id) => api.delete(`/test-cases/${id}`),
+  getTagsByProject: (projectId) => api.get('/test-cases/tags', { params: { projectId } }),
   bulkImport: (formData) => {
     return axios.post(`${API_BASE_URL}/test-cases/bulk/import`, formData, {
       headers: {

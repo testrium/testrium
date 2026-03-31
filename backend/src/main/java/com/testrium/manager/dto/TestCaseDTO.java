@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestCaseDTO {
 
@@ -52,6 +54,8 @@ public class TestCaseDTO {
     private Boolean isAutomated;
 
     private Boolean isRegression;
+
+    private List<String> tags = new ArrayList<>();
 
     public TestCaseDTO() {
     }
@@ -207,5 +211,13 @@ public class TestCaseDTO {
 
     public void setIsRegression(Boolean isRegression) {
         this.isRegression = isRegression;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags == null ? new ArrayList<>() : tags;
     }
 }
