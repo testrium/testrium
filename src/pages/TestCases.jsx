@@ -154,7 +154,7 @@ export default function TestCases() {
   const loadModulesByApplication = async (applicationId) => {
     try {
       const response = await testModulesAPI.getAll();
-      const filtered = response.data.filter(m => m.applicationId === applicationId);
+      const filtered = response.data.filter(m => m.applicationId === parseInt(applicationId));
       setModules(filtered);
     } catch (err) {
       console.error('Load modules error:', err);
