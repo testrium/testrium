@@ -6,7 +6,7 @@ RUN npm ci
 COPY . .
 ARG VITE_API_BASE_URL=/api
 ARG VITE_APP_NAME=Testrium
-ARG VITE_APP_VERSION=1.7.0
+ARG VITE_APP_VERSION=2.1.0
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_APP_NAME=$VITE_APP_NAME
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
@@ -24,6 +24,6 @@ RUN mvn clean package -DskipTests -B
 # Stage 3: Runtime
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=backend-build /app/target/testrium-2.0.0.jar app.jar
+COPY --from=backend-build /app/target/testrium-2.1.0.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
