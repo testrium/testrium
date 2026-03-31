@@ -20,7 +20,7 @@ if %errorlevel% == 0 (
 
 REM ── Try stopping Java process ──────────────────
 echo [Java] Looking for running Testrium process...
-for /f "tokens=1" %%p in ('wmic process where "commandline like '%%testrium-2.0.0.jar%%'" get processid ^| findstr /r "[0-9]"') do (
+for /f "tokens=1" %%p in ('wmic process where "commandline like '%%testrium-2.1.0.jar%%'" get processid ^| findstr /r "[0-9]"') do (
     echo Stopping process %%p...
     taskkill /PID %%p /F >nul 2>&1
     echo Testrium stopped.

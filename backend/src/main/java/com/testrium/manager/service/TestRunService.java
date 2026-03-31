@@ -128,6 +128,56 @@ public class TestRunService {
     }
 
     @Transactional
+    public TestRunDTO updateTestRun(Long id, String name, String description, Long assignedToUserId) {
+        TestRun testRun = testRunRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test run not found"));
+
+        if (name != null && !name.trim().isEmpty()) {
+            testRun.setName(name.trim());
+        }
+        testRun.setDescription(description);
+        testRun.setAssignedToUserId(assignedToUserId);
+        testRun.setUpdatedAt(LocalDateTime.now());
+
+        testRun = testRunRepository.save(testRun);
+        return convertToDTO(testRun);
+    }
+
+    @Transactional
+    public TestRunDTO cloneTestRun(Long id, Long currentUserId, String customName) {
+        TestRun original = testRunRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Test run not found"));
+
+        TestRun clone = new TestRun();
+        clone.setName(customName != null && !customName.trim().isEmpty() ? customName.trim() : original.getName());
+        clone.setDescription(original.getDescription());
+        clone.setProjectId(original.getProjectId());
+        clone.setModuleId(original.getModuleId());
+        clone.setAssignedToUserId(original.getAssignedToUserId());
+        clone.setStatus("NOT_STARTED");
+        clone.setCreatedByUserId(currentUserId);
+        clone.setCreatedAt(LocalDateTime.now());
+        clone.setUpdatedAt(LocalDateTime.now());
+
+        clone = testRunRepository.save(clone);
+
+        List<TestExecution> originalExecutions = testExecutionRepository.findByTestRunId(id);
+        List<TestExecution> clonedExecutions = new ArrayList<>();
+        for (TestExecution orig : originalExecutions) {
+            TestExecution ex = new TestExecution();
+            ex.setTestRunId(clone.getId());
+            ex.setTestCaseId(orig.getTestCaseId());
+            ex.setStatus("NOT_EXECUTED");
+            ex.setCreatedAt(LocalDateTime.now());
+            ex.setUpdatedAt(LocalDateTime.now());
+            clonedExecutions.add(ex);
+        }
+        testExecutionRepository.saveAll(clonedExecutions);
+
+        return convertToDTO(clone);
+    }
+
+    @Transactional
     public void deleteTestRun(Long id) {
         TestRun testRun = testRunRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Test run not found"));

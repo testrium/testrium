@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle, ChevronLeft, ChevronRight, Eye
+  Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle, ChevronLeft, ChevronRight, Eye, Copy, Pencil
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
-import { projectsAPI, testModulesAPI, testCasesAPI, projectMembersAPI } from '../services/api';
+import { projectsAPI, testModulesAPI, testCasesAPI, projectMembersAPI, usersAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
@@ -39,6 +39,8 @@ export default function TestRuns() {
     status: ''
   });
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [cloneModal, setCloneModal] = useState({ open: false, id: null, name: '' });
+  const [editModal, setEditModal] = useState({ open: false, run: null, name: '', description: '', assignedToUserId: '' });
   const [newTestRun, setNewTestRun] = useState({
     name: '',
     description: '',
@@ -55,6 +57,7 @@ export default function TestRuns() {
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadData();
+    loadAllUsers();
   }, [location]);
 
   useEffect(() => {
@@ -67,7 +70,6 @@ export default function TestRuns() {
     if (newTestRun.projectId) {
       loadModulesForProject(newTestRun.projectId);
       loadTestCasesForProject(newTestRun.projectId);
-      loadProjectMembers(newTestRun.projectId);
     }
   }, [newTestRun.projectId]);
 
@@ -169,12 +171,12 @@ export default function TestRuns() {
     }
   };
 
-  const loadProjectMembers = async (projectId) => {
+  const loadAllUsers = async () => {
     try {
-      const response = await projectMembersAPI.getByProject(projectId);
+      const response = await usersAPI.getAll();
       setUsers(response.data);
     } catch (err) {
-      console.error('Load project members error:', err);
+      console.error('Load users error:', err);
     }
   };
 
@@ -200,6 +202,46 @@ export default function TestRuns() {
     } catch (err) {
       console.error('Create test run error:', err);
       setError(err.response?.data?.message || 'Failed to create test run');
+    }
+  };
+
+  const openCloneModal = (testRun) => {
+    setCloneModal({ open: true, id: testRun.id, name: testRun.name });
+  };
+
+  const handleCloneConfirm = async () => {
+    try {
+      await testRunsAPI.clone(cloneModal.id, cloneModal.name);
+      setCloneModal({ open: false, id: null, name: '' });
+      loadTestRuns();
+    } catch (err) {
+      console.error('Clone test run error:', err);
+      setError(err.response?.data?.message || 'Failed to clone test run');
+    }
+  };
+
+  const openEditModal = (testRun) => {
+    setEditModal({
+      open: true,
+      run: testRun,
+      name: testRun.name,
+      description: testRun.description || '',
+      assignedToUserId: testRun.assignedToUserId ? String(testRun.assignedToUserId) : ''
+    });
+  };
+
+  const handleEditSave = async () => {
+    try {
+      await testRunsAPI.update(editModal.run.id, {
+        name: editModal.name,
+        description: editModal.description,
+        assignedToUserId: editModal.assignedToUserId || null
+      });
+      setEditModal({ open: false, run: null, name: '', description: '', assignedToUserId: '' });
+      loadTestRuns();
+    } catch (err) {
+      console.error('Edit test run error:', err);
+      setError(err.response?.data?.message || 'Failed to update test run');
     }
   };
 
@@ -497,6 +539,26 @@ export default function TestRuns() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                openEditModal(testRun);
+                              }}
+                              className="p-2 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-colors"
+                              title="Edit Test Run"
+                            >
+                              <Pencil className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openCloneModal(testRun);
+                              }}
+                              className="p-2 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                              title="Clone Test Run"
+                            >
+                              <Copy className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleDeleteTestRun(testRun.id);
                               }}
                               className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -594,6 +656,110 @@ export default function TestRuns() {
             </div>
           )}
 
+          {/* Clone Modal */}
+          <Modal
+            isOpen={cloneModal.open}
+            onClose={() => setCloneModal({ open: false, id: null, name: '' })}
+            className="max-w-md"
+          >
+            <ModalHeader onClose={() => setCloneModal({ open: false, id: null, name: '' })}>
+              <div>
+                <ModalTitle>Clone Test Run</ModalTitle>
+                <ModalDescription>Enter a name for the cloned test run</ModalDescription>
+              </div>
+            </ModalHeader>
+            <ModalContent>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Name <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  type="text"
+                  value={cloneModal.name}
+                  onChange={(e) => setCloneModal(prev => ({ ...prev, name: e.target.value }))}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCloneConfirm()}
+                  autoFocus
+                />
+              </div>
+            </ModalContent>
+            <ModalFooter>
+              <Button variant="outline" onClick={() => setCloneModal({ open: false, id: null, name: '' })}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCloneConfirm}
+                disabled={!cloneModal.name.trim()}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Clone
+              </Button>
+            </ModalFooter>
+          </Modal>
+
+          {/* Edit Modal */}
+          <Modal
+            isOpen={editModal.open}
+            onClose={() => setEditModal({ open: false, run: null, name: '', description: '', assignedToUserId: '' })}
+            className="max-w-lg"
+          >
+            <ModalHeader onClose={() => setEditModal({ open: false, run: null, name: '', description: '', assignedToUserId: '' })}>
+              <div>
+                <ModalTitle>Edit Test Run</ModalTitle>
+                <ModalDescription>Update name, description, or assignee</ModalDescription>
+              </div>
+            </ModalHeader>
+            <ModalContent>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={editModal.name}
+                    onChange={(e) => setEditModal(prev => ({ ...prev, name: e.target.value }))}
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <Textarea
+                    value={editModal.description}
+                    onChange={(e) => setEditModal(prev => ({ ...prev, description: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Assigned To</label>
+                  <Select
+                    value={editModal.assignedToUserId}
+                    onChange={(e) => setEditModal(prev => ({ ...prev, assignedToUserId: e.target.value }))}
+                  >
+                    <option value="">Unassigned</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.username}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+            </ModalContent>
+            <ModalFooter>
+              <Button variant="outline" onClick={() => setEditModal({ open: false, run: null, name: '', description: '', assignedToUserId: '' })}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditSave}
+                disabled={!editModal.name.trim()}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              >
+                Save Changes
+              </Button>
+            </ModalFooter>
+          </Modal>
+
           <Modal
             isOpen={showCreateModal}
             onClose={() => {
@@ -684,9 +850,9 @@ export default function TestRuns() {
                     disabled={!newTestRun.projectId}
                   >
                     <option value="">Unassigned</option>
-                    {users.map(member => (
-                      <option key={member.userId} value={member.userId}>
-                        {member.username}
+                    {users.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.username}
                       </option>
                     ))}
                   </Select>

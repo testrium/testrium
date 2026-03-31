@@ -53,7 +53,7 @@ if %errorlevel% neq 0 (
 
 REM ── Find or download the JAR ──────────────────
 set JAR=testrium.jar
-set VERSION=2.0.0
+set VERSION=2.1.0
 set DOWNLOAD_URL=https://github.com/testrium/testrium/releases/download/v%VERSION%/testrium-%VERSION%.jar
 
 REM Check current directory first, then backend/target

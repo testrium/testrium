@@ -34,6 +34,18 @@ export const testRunsAPI = {
     );
   },
 
+  update: (id, data) => {
+    return axios.put(`${API_BASE_URL}/test-runs/${id}`, data, {
+      headers: getAuthHeader()
+    });
+  },
+
+  clone: (id, name) => {
+    return axios.post(`${API_BASE_URL}/test-runs/${id}/clone`, { name }, {
+      headers: getAuthHeader()
+    });
+  },
+
   delete: (id) => {
     return axios.delete(`${API_BASE_URL}/test-runs/${id}`, {
       headers: getAuthHeader()

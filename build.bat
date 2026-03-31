@@ -76,7 +76,7 @@ cd ..
 echo.
 echo =============================================
 echo  Build complete!
-echo  JAR: backend\target\testrium-2.0.0.jar
+echo  JAR: backend\target\testrium-2.1.0.jar
 echo.
 echo  Run start.bat to launch the app.
 echo =============================================

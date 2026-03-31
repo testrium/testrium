@@ -94,6 +94,43 @@ public class TestRunController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateTestRun(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        try {
+            String name = (String) body.get("name");
+            String description = (String) body.get("description");
+            Long assignedToUserId = body.get("assignedToUserId") != null
+                    ? Long.valueOf(body.get("assignedToUserId").toString()) : null;
+            TestRunDTO updated = testRunService.updateTestRun(id, name, description, assignedToUserId);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<?> cloneTestRun(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, String> body,
+            Authentication authentication) {
+        try {
+            String email = authentication.getName();
+            User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            String customName = body != null ? body.get("name") : null;
+            TestRunDTO cloned = testRunService.cloneTestRun(id, currentUser.getId(), customName);
+            return ResponseEntity.status(HttpStatus.CREATED).body(cloned);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTestRun(@PathVariable Long id) {
         try {

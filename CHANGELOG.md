@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-03-31
+
+### Added
+
+#### Tags / Labels on Test Cases
+- Tag input component with chip UI — press Enter or comma to add, Backspace to remove
+- Project-aware autocomplete with built-in suggestions (smoke, regression, critical, sanity, e2e, etc.)
+- Tag filter in Test Cases page — click any tag chip to filter by it
+- Tag chips displayed on each test case card
+- Backend: `@ElementCollection` tags field on `TestCase` entity (auto-creates `test_case_tags` table)
+- Backend: `GET /api/test-cases/tags?projectId=` endpoint for tag suggestions
+- Tag normalization: lowercase, trimmed, max 50 chars, deduplicated
+
+#### Clone Test Run
+- Clone button (copy icon) on each test run row — prompts for a name pre-filled with the original run's name
+- Cloned run starts with status `NOT_STARTED` and all executions reset to `NOT_EXECUTED`
+- Backend: `POST /api/test-runs/{id}/clone` endpoint
+
+#### Edit Test Run
+- Edit button (pencil icon) on each test run row — edit name, description, and assignee
+- Backend: `PUT /api/test-runs/{id}` endpoint
+
+### Fixed
+- Module dropdown not loading in Test Cases filter — `applicationId` type mismatch (string vs number)
+- Assign To dropdown in Test Run modals now loads all users (previously used wrong API method, returning empty list)
+
+### Changed
+- Updated version from 2.0.0 to 2.1.0
+
+---
+
 ## [1.7.0] - 2024-12-14
 
 ### Added - Test Run Execution Enhancements
