@@ -43,3 +43,6 @@ docs/.vitepress/cache/
 
 # Private planning — do not commit
 PRIVATE_ROADMAP.md
+
+# Frontend build output (injected into backend at build time)
+backend/src/main/resources/static/
