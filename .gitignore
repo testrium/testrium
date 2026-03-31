@@ -38,4 +38,8 @@ backend/data/
 
 pramana-manager-**.7z
 pramana-manager-**.jar
-pramana-manager-**.zipdocs/.vitepress/cache/
+pramana-manager-**.zip
+docs/.vitepress/cache/
+
+# Private planning — do not commit
+PRIVATE_ROADMAP.md
