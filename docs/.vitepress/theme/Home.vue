@@ -1735,8 +1735,10 @@ const terminalLines = [
 .cta-heading {
   font-size: clamp(2rem, 4.5vw, 3.2rem);
   font-weight: 900;
+  line-height: 1.2;
   letter-spacing: -0.03em;
   margin-bottom: 14px;
+  padding-bottom: 4px;
   background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 55%, var(--brand-3) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
