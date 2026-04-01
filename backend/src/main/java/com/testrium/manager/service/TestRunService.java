@@ -33,6 +33,9 @@ public class TestRunService {
     @Autowired
     private TestCaseRepository testCaseRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Transactional
     public TestRunDTO createTestRun(CreateTestRunRequest request, Long createdByUserId) {
         // Validate project exists
@@ -85,6 +88,22 @@ public class TestRunService {
 
         testExecutionRepository.saveAll(executions);
 
+        // Notify assignee if different from creator
+        final TestRun savedRun = testRun;
+        if (savedRun.getAssignedToUserId() != null &&
+                !savedRun.getAssignedToUserId().equals(createdByUserId)) {
+            userRepository.findById(savedRun.getAssignedToUserId()).ifPresent(assignee ->
+                emailService.sendTestRunAssigned(
+                        assignee.getEmail(),
+                        assignee.getUsername(),
+                        savedRun.getName(),
+                        project.getName(),
+                        savedRun.getId(),
+                        savedRun.getProjectId()
+                )
+            );
+        }
+
         return convertToDTO(testRun);
     }
 
@@ -123,6 +142,34 @@ public class TestRunService {
 
         testRun.setUpdatedAt(LocalDateTime.now());
         testRun = testRunRepository.save(testRun);
+
+        // Notify on completion
+        if ("COMPLETED".equals(status)) {
+            final TestRun completedRun = testRun;
+            List<TestExecution> execs = testExecutionRepository.findByTestRunId(id);
+            int passed = (int) execs.stream().filter(e -> "PASS".equals(e.getStatus())).count();
+            int failed = (int) execs.stream().filter(e -> "FAIL".equals(e.getStatus())).count();
+            int total = execs.size();
+            String runName = completedRun.getName();
+            String projectName = projectRepository.findById(completedRun.getProjectId())
+                    .map(p -> p.getName()).orElse("Unknown");
+
+            // Notify assignee
+            if (completedRun.getAssignedToUserId() != null) {
+                userRepository.findById(completedRun.getAssignedToUserId()).ifPresent(u ->
+                    emailService.sendTestRunCompleted(u.getEmail(), u.getUsername(),
+                            runName, projectName, passed, failed, total, completedRun.getProjectId())
+                );
+            }
+            // Notify creator (if different from assignee)
+            if (completedRun.getCreatedByUserId() != null &&
+                    !completedRun.getCreatedByUserId().equals(completedRun.getAssignedToUserId())) {
+                userRepository.findById(completedRun.getCreatedByUserId()).ifPresent(u ->
+                    emailService.sendTestRunCompleted(u.getEmail(), u.getUsername(),
+                            runName, projectName, passed, failed, total, completedRun.getProjectId())
+                );
+            }
+        }
 
         return convertToDTO(testRun);
     }

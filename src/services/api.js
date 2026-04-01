@@ -87,6 +87,13 @@ export const testModulesAPI = {
   delete: (id) => api.delete(`/test-modules/${id}`),
 };
 
+// Settings API
+export const settingsAPI = {
+  getEmail: () => api.get('/settings/email'),
+  saveEmail: (data) => api.put('/settings/email', data),
+  testEmail: (email) => api.post('/settings/email/test', { email }),
+};
+
 // Users API
 export const usersAPI = {
   getAll: () => api.get('/users'),

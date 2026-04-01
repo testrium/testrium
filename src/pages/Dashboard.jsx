@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI, projectMembersAPI, usersAPI } from '../services/api';
 import { jiraAPI } from '../api/jira';
+import { emailConfigAPI } from '../api/emailConfig';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProjectMembersModal from '../components/ProjectMembersModal';
@@ -19,7 +20,7 @@ import {
   ModalContent,
   ModalFooter
 } from '../components/ui/Modal';
-import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database } from 'lucide-react';
+import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database, Mail, Send, Save, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
 
 export default function Dashboard() {
@@ -49,6 +50,90 @@ export default function Dashboard() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [memberRole, setMemberRole] = useState('MEMBER');
   const [membersLoading, setMembersLoading] = useState(false);
+
+  // Email configuration state
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailProject, setEmailProject] = useState(null);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailTesting, setEmailTesting] = useState(false);
+  const [emailSaveMsg, setEmailSaveMsg] = useState(null);
+  const [emailTestMsg, setEmailTestMsg] = useState(null);
+  const [emailTestRecipient, setEmailTestRecipient] = useState('');
+  const [showEmailPassword, setShowEmailPassword] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    smtpHost: '', smtpPort: '587', smtpUsername: '', password: '',
+    fromAddress: '', tls: 'true', enabled: true, passwordSaved: false
+  });
+
+  const handleEmailSettings = async (project) => {
+    setEmailProject(project);
+    setShowEmailModal(true);
+    setEmailLoading(true);
+    setEmailSaveMsg(null);
+    setEmailTestMsg(null);
+    setShowEmailPassword(false);
+    try {
+      const res = await emailConfigAPI.getConfig(project.id);
+      const d = res.data;
+      setEmailForm({
+        smtpHost: d.smtpHost || '',
+        smtpPort: d.smtpPort || '587',
+        smtpUsername: d.smtpUsername || '',
+        password: '',
+        fromAddress: d.fromAddress || '',
+        tls: d.tls || 'true',
+        enabled: d.enabled !== false,
+        passwordSaved: d.passwordSaved === true
+      });
+      setEmailTestRecipient(d.smtpUsername || '');
+    } catch { /* no config yet */ } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleSaveEmailConfig = async () => {
+    setEmailSaving(true);
+    setEmailSaveMsg(null);
+    try {
+      await emailConfigAPI.saveConfig(emailProject.id, {
+        smtpHost: emailForm.smtpHost,
+        smtpPort: emailForm.smtpPort,
+        smtpUsername: emailForm.smtpUsername,
+        password: emailForm.password,
+        fromAddress: emailForm.fromAddress,
+        tls: emailForm.tls,
+        enabled: String(emailForm.enabled)
+      });
+      setEmailSaveMsg({ type: 'success', text: 'Email configuration saved' });
+      setEmailForm(f => ({ ...f, password: '', passwordSaved: true }));
+    } catch (err) {
+      setEmailSaveMsg({ type: 'error', text: err.response?.data?.message || 'Failed to save' });
+    } finally {
+      setEmailSaving(false);
+    }
+  };
+
+  const handleTestEmailConfig = async () => {
+    if (!emailTestRecipient.trim()) return;
+    setEmailTesting(true);
+    setEmailTestMsg(null);
+    try {
+      const res = await emailConfigAPI.testEmail(emailProject.id, emailTestRecipient.trim());
+      setEmailTestMsg({ type: 'success', text: res.data.message });
+    } catch (err) {
+      setEmailTestMsg({ type: 'error', text: err.response?.data?.message || 'Failed to send test email' });
+    } finally {
+      setEmailTesting(false);
+    }
+  };
+
+  const handleCloseEmailModal = () => {
+    setShowEmailModal(false);
+    setEmailProject(null);
+    setEmailSaveMsg(null);
+    setEmailTestMsg(null);
+  };
 
   // JIRA configuration state
   const [showJiraModal, setShowJiraModal] = useState(false);
@@ -565,6 +650,15 @@ export default function Dashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleEmailSettings(project)}
+                              className="hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                              title="Email Notifications"
+                            >
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleJiraSettings(project)}
                               className="hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400"
                               title="JIRA Settings"
@@ -896,6 +990,136 @@ export default function Dashboard() {
             </Button>
           </ModalFooter>
         </form>
+      </Modal>
+
+      {/* Email Configuration Modal */}
+      <Modal isOpen={showEmailModal} onClose={handleCloseEmailModal} className="max-w-2xl">
+        <ModalHeader onClose={handleCloseEmailModal}>
+          <div>
+            <ModalTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-blue-600" />
+              Email Notifications — {emailProject?.name}
+            </ModalTitle>
+            <ModalDescription>
+              Configure SMTP settings for test run notifications in this project.
+            </ModalDescription>
+          </div>
+        </ModalHeader>
+
+        <ModalContent>
+          {emailLoading ? (
+            <p className="text-sm text-gray-500 py-4 text-center">Loading configuration…</p>
+          ) : (
+            <div className="space-y-4">
+              {/* Enable toggle */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={emailForm.enabled}
+                  onChange={e => setEmailForm(f => ({ ...f, enabled: e.target.checked }))}
+                  className="w-4 h-4 accent-blue-600"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Enable email notifications for this project</span>
+              </label>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SMTP Host</label>
+                  <Input value={emailForm.smtpHost} onChange={e => setEmailForm(f => ({ ...f, smtpHost: e.target.value }))} placeholder="smtp.gmail.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Port</label>
+                  <Input type="number" value={emailForm.smtpPort} onChange={e => setEmailForm(f => ({ ...f, smtpPort: e.target.value }))} placeholder="587" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username / Email</label>
+                <Input type="email" value={emailForm.smtpUsername} onChange={e => setEmailForm(f => ({ ...f, smtpUsername: e.target.value }))} placeholder="you@example.com" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Password {emailForm.passwordSaved && <span className="text-green-600 text-xs ml-1">(saved)</span>}
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showEmailPassword ? 'text' : 'password'}
+                    value={emailForm.password}
+                    onChange={e => setEmailForm(f => ({ ...f, password: e.target.value }))}
+                    placeholder={emailForm.passwordSaved ? 'Leave blank to keep existing' : 'App password'}
+                    className="pr-10"
+                  />
+                  <button type="button" onClick={() => setShowEmailPassword(s => !s)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showEmailPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From Address</label>
+                <Input type="email" value={emailForm.fromAddress} onChange={e => setEmailForm(f => ({ ...f, fromAddress: e.target.value }))} placeholder="noreply@example.com" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">TLS</label>
+                <select
+                  value={emailForm.tls}
+                  onChange={e => setEmailForm(f => ({ ...f, tls: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="true">Enabled (STARTTLS)</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
+
+              {emailSaveMsg && (
+                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${
+                  emailSaveMsg.type === 'success'
+                    ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                }`}>
+                  {emailSaveMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                  {emailSaveMsg.text}
+                </div>
+              )}
+
+              {/* Test Email */}
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Send Test Email</p>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    value={emailTestRecipient}
+                    onChange={e => setEmailTestRecipient(e.target.value)}
+                    placeholder="recipient@example.com"
+                    className="flex-1"
+                  />
+                  <Button variant="outline" onClick={handleTestEmailConfig} disabled={emailTesting || !emailTestRecipient.trim()}>
+                    <Send className="w-4 h-4 mr-2" />
+                    {emailTesting ? 'Sending…' : 'Send'}
+                  </Button>
+                </div>
+                {emailTestMsg && (
+                  <div className={`flex items-center gap-2 text-sm mt-2 ${emailTestMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                    {emailTestMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    {emailTestMsg.text}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </ModalContent>
+
+        <ModalFooter>
+          <Button variant="outline" onClick={handleCloseEmailModal}>Cancel</Button>
+          <Button onClick={handleSaveEmailConfig} disabled={emailSaving || emailLoading}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <Save className="w-4 h-4 mr-2" />
+            {emailSaving ? 'Saving…' : 'Save Configuration'}
+          </Button>
+        </ModalFooter>
       </Modal>
     </div>
   );
