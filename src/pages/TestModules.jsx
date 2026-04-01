@@ -21,8 +21,10 @@ import { Textarea } from '../components/ui/Textarea';
 import {
   Plus, Search, Edit, Trash2, AlertCircle, FileText, Filter, FolderKanban
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestModules() {
+  usePageTitle('Test Modules');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

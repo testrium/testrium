@@ -5,8 +5,10 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import { TestTube2 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Register() {
+  usePageTitle('Register');
   const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({

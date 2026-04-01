@@ -20,8 +20,10 @@ import {
   ModalFooter
 } from '../components/ui/Modal';
 import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Dashboard() {
+  usePageTitle('Dashboard');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

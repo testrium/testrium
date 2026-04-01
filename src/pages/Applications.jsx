@@ -11,8 +11,10 @@ import { Textarea } from '../components/ui/Textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Modal, ModalHeader, ModalTitle, ModalDescription, ModalContent, ModalFooter } from '../components/ui/Modal';
 import { Plus, Edit, Trash2, AlertCircle, Package } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Applications() {
+  usePageTitle('Applications');
   const { user } = useAuth();
   const [applications, setApplications] = useState([]);
   const [projects, setProjects] = useState([]);

@@ -91,6 +91,8 @@ export const testModulesAPI = {
 export const usersAPI = {
   getAll: () => api.get('/users'),
   getById: (id) => api.get(`/users/${id}`),
+  getMe: () => api.get('/users/me'),
+  updateMe: (data) => api.put('/users/me', data),
 };
 
 // Project Members API

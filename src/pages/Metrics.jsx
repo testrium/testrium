@@ -22,8 +22,10 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function Metrics() {
+  usePageTitle('Metrics');
   const { user, logout } = useAuth();
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState('');

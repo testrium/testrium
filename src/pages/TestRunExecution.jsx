@@ -7,8 +7,10 @@ import {
 import { testRunsAPI } from '../services/testRuns';
 import { testExecutionsAPI } from '../services/testExecutions';
 import { jiraAPI } from '../api/jira';
+import usePageTitle from '../hooks/usePageTitle';
 
 const TestRunExecution = () => {
+  usePageTitle('Test Run');
   const { id } = useParams();
   const navigate = useNavigate();
   const [testRun, setTestRun] = useState(null);

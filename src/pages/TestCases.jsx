@@ -14,8 +14,10 @@ import {
   Plus, Search, Filter, ChevronRight,
   Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload, Tag
 } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestCases() {
+  usePageTitle('Test Cases');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();

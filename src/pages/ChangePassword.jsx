@@ -6,8 +6,10 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import { KeyRound, CheckCircle } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function ChangePassword() {
+  usePageTitle('Change Password');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});

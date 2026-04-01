@@ -124,6 +124,32 @@ public class UserController {
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 
+    /** Current user: get own profile */
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return ResponseEntity.ok(new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreatedAt()));
+    }
+
+    /** Current user: update own profile (username only) */
+    @PutMapping("/me")
+    public ResponseEntity<?> updateMe(Authentication authentication, @RequestBody Map<String, String> body) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String newUsername = body.get("username");
+        if (newUsername == null || newUsername.isBlank())
+            return ResponseEntity.badRequest().body(Map.of("message", "Username cannot be empty"));
+        newUsername = newUsername.trim();
+        if (!newUsername.equals(user.getUsername()) && userRepository.findByUsername(newUsername).isPresent())
+            return ResponseEntity.badRequest().body(Map.of("message", "Username already taken"));
+
+        user.setUsername(newUsername);
+        userRepository.save(user);
+        return ResponseEntity.ok(new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole(), user.getCreatedAt()));
+    }
+
     /** Current user: change own password */
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body) {

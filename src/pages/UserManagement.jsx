@@ -8,8 +8,10 @@ import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Users, Plus, Trash2, KeyRound, ShieldCheck, User, X, Check, Pencil } from 'lucide-react';
 import api from '../services/api';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function UserManagement() {
+  usePageTitle('User Management');
   const { user: currentUser } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);

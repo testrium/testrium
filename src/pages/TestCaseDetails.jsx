@@ -6,8 +6,10 @@ import Footer from '../components/Footer';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { ArrowLeft, Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestCaseDetails() {
+  usePageTitle('Test Case Details');
   const { id } = useParams();
   const navigate = useNavigate();
   const [testCase, setTestCase] = useState(null);

@@ -5,10 +5,12 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
 import { TestTube2, ShieldCheck } from 'lucide-react';
+import usePageTitle from '../hooks/usePageTitle';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 export default function Setup() {
+  usePageTitle('Setup');
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: '', email: '', password: '', confirmPassword: '' });
   const [errors, setErrors] = useState({});

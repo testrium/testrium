@@ -19,6 +19,7 @@ import ChangePassword from './pages/ChangePassword';
 import Help from './pages/Help';
 import Setup from './pages/Setup';
 import UserManagement from './pages/UserManagement';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -106,6 +107,7 @@ function App() {
             }
           />
 
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />

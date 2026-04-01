@@ -13,8 +13,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import html2canvas from 'html2canvas';
+import usePageTitle from '../hooks/usePageTitle';
 
 const Reports = () => {
+  usePageTitle('Reports');
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);

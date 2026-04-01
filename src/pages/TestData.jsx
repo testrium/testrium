@@ -4,8 +4,10 @@ import { Database, Plus, Edit, Trash2, X, Save, Filter, Search, ChevronLeft, Che
 import { testDataAPI } from '../api/testData';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestData() {
+  usePageTitle('Test Data');
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('projectId');
 

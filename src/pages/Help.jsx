@@ -174,7 +174,10 @@ function Section({ section }) {
   );
 }
 
+import usePageTitle from '../hooks/usePageTitle';
+
 export default function Help() {
+  usePageTitle('Help');
   const navigate = useNavigate();
 
   return (

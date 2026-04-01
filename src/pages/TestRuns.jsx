@@ -21,8 +21,10 @@ import {
   ModalContent,
   ModalFooter
 } from '../components/ui/Modal';
+import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestRuns() {
+  usePageTitle('Test Runs');
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
