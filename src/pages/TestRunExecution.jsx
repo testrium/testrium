@@ -7,6 +7,7 @@ import {
 import { testRunsAPI } from '../services/testRuns';
 import { testExecutionsAPI } from '../services/testExecutions';
 import { jiraAPI } from '../api/jira';
+import AttachmentSection from '../components/AttachmentSection';
 import usePageTitle from '../hooks/usePageTitle';
 
 const TestRunExecution = () => {
@@ -624,6 +625,8 @@ const TestRunExecution = () => {
                           />
                         </div>
                       </div>
+
+                      <AttachmentSection executionId={selectedExecution?.id} />
 
                       <div className="flex justify-between pt-4">
                         <div className="flex gap-2">

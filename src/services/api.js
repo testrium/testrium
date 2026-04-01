@@ -95,6 +95,20 @@ export const usersAPI = {
   updateMe: (data) => api.put('/users/me', data),
 };
 
+// Attachments API
+export const attachmentsAPI = {
+  getByExecution: (executionId) => api.get('/attachments', { params: { executionId } }),
+  upload: (executionId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/attachments?executionId=${executionId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  download: (id) => api.get(`/attachments/${id}/download`, { responseType: 'blob' }),
+  delete: (id) => api.delete(`/attachments/${id}`),
+};
+
 // Project Members API
 export const projectMembersAPI = {
   getProjectMembers: (projectId) => api.get(`/project-members/project/${projectId}`),
