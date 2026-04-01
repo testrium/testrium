@@ -46,3 +46,6 @@ PRIVATE_ROADMAP.md
 
 # Frontend build output (injected into backend at build time)
 backend/src/main/resources/static/
+
+# Uploaded attachments (runtime data, not source)
+uploads/
