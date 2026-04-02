@@ -75,6 +75,10 @@ export const testCasesAPI = {
       }
     });
   },
+  exportExcel: (params) => api.get('/test-cases/export', {
+    params,
+    responseType: 'blob'
+  }),
 };
 
 // Test Modules API

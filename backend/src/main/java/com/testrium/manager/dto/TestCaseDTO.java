@@ -41,6 +41,8 @@ public class TestCaseDTO {
 
     private String moduleName;
 
+    private String applicationName;
+
     private String projectName;
 
     private String createdByUsername;
@@ -155,6 +157,14 @@ public class TestCaseDTO {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
     }
 
     public String getProjectName() {

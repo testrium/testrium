@@ -4,6 +4,7 @@ import com.testrium.manager.dto.BulkImportResult;
 import com.testrium.manager.dto.TestCaseDTO;
 import com.testrium.manager.entity.TestCase;
 import com.testrium.manager.service.TestCaseBulkImportService;
+import com.testrium.manager.service.TestCaseExportService;
 import com.testrium.manager.service.TestCaseService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -23,10 +24,13 @@ public class TestCaseController {
 
     private final TestCaseService testCaseService;
     private final TestCaseBulkImportService bulkImportService;
+    private final TestCaseExportService exportService;
 
-    public TestCaseController(TestCaseService testCaseService, TestCaseBulkImportService bulkImportService) {
+    public TestCaseController(TestCaseService testCaseService, TestCaseBulkImportService bulkImportService,
+                              TestCaseExportService exportService) {
         this.testCaseService = testCaseService;
         this.bulkImportService = bulkImportService;
+        this.exportService = exportService;
     }
 
     @GetMapping
@@ -106,6 +110,27 @@ public class TestCaseController {
      * Download Excel template for bulk import
      * @return Excel file with headers and sample data
      */
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportToExcel(
+            @RequestParam(required = false) Long projectId,
+            @RequestParam(required = false) Long moduleId,
+            @RequestParam(required = false) TestCase.TestCaseStatus status,
+            @RequestParam(required = false) TestCase.Priority priority,
+            @RequestParam(required = false) String tag) {
+        try {
+            byte[] data = exportService.exportToExcel(projectId, moduleId, status, priority, tag);
+            String filename = "TestCases_Export_" +
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", filename);
+            headers.setContentLength(data.length);
+            return ResponseEntity.ok().headers(headers).body(data);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/bulk/template")
     public ResponseEntity<byte[]> downloadTemplate() {
         try {

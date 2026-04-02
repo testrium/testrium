@@ -168,6 +168,9 @@ public class TestCaseService {
         if (testCase.getModule() != null) {
             dto.setModuleId(testCase.getModule().getId());
             dto.setModuleName(testCase.getModule().getName());
+            if (testCase.getModule().getApplication() != null) {
+                dto.setApplicationName(testCase.getModule().getApplication().getName());
+            }
         }
 
         dto.setCreatedByUsername(testCase.getCreatedBy().getUsername());

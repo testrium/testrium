@@ -12,7 +12,7 @@ import TestCaseForm from '../components/TestCaseForm';
 import BulkImportModal from '../components/BulkImportModal';
 import {
   Plus, Search, Filter, ChevronRight,
-  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload, Tag
+  Edit, Trash2, AlertCircle, CheckCircle2, Clock, XCircle, FileText, Layers, Upload, Tag, Download
 } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
 
@@ -30,6 +30,7 @@ export default function TestCases() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [editingTestCase, setEditingTestCase] = useState(null);
+  const [exportLoading, setExportLoading] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -201,6 +202,29 @@ export default function TestCases() {
     });
   };
 
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const params = {};
+      if (filters.projectId) params.projectId = filters.projectId;
+      if (filters.moduleId) params.moduleId = filters.moduleId;
+      if (filters.status) params.status = filters.status;
+      if (filters.priority) params.priority = filters.priority;
+      if (filters.tag) params.tag = filters.tag;
+      const response = await testCasesAPI.exportExcel(params);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TestCases_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const filteredTestCases = testCases.filter(tc => {
     // Search filter
     if (filters.search) {
@@ -293,6 +317,15 @@ export default function TestCases() {
               <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and organize your test cases</p>
             </div>
             <div className="flex gap-2">
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                disabled={exportLoading}
+                className="border-green-600 text-green-600 hover:bg-green-50"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                {exportLoading ? 'Exporting...' : 'Export Excel'}
+              </Button>
               <Button
                 onClick={() => setShowBulkImportModal(true)}
                 variant="outline"
