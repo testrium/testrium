@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2026-04-02
+
+### Added
+
+#### Per-Project Email Notifications
+- SMTP configuration per project (host, port, username, password, from, TLS) — same pattern as JIRA config
+- Blue mail icon on each project card opens email config modal (admin only)
+- AES-encrypted password storage via `ProjectEmailConfig` entity
+- Async fire-and-forget notifications: test run assigned + test run completed
+- Test email button to verify SMTP settings from the UI
+- Verification emails fall back to first configured project SMTP
+
+#### Bulk Export — Test Cases to Excel
+- Green "Export Excel" button on Test Cases page exports currently filtered test cases
+- Styled `.xlsx` with indigo header row, colour-coded priority badges, frozen header rows, wrapped text for steps/expected result
+- Columns: ID, Title, Application, Module, Type, Priority, Status, Description, Preconditions, Steps, Expected Result, Automated, Regression, Tags, Created By, Created At
+- Respects active filters (project, module, status, priority, tag)
+- File named `TestCases_Export_YYYYMMDD.xlsx`
+
+#### Cross-Project Overview Dashboard
+- New "Overview" page in the nav bar with aggregated metrics across all accessible projects
+- Role-scoped: admins see all projects; leads/members see only their member projects
+- 5 KPI cards: Projects, Test Cases, Test Runs, Team Members, Overall Pass Rate
+- Charts: test run status pie, priority distribution pie, automation coverage donut
+- Per-project comparison bar chart (test cases vs test runs, top 8)
+- Project breakdown table with pass rate progress bar per row
+- Recent test runs table (last 10 across all projects) with clickable rows
+
+#### Slack / Teams Webhook Notifications
+- Webhook URLs (Slack incoming webhook + Teams MessageCard connector) per project
+- Purple webhook icon on each project card opens config modal (admin only)
+- Toggle notifications per event: test run assigned / test run completed
+- Separate test buttons for Slack and Teams in the UI
+- Async fire-and-forget delivery; silently skips if not configured
+
+---
+
 ## [2.1.0] - 2026-03-31
 
 ### Added
