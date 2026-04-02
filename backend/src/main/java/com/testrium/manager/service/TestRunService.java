@@ -36,6 +36,9 @@ public class TestRunService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private WebhookService webhookService;
+
     @Transactional
     public TestRunDTO createTestRun(CreateTestRunRequest request, Long createdByUserId) {
         // Validate project exists
@@ -102,6 +105,10 @@ public class TestRunService {
                         savedRun.getProjectId()
                 )
             );
+            webhookService.notifyTestRunAssigned(
+                    savedRun.getProjectId(), savedRun.getName(), project.getName(),
+                    userRepository.findById(savedRun.getAssignedToUserId())
+                            .map(u -> u.getUsername()).orElse("someone"));
         }
 
         return convertToDTO(testRun);
@@ -169,6 +176,9 @@ public class TestRunService {
                             runName, projectName, passed, failed, total, completedRun.getProjectId())
                 );
             }
+            // Webhook notification
+            webhookService.notifyTestRunCompleted(
+                    completedRun.getProjectId(), runName, projectName, passed, failed, total);
         }
 
         return convertToDTO(testRun);

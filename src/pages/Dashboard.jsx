@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { projectsAPI, projectMembersAPI, usersAPI } from '../services/api';
 import { jiraAPI } from '../api/jira';
 import { emailConfigAPI } from '../api/emailConfig';
+import { webhookConfigAPI } from '../api/webhookConfig';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import ProjectMembersModal from '../components/ProjectMembersModal';
@@ -20,7 +21,7 @@ import {
   ModalContent,
   ModalFooter
 } from '../components/ui/Modal';
-import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database, Mail, Send, Save, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { FolderOpen, TrendingUp, CheckCircle2, FolderKanban, FileText, Layers, Plus, Edit, Trash2, AlertCircle, Users, Settings, Database, Mail, Send, Save, Eye, EyeOff, CheckCircle, Webhook } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
 
 export default function Dashboard() {
@@ -133,6 +134,73 @@ export default function Dashboard() {
     setEmailProject(null);
     setEmailSaveMsg(null);
     setEmailTestMsg(null);
+  };
+
+  // Webhook configuration state
+  const [showWebhookModal, setShowWebhookModal] = useState(false);
+  const [webhookProject, setWebhookProject] = useState(null);
+  const [webhookLoading, setWebhookLoading] = useState(false);
+  const [webhookSaving, setWebhookSaving] = useState(false);
+  const [webhookTesting, setWebhookTesting] = useState(null); // 'slack'|'teams'|null
+  const [webhookSaveMsg, setWebhookSaveMsg] = useState(null);
+  const [webhookTestMsg, setWebhookTestMsg] = useState(null);
+  const [webhookForm, setWebhookForm] = useState({
+    slackWebhookUrl: '', teamsWebhookUrl: '',
+    notifyOnAssigned: true, notifyOnCompleted: true, enabled: true
+  });
+
+  const handleWebhookSettings = async (project) => {
+    setWebhookProject(project);
+    setShowWebhookModal(true);
+    setWebhookLoading(true);
+    setWebhookSaveMsg(null);
+    setWebhookTestMsg(null);
+    try {
+      const res = await webhookConfigAPI.getConfig(project.id);
+      const d = res.data;
+      setWebhookForm({
+        slackWebhookUrl: d.slackWebhookUrl || '',
+        teamsWebhookUrl: d.teamsWebhookUrl || '',
+        notifyOnAssigned: d.notifyOnAssigned !== false,
+        notifyOnCompleted: d.notifyOnCompleted !== false,
+        enabled: d.enabled !== false,
+      });
+    } catch { /* no config yet */ } finally {
+      setWebhookLoading(false);
+    }
+  };
+
+  const handleSaveWebhookConfig = async () => {
+    setWebhookSaving(true);
+    setWebhookSaveMsg(null);
+    try {
+      await webhookConfigAPI.saveConfig(webhookProject.id, webhookForm);
+      setWebhookSaveMsg({ type: 'success', text: 'Webhook configuration saved' });
+    } catch (err) {
+      setWebhookSaveMsg({ type: 'error', text: err.response?.data?.message || 'Failed to save' });
+    } finally {
+      setWebhookSaving(false);
+    }
+  };
+
+  const handleTestWebhook = async (target) => {
+    setWebhookTesting(target);
+    setWebhookTestMsg(null);
+    try {
+      const res = await webhookConfigAPI.test(webhookProject.id, target);
+      setWebhookTestMsg({ type: 'success', text: res.data.message });
+    } catch (err) {
+      setWebhookTestMsg({ type: 'error', text: err.response?.data?.message || 'Test failed' });
+    } finally {
+      setWebhookTesting(null);
+    }
+  };
+
+  const handleCloseWebhookModal = () => {
+    setShowWebhookModal(false);
+    setWebhookProject(null);
+    setWebhookSaveMsg(null);
+    setWebhookTestMsg(null);
   };
 
   // JIRA configuration state
@@ -650,6 +718,15 @@ export default function Dashboard() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleWebhookSettings(project)}
+                              className="hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-600 dark:text-purple-400"
+                              title="Slack / Teams Webhook"
+                            >
+                              <Webhook className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEmailSettings(project)}
                               className="hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                               title="Email Notifications"
@@ -1118,6 +1195,119 @@ export default function Dashboard() {
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
             <Save className="w-4 h-4 mr-2" />
             {emailSaving ? 'Saving…' : 'Save Configuration'}
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Webhook Configuration Modal */}
+      <Modal isOpen={showWebhookModal} onClose={handleCloseWebhookModal} className="max-w-2xl">
+        <ModalHeader onClose={handleCloseWebhookModal}>
+          <div>
+            <ModalTitle className="flex items-center gap-2">
+              <Webhook className="h-5 w-5 text-purple-600" />
+              Slack / Teams Webhooks — {webhookProject?.name}
+            </ModalTitle>
+            <ModalDescription>
+              Configure webhook URLs to receive notifications in Slack or Microsoft Teams.
+            </ModalDescription>
+          </div>
+        </ModalHeader>
+
+        <ModalContent>
+          {webhookLoading ? (
+            <p className="text-sm text-gray-500 py-4 text-center">Loading configuration…</p>
+          ) : (
+            <div className="space-y-5">
+              {/* Enable toggle */}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={webhookForm.enabled}
+                  onChange={e => setWebhookForm(f => ({ ...f, enabled: e.target.checked }))}
+                  className="w-4 h-4 accent-purple-600" />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Enable webhook notifications for this project</span>
+              </label>
+
+              {/* Slack URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Slack Incoming Webhook URL
+                </label>
+                <Input value={webhookForm.slackWebhookUrl}
+                  onChange={e => setWebhookForm(f => ({ ...f, slackWebhookUrl: e.target.value }))}
+                  placeholder="https://hooks.slack.com/services/…" />
+                <p className="text-xs text-gray-400 mt-1">Create one at <span className="font-mono">api.slack.com/apps</span> → Incoming Webhooks</p>
+              </div>
+
+              {/* Teams URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Microsoft Teams Webhook URL
+                </label>
+                <Input value={webhookForm.teamsWebhookUrl}
+                  onChange={e => setWebhookForm(f => ({ ...f, teamsWebhookUrl: e.target.value }))}
+                  placeholder="https://outlook.office.com/webhook/…" />
+                <p className="text-xs text-gray-400 mt-1">Add via Connectors in your Teams channel settings</p>
+              </div>
+
+              {/* Trigger toggles */}
+              <div className="border border-gray-100 dark:border-gray-700 rounded-lg p-4 space-y-3">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Notify when</p>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={webhookForm.notifyOnAssigned}
+                    onChange={e => setWebhookForm(f => ({ ...f, notifyOnAssigned: e.target.checked }))}
+                    className="w-4 h-4 accent-purple-600" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Test run is assigned</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={webhookForm.notifyOnCompleted}
+                    onChange={e => setWebhookForm(f => ({ ...f, notifyOnCompleted: e.target.checked }))}
+                    className="w-4 h-4 accent-purple-600" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Test run is completed</span>
+                </label>
+              </div>
+
+              {webhookSaveMsg && (
+                <div className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg ${
+                  webhookSaveMsg.type === 'success'
+                    ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                }`}>
+                  {webhookSaveMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                  {webhookSaveMsg.text}
+                </div>
+              )}
+
+              {/* Test buttons */}
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send Test Notification</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => handleTestWebhook('slack')}
+                    disabled={!!webhookTesting || !webhookForm.slackWebhookUrl.trim()}>
+                    <Send className="w-4 h-4 mr-2" />
+                    {webhookTesting === 'slack' ? 'Sending…' : 'Test Slack'}
+                  </Button>
+                  <Button variant="outline" onClick={() => handleTestWebhook('teams')}
+                    disabled={!!webhookTesting || !webhookForm.teamsWebhookUrl.trim()}>
+                    <Send className="w-4 h-4 mr-2" />
+                    {webhookTesting === 'teams' ? 'Sending…' : 'Test Teams'}
+                  </Button>
+                </div>
+                {webhookTestMsg && (
+                  <div className={`flex items-center gap-2 text-sm mt-2 ${webhookTestMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                    {webhookTestMsg.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                    {webhookTestMsg.text}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </ModalContent>
+
+        <ModalFooter>
+          <Button variant="outline" onClick={handleCloseWebhookModal}>Cancel</Button>
+          <Button onClick={handleSaveWebhookConfig} disabled={webhookSaving || webhookLoading}
+            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+            <Save className="w-4 h-4 mr-2" />
+            {webhookSaving ? 'Saving…' : 'Save Configuration'}
           </Button>
         </ModalFooter>
       </Modal>
