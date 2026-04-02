@@ -64,6 +64,7 @@ export default function Navigation() {
 
   const navItems = [
     { path: '/dashboard', icon: Home, label: 'Dashboard', gradient: 'from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' },
+    { path: '/overview', icon: BarChart3, label: 'Overview', gradient: 'from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700' },
     { path: '/metrics', icon: TrendingUp, label: 'Metrics', gradient: 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' },
     { path: '/applications', icon: Package, label: 'Applications', gradient: 'from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700' },
     { path: '/test-modules', icon: Layers, label: 'Modules', gradient: 'from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700' },

@@ -142,6 +142,7 @@ export const metricsAPI = {
   getProjectMetrics: (projectId) => api.get(`/metrics/project/${projectId}`),
   getAllApplicationMetricsForProject: (projectId) => api.get(`/metrics/project/${projectId}/applications`),
   getAllModuleMetricsForApplication: (applicationId) => api.get(`/metrics/application/${applicationId}/modules`),
+  getOverview: () => api.get('/metrics/overview'),
 };
 
 // Automation Comments API
