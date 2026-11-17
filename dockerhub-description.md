@@ -34,9 +34,21 @@ Open **http://localhost:8080** and login with `admin@testrium.com` / `Admin@123`
 - **JIRA Integration** — Create bugs directly from failed test executions
 - **Test Data Management** — Environment-specific data (DEV/QA/STAGING/PROD) with API access for automation frameworks
 - **Reports & Analytics** — PDF/Excel exports, charts, trend analysis, and metrics dashboard
-- **Role-Based Access** — ADMIN and USER roles with project-level permissions
-- **Bulk Import** — Import test cases via Excel or CSV
+- **Role-Based Access** — Admin and user accounts, with Lead / Member / Viewer roles per project
+- **Bulk Import & Export** — Import test cases via Excel or CSV; export filtered test cases to Excel
+- **Tags & Labels** — Tag test cases (smoke, regression, critical…) and filter by tag
+- **Cross-Project Overview** — Aggregated KPIs and charts across all projects, scoped by role
+- **Notifications** — Per-project email (SMTP) and Slack / Microsoft Teams webhooks for test run events
 - **Dark Mode** — Full dark mode support
+
+---
+
+## Image Tags
+
+| Tag | Description |
+|---|---|
+| `latest` | Most recent release |
+| `2.2.0`, `2.1.0`, … | Pinned release versions — set `TESTRIUM_VERSION` in `.env` |
 
 ---
 
@@ -68,12 +80,14 @@ A single all-in-one image:
 
 ---
 
-## Source Code
+## Links
 
-GitHub: [https://github.com/testrium/testrium](https://github.com/testrium/testrium)
+- **Documentation:** [https://testrium.github.io/testrium/](https://testrium.github.io/testrium/)
+- **Source Code:** [https://github.com/testrium/testrium](https://github.com/testrium/testrium)
+- **Issues & Feedback:** [https://github.com/testrium/testrium/issues](https://github.com/testrium/testrium/issues)
 
 ---
 
 ## License
 
-Proprietary © Testrium. All rights reserved.
+Testrium is licensed under the [Apache License 2.0](https://github.com/testrium/testrium/blob/master/LICENSE.txt).

@@ -1,0 +1,31 @@
+name: Sync Docker Hub Description
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'dockerhub-description.md'
+      - '.github/workflows/dockerhub-description.yml'
+  workflow_dispatch:
+
+jobs:
+  sync-description:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Requires DOCKERHUB_TOKEN with Read, Write & Delete scope
+      # (Docker Hub rejects description updates from narrower tokens).
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: sddmhossain/testrium
+          short-description: 'Self-hosted test case management for QA teams — test runs, Jira, reports. Spring Boot + React.'
+          readme-filepath: ./dockerhub-description.md
