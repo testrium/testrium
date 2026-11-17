@@ -1,13 +1,13 @@
 # Testrium
 
-**Version:** 1.7.0
+**Version:** 2.2.0
 **A Comprehensive Test Case Management System**
 
 ![Java](https://img.shields.io/badge/Java-17-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen)
 ![React](https://img.shields.io/badge/React-18.2-blue)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
-![License](https://img.shields.io/badge/License-Proprietary-red)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt)
 
 ---
 
@@ -23,8 +23,17 @@ Create, organize, and maintain test cases with detailed steps and expected resul
 ✅ **Test Run Execution**
 Execute tests individually or in bulk with real-time status tracking.
 
-✅ **Bulk Operations (NEW in 1.7.0)**
-Select and update multiple test results at once.
+✅ **Bulk Operations**
+Select and update multiple test results at once; bulk import and export test cases via Excel.
+
+✅ **Tags & Labels**
+Tag test cases (smoke, regression, critical…) and filter by tag.
+
+✅ **Cross-Project Overview**
+Aggregated KPIs and charts across all projects, scoped by role.
+
+✅ **Notifications**
+Per-project email (SMTP) and Slack / Microsoft Teams webhook notifications for test run events.
 
 ✅ **JIRA Integration**
 Create bugs directly from failed test executions.
@@ -127,27 +136,14 @@ Frontend starts at `http://localhost:5173`
 
 ---
 
-## What's New in Version 1.7.0
+## What's New in Version 2.2.0
 
-### 🎯 Bulk Update Feature
+- **Cross-Project Overview** — a new Overview page with KPIs (projects, test cases, runs, members, pass rate), status/priority/automation charts, and a per-project breakdown. Admins see all projects; leads and members see their own.
+- **Slack / Teams Notifications** — per-project webhooks for "test run assigned" and "test run completed", with test buttons in the UI.
+- **Per-Project Email Notifications** — SMTP settings per project with encrypted password storage and a "send test email" button.
+- **Export Test Cases to Excel** — exports the currently filtered test cases to a styled `.xlsx` file.
 
-The latest release introduces powerful bulk update capabilities for test execution:
-
-- **Multi-Select Tests**: Use checkboxes to select individual tests
-- **Select All**: One-click selection of all tests in a run
-- **Module Selection**: Select all tests within a specific module
-- **Bulk Status Update**: Update status for multiple tests simultaneously
-- **Visual Feedback**: Clear indication of selected tests and count
-
-### How to Use Bulk Update
-
-1. Navigate to a test run execution page
-2. Use checkboxes to select tests you want to update
-3. Or click "Select All" to select all tests
-4. Choose the desired status from the dropdown
-5. Click "Update Selected" to apply the status
-
-This feature significantly speeds up test result updates, especially for large test runs!
+Version 2.1.0 added tags on test cases, cloning and editing of test runs. See [CHANGELOG.md](./CHANGELOG.md) for the full history.
 
 ---
 
@@ -374,12 +370,6 @@ cd backend
 mvn test
 ```
 
-### Run Frontend Tests
-
-```bash
-npm test
-```
-
 ### Testing Checklist
 
 For comprehensive testing checklist, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
@@ -410,13 +400,12 @@ For comprehensive testing checklist, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 ## Roadmap
 
-### Version 1.8.0 (Planned)
+### Planned
 - Test case templates
 - Test suite management
 - Automated test scheduling
-- Email notifications
 
-### Version 2.0.0 (Future)
+### Future
 - Multi-tenancy support
 - Advanced analytics with ML
 - Mobile application
@@ -433,7 +422,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for complete version history.
 **Port 8080 already in use:**
 ```bash
 # Kill process or use different port
-java -jar target/testrium-1.7.0.jar --server.port=8081
+java -jar target/testrium-2.2.0.jar --server.port=8081
 ```
 
 **Database connection failed:**
@@ -498,9 +487,7 @@ For support and questions:
 
 ## License
 
-Testrium © 2024. All rights reserved.
-
-This is proprietary software. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited.
+Testrium is licensed under the [Apache License 2.0](./LICENSE.txt).
 
 ---
 
@@ -517,8 +504,8 @@ This is proprietary software. Unauthorized copying, modification, distribution, 
 
 **Project:** Testrium
 **GitHub:** https://github.com/testrium/testrium
-**Version:** 1.7.0
-**Last Updated:** March 2025
+**Version:** 2.2.0
+**Last Updated:** April 2026
 
 ---
 
