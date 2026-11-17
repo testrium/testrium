@@ -1,9 +1,23 @@
 # Changelog
 
-All notable changes to Pramana Manager will be documented in this file.
+All notable changes to Testrium will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [2.2.1] - 2026-11-17
+
+### Added
+- Help page: "Using Testrium?" card linking to GitHub Discussions, plus quick links to the documentation, Q&A and bug reports
+- CI checks on every pull request (frontend build, backend build & tests, Docker image build) and a pull request template
+- Docker Hub description is now synced automatically from `dockerhub-description.md`
+
+### Fixed
+- README and Docker Hub description incorrectly stated a proprietary license — Testrium is licensed under Apache 2.0
+- README still referenced version 1.7.0; updated with 2.x features
+- Docker image build no longer hardcodes the JAR version
 
 ---
 

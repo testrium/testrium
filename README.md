@@ -1,6 +1,6 @@
 # Testrium
 
-**Version:** 2.2.0
+**Version:** 2.2.1
 **A Comprehensive Test Case Management System**
 
 ![Java](https://img.shields.io/badge/Java-17-orange)
@@ -422,7 +422,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for complete version history.
 **Port 8080 already in use:**
 ```bash
 # Kill process or use different port
-java -jar target/testrium-2.2.0.jar --server.port=8081
+java -jar target/testrium-2.2.1.jar --server.port=8081
 ```
 
 **Database connection failed:**
@@ -504,8 +504,8 @@ Testrium is licensed under the [Apache License 2.0](./LICENSE.txt).
 
 **Project:** Testrium
 **GitHub:** https://github.com/testrium/testrium
-**Version:** 2.2.0
-**Last Updated:** April 2026
+**Version:** 2.2.1
+**Last Updated:** November 2026
 
 ---
 
