@@ -48,7 +48,7 @@ Open **http://localhost:8080** and login with `admin@testrium.com` / `Admin@123`
 | Tag | Description |
 |---|---|
 | `latest` | Most recent release |
-| `2.2.0`, `2.1.0`, … | Pinned release versions — set `TESTRIUM_VERSION` in `.env` |
+| `2.2.1`, `2.2.0`, … | Pinned release versions — set `TESTRIUM_VERSION` in `.env` |
 
 ---
 
