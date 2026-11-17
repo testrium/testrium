@@ -4,8 +4,17 @@ import Navigation from '../components/Navigation';
 import {
   BookOpen, Package, Layers, FileText, Play, BarChart3,
   Database, KeyRound, ChevronDown, ChevronRight, ArrowRight,
-  Users, Settings, Zap, CheckCircle2, AlertCircle, Info
+  Users, Settings, Zap, CheckCircle2, Info,
+  Heart, MessageCircle, Bug
 } from 'lucide-react';
+
+const GITHUB_URL = 'https://github.com/testrium/testrium';
+
+const supportLinks = [
+  { icon: BookOpen, label: 'Documentation', desc: 'Guides, configuration and API reference', href: 'https://testrium.github.io/testrium/' },
+  { icon: MessageCircle, label: 'Ask a Question', desc: 'Get help from the community', href: `${GITHUB_URL}/discussions/categories/q-a` },
+  { icon: Bug, label: 'Report a Bug', desc: 'Something broken? Open an issue', href: `${GITHUB_URL}/issues/new` },
+];
 
 const sections = [
   {
@@ -213,23 +222,45 @@ export default function Help() {
           ))}
         </div>
 
-        {/* Footer */}
-        <div className="mt-10 p-5 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Using Testrium? */}
+        <a
+          href={`${GITHUB_URL}/discussions/categories/show-and-tell`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-10 flex items-center justify-between gap-4 p-5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow"
+        >
           <div className="flex gap-3 items-start">
-            <AlertCircle className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+            <Heart className="h-5 w-5 text-pink-500 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">Still need help?</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Check the full documentation or open an issue on GitHub.</p>
+              <p className="font-semibold text-sm text-gray-900 dark:text-white">Using Testrium? Tell us about it!</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Testrium is free and open source. Hearing how your team uses it helps decide what gets built next.
+              </p>
             </div>
           </div>
-          <a
-            href="https://github.com/testrium/testrium/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap"
-          >
-            Open an Issue <ArrowRight className="h-4 w-4" />
-          </a>
+          <ArrowRight className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+        </a>
+
+        {/* Still need help? */}
+        <div className="mt-4 p-5 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <p className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-3">Still need help?</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {supportLinks.map(({ icon: LinkIcon, label, desc, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex gap-3 items-start p-3 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
+              >
+                <LinkIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{label}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{desc}</p>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>
