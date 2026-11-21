@@ -6,7 +6,7 @@
 -- This will automatically create an admin user with:
 --   Username: admin
 --   Password: admin123
---   Email: admin@pramana.com
+--   Email: admin@testrium.local
 --
 -- To check if admin exists:
 -- GET http://localhost:8080/api/admin/admin-exists
@@ -19,7 +19,7 @@
 -- INSERT INTO users (username, email, password, role, created_at, updated_at)
 -- VALUES (
 --     'admin',
---     'admin@pramana.com',
+--     'admin@testrium.local',
 --     '$2a$10$YourBCryptHashHere',
 --     'ADMIN',
 --     CURRENT_TIMESTAMP,

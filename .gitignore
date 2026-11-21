@@ -36,9 +36,9 @@ nul
 data/
 backend/data/
 
-pramana-manager-**.7z
-pramana-manager-**.jar
-pramana-manager-**.zip
+testrium-**.7z
+testrium-**.jar
+testrium-**.zip
 docs/.vitepress/cache/
 
 # Private planning — do not commit

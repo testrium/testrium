@@ -1,4 +1,4 @@
-# Pramana Manager - System Architecture
+# Testrium - System Architecture
 
 Version: 1.7.0
 
@@ -61,7 +61,7 @@ src/
 ### Backend (Spring Boot)
 
 ```
-com.pramana.manager/
+com.testrium.manager/
 ├── controller/         # REST Controllers
 │   ├── AuthController
 │   ├── TestCaseController
