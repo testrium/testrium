@@ -1,9 +1,9 @@
-# Pramana Manager Testing Guide
+# Testrium Testing Guide
 
 **Version:** 1.7.0
 **Last Updated:** December 14, 2024
 
-This guide provides comprehensive instructions for setting up and testing Pramana Manager on different systems and environments.
+This guide provides comprehensive instructions for setting up and testing Testrium on different systems and environments.
 
 ---
 
@@ -157,16 +157,16 @@ This guide provides comprehensive instructions for setting up and testing Praman
 mysql -u root -p
 
 -- Create database
-CREATE DATABASE pramana_manager;
+CREATE DATABASE testrium;
 
 -- Create user (optional - for production)
-CREATE USER 'pramana_user'@'localhost' IDENTIFIED BY 'YourStrongPassword123!';
-GRANT ALL PRIVILEGES ON pramana_manager.* TO 'pramana_user'@'localhost';
+CREATE USER 'testrium_user'@'localhost' IDENTIFIED BY 'YourStrongPassword123!';
+GRANT ALL PRIVILEGES ON testrium.* TO 'testrium_user'@'localhost';
 FLUSH PRIVILEGES;
 
 -- Verify
 SHOW DATABASES;
-USE pramana_manager;
+USE testrium;
 ```
 
 ### 2. Configure Database Connection
@@ -175,7 +175,7 @@ Edit `backend/src/main/resources/application.properties`:
 
 ```properties
 # Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/pramana_manager?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.url=jdbc:mysql://localhost:3306/testrium?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
 spring.datasource.password=your_mysql_password
 
@@ -202,7 +202,7 @@ mysql -u root -p -e "SELECT 1 FROM DUAL;"
 ### 1. Clone/Copy Project
 
 ```bash
-cd /path/to/pramana-manager
+cd /path/to/testrium
 cd backend
 ```
 
@@ -242,12 +242,12 @@ mvn spring-boot:run
 
 **Option B - Using JAR:**
 ```bash
-java -jar target/pramana-manager-1.7.0.jar
+java -jar target/testrium-2.2.1.jar
 ```
 
 **Option C - With Custom Port:**
 ```bash
-java -jar target/pramana-manager-1.7.0.jar --server.port=8081
+java -jar target/testrium-2.2.1.jar --server.port=8081
 ```
 
 ### 4. Verify Backend is Running
@@ -267,7 +267,7 @@ curl http://localhost:8080/actuator/health
 ### 1. Navigate to Frontend Directory
 
 ```bash
-cd /path/to/pramana-manager
+cd /path/to/testrium
 # Already in root directory
 ```
 
@@ -329,7 +329,7 @@ Create `Dockerfile` for backend:
 ```dockerfile
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY target/pramana-manager-1.7.0.jar app.jar
+COPY target/testrium-2.2.1.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
@@ -342,7 +342,7 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: pramana_manager
+      MYSQL_DATABASE: testrium
     ports:
       - "3306:3306"
     volumes:
@@ -353,7 +353,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/pramana_manager
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/testrium
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: rootpassword
     depends_on:
@@ -382,18 +382,18 @@ docker-compose up -d
 **Backend on Linux Server:**
 ```bash
 # Create systemd service
-sudo nano /etc/systemd/system/pramana-backend.service
+sudo nano /etc/systemd/system/testrium-backend.service
 ```
 
 ```ini
 [Unit]
-Description=Pramana Manager Backend
+Description=Testrium Backend
 After=mysql.service
 
 [Service]
-User=pramana
-WorkingDirectory=/opt/pramana-manager/backend
-ExecStart=/usr/bin/java -jar /opt/pramana-manager/backend/target/pramana-manager-1.7.0.jar
+User=testrium
+WorkingDirectory=/opt/testrium/backend
+ExecStart=/usr/bin/java -jar /opt/testrium/backend/target/testrium-2.2.1.jar
 SuccessExitStatus=143
 TimeoutStopSec=10
 Restart=on-failure
@@ -406,9 +406,9 @@ WantedBy=multi-user.target
 ```bash
 # Enable and start service
 sudo systemctl daemon-reload
-sudo systemctl enable pramana-backend
-sudo systemctl start pramana-backend
-sudo systemctl status pramana-backend
+sudo systemctl enable testrium-backend
+sudo systemctl start testrium-backend
+sudo systemctl status testrium-backend
 ```
 
 **Frontend with Nginx:**
@@ -420,7 +420,7 @@ npm run build
 sudo apt install nginx -y
 
 # Configure Nginx
-sudo nano /etc/nginx/sites-available/pramana-manager
+sudo nano /etc/nginx/sites-available/testrium
 ```
 
 ```nginx
@@ -428,7 +428,7 @@ server {
     listen 80;
     server_name your-domain.com;
 
-    root /var/www/pramana-manager/dist;
+    root /var/www/testrium/dist;
     index index.html;
 
     location / {
@@ -448,7 +448,7 @@ server {
 
 ```bash
 # Enable site and restart Nginx
-sudo ln -s /etc/nginx/sites-available/pramana-manager /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/testrium /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -469,7 +469,7 @@ sudo systemctl restart nginx
 3. **Allow firewall access:**
    ```bash
    # Windows
-   netsh advfirewall firewall add rule name="Pramana Backend" dir=in action=allow protocol=TCP localport=8080
+   netsh advfirewall firewall add rule name="Testrium Backend" dir=in action=allow protocol=TCP localport=8080
 
    # Linux
    sudo ufw allow 8080/tcp
@@ -510,7 +510,7 @@ Create `.env` file in backend directory:
 # Database
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=pramana_manager
+DB_NAME=testrium
 DB_USERNAME=root
 DB_PASSWORD=your_password
 
@@ -533,7 +533,7 @@ Create `.env` file in root directory:
 
 ```properties
 VITE_API_BASE_URL=http://localhost:8080/api
-VITE_APP_NAME=Pramana Manager
+VITE_APP_NAME=Testrium
 VITE_APP_VERSION=1.7.0
 ```
 
@@ -541,7 +541,7 @@ VITE_APP_VERSION=1.7.0
 
 **Backend (application.properties):**
 ```properties
-spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:pramana_manager}
+spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:testrium}
 spring.datasource.username=${DB_USERNAME:root}
 spring.datasource.password=${DB_PASSWORD}
 ```
@@ -569,7 +569,7 @@ lsof -i :8080
 kill -9 <PID>
 
 # Or use different port
-java -jar target/pramana-manager-1.7.0.jar --server.port=8081
+java -jar target/testrium-2.2.1.jar --server.port=8081
 ```
 
 ### Issue 2: Database connection refused
@@ -823,11 +823,11 @@ curl http://localhost:8080/actuator/httptrace
 
 For issues, questions, or contributions:
 - **GitHub Issues:** [Create an issue]
-- **Email:** support@pramana-manager.com
+- **Email:** support@testrium.com
 - **Documentation:** See AUTOMATION_API_GUIDE.md for API integration
 
 ---
 
 ## License
 
-Pramana Manager © 2024. All rights reserved.
+Testrium © 2024. All rights reserved.
