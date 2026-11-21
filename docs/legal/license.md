@@ -10,7 +10,16 @@ This means you are free to:
 - **Self-host** on any infrastructure you control
 - **Sublicense** as part of a larger work
 
-The only requirements are that you retain the original copyright notice and the license text in any distribution.
+## Conditions: attribution is required
+
+If you distribute Testrium or anything built on it (a fork, modified or rebranded version, Docker image, or bundled product), you **must**:
+
+- Include the `LICENSE.txt` and [`NOTICE`](https://github.com/testrium/testrium/blob/master/NOTICE) files
+- Keep all existing copyright and attribution notices
+- Mark the files you changed with a prominent notice
+- Credit Testrium where users can see it, e.g. *"Based on [Testrium](https://github.com/testrium/testrium), licensed under the Apache License 2.0."*
+
+The license **does not** let you use the Testrium name or logo for your own product. If you build your own tool from Testrium, give it a different name and credit Testrium. See the [Trademark & Attribution Policy](./trademark).
 
 ---
 
