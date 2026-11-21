@@ -324,21 +324,9 @@ We use Semantic Versioning (MAJOR.MINOR.PATCH):
 
 ---
 
-## Upcoming Features (Planned)
+## Upcoming Features
 
-### Version 1.8.0 (Planned)
-- [ ] Test case templates
-- [ ] Test suite management
-- [ ] Automated test scheduling
-- [ ] Email notifications for test results
-- [ ] Enhanced dashboard widgets
-
-### Version 2.0.0 (Future)
-- [ ] Multi-tenancy support
-- [ ] Advanced analytics and ML insights
-- [ ] Mobile application
-- [ ] CI/CD integration plugins
-- [ ] Test case version control
+The roadmap lives in the [README](./README.md#roadmap). Items move into a version section above once they are released.
 
 ---
 

@@ -400,18 +400,28 @@ For comprehensive testing checklist, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 
 ## Roadmap
 
-### Planned
+### Recently shipped
+- Per-project email notifications (2.2.0)
+- Slack / Teams webhook notifications (2.2.0)
+- Cross-project Overview dashboard (2.2.0)
+- Excel export of test cases (2.2.0)
+- Tags / labels, clone and edit test runs (2.1.0)
+- JIRA integration and Automation API
+
+### Next up
 - Test case templates
-- Test suite management
-- Automated test scheduling
+- Test suites: reusable groups of test cases to start runs from
+- Test case history: see who changed what, and when
+- CI/CD result import: push automated results (e.g. JUnit XML) into a test run
+- Scheduled / recurring test runs
 
-### Future
-- Multi-tenancy support
-- Advanced analytics with ML
-- Mobile application
-- CI/CD integration plugins
+### Later
+- Multi-tenancy (organizations / workspaces)
+- Advanced analytics: flaky-test detection and trend insights
+- Real-time collaboration during test execution
+- Mobile-friendly execution view
 
-See [CHANGELOG.md](./CHANGELOG.md) for complete version history.
+Want to help? Look for issues labeled [`good first issue`](https://github.com/testrium/testrium/labels/good%20first%20issue). See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
 
 ---
 
