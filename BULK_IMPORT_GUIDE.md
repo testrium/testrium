@@ -1,4 +1,4 @@
-# Bulk Test Case Import Guide - Pramana Manager v1.8.0
+# Bulk Test Case Import Guide - Testrium v1.8.0
 
 ## Overview
 The bulk import feature allows you to import hundreds or thousands of test cases from TestRail or other test management tools using Excel or CSV files.
@@ -10,7 +10,7 @@ The bulk import feature allows you to import hundreds or thousands of test cases
 ✅ **Duplicate Detection**: Skips test cases that already exist (by title)
 ✅ **Partial Success**: Imports valid rows even if some fail
 ✅ **Detailed Error Report**: Shows exactly which rows failed and why
-✅ **Smart Field Mapping**: Intelligently maps TestRail fields to Pramana fields
+✅ **Smart Field Mapping**: Intelligently maps TestRail fields to Testrium fields
 ✅ **TestRail Compatible**: Direct support for TestRail CSV export format
 
 ---
@@ -41,8 +41,8 @@ This downloads an Excel template with:
 2. The export will have columns: ID, Title, Automation Type, Created By, Section, Steps
 3. You can use this file directly or add optional columns
 
-**Column Mapping (TestRail → Pramana):**
-| TestRail Column | Pramana Column | Required | Notes |
+**Column Mapping (TestRail → Testrium):**
+| TestRail Column | Testrium Column | Required | Notes |
 |----------------|----------------|----------|-------|
 | ID | ID | No | Reference only, not used |
 | Title | Title | **Yes** | Must be unique |
@@ -218,7 +218,7 @@ TestRail's export typically includes:
 
 **Missing Application:**
 Since TestRail doesn't have "Application" concept, you need to:
-1. Create Application in Pramana first
+1. Create Application in Testrium first
 2. Use that Application ID in import
 
 **Multiple Test Suites:**
@@ -231,7 +231,7 @@ TestRail custom fields won't be imported. You can:
 1. Add them to Description field before import
 2. Update manually after import
 
-### 5. Import to Pramana:
+### 5. Import to Testrium:
 ```bash
 curl -X POST http://localhost:8080/api/test-cases/bulk/import \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -360,7 +360,7 @@ Content-Disposition: attachment; filename="TestCase_Import_Template.xlsx"
 A: Yes, leave the Section column empty. Test cases will be created without a module.
 
 **Q: What happens to TestRail IDs?**
-A: They are ignored. Pramana generates its own IDs.
+A: They are ignored. Testrium generates its own IDs.
 
 **Q: Can I update existing test cases via import?**
 A: No, duplicates are skipped. Delete existing ones first if you want to re-import.
@@ -403,4 +403,4 @@ For issues or questions:
 1. Check this guide first
 2. Review error messages in import response
 3. Test with template file
-4. Contact your Pramana Manager administrator
+4. Contact your Testrium administrator
