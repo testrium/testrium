@@ -331,8 +331,4 @@ docker-compose
 
 ## Future Enhancements
 
-- Test case templates
-- CI/CD integration
-- Real-time collaboration
-- Advanced analytics with ML
-- Mobile application
+See the [Roadmap in the README](./README.md#roadmap) for planned work, including test case templates, test suites, test case history, CI/CD result import and multi-tenancy.
