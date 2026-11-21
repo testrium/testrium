@@ -29,6 +29,7 @@ export default defineConfig({
           { text: 'Changelog', link: 'https://github.com/testrium/testrium/blob/master/CHANGELOG.md' },
           { text: 'Releases', link: 'https://github.com/testrium/testrium/releases' },
           { text: 'License', link: '/legal/license' },
+          { text: 'Trademark & Attribution', link: '/legal/trademark' },
           { text: 'Privacy Policy', link: '/legal/privacy' },
         ]
       }
@@ -80,6 +81,7 @@ export default defineConfig({
           text: 'Legal',
           items: [
             { text: 'License', link: '/legal/license' },
+            { text: 'Trademark & Attribution', link: '/legal/trademark' },
             { text: 'Privacy Policy', link: '/legal/privacy' },
           ]
         }

@@ -489,6 +489,10 @@ For support and questions:
 
 Testrium is licensed under the [Apache License 2.0](./LICENSE.txt).
 
+**Attribution is required.** If you fork, modify, rebrand or redistribute Testrium, you must keep the [`LICENSE.txt`](./LICENSE.txt) and [`NOTICE`](./NOTICE) files and credit the project, for example: *"Based on [Testrium](https://github.com/testrium/testrium), licensed under the Apache License 2.0."*
+
+The Testrium name and logo are **not** covered by the license. Derivative tools must use their own name and branding. See the [Trademark & Attribution Policy](./TRADEMARKS.md).
+
 ---
 
 ## Acknowledgments
