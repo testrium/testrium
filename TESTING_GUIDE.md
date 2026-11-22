@@ -1,401 +1,262 @@
 # Testrium Testing Guide
 
-**Version:** 1.7.0
-**Last Updated:** December 14, 2024
+**Version:** 2.2.1
+**Last Updated:** November 2026
 
-This guide provides comprehensive instructions for setting up and testing Testrium on different systems and environments.
+This guide explains how to set up Testrium on different systems and environments, and how to check that a build works before you release or deploy it.
 
 ---
 
 ## Table of Contents
 
 1. [System Requirements](#system-requirements)
-2. [Environment Setup](#environment-setup)
-3. [Database Configuration](#database-configuration)
-4. [Backend Setup](#backend-setup)
-5. [Frontend Setup](#frontend-setup)
-6. [Testing on Different Systems](#testing-on-different-systems)
-7. [Environment Variables](#environment-variables)
-8. [Common Issues & Troubleshooting](#common-issues--troubleshooting)
-9. [Testing Checklist](#testing-checklist)
-10. [Performance Testing](#performance-testing)
+2. [Ways to Run Testrium](#ways-to-run-testrium)
+3. [Option A: Docker Compose](#option-a-docker-compose)
+4. [Option B: Local Development](#option-b-local-development)
+5. [Option C: Single JAR](#option-c-single-jar)
+6. [Using MySQL Instead of H2](#using-mysql-instead-of-h2)
+7. [First Run: Create the Admin Account](#first-run-create-the-admin-account)
+8. [Deploying to a Server](#deploying-to-a-server)
+9. [Environment Variables](#environment-variables)
+10. [Common Issues & Troubleshooting](#common-issues--troubleshooting)
+11. [Testing Checklist](#testing-checklist)
+12. [Performance Testing](#performance-testing)
 
 ---
 
 ## System Requirements
 
-### Minimum Requirements
+What you need depends on how you run Testrium:
 
-- **Java:** JDK 17 or higher
-- **Node.js:** v18.x or higher
-- **npm:** v9.x or higher
-- **MySQL:** 8.0 or higher
-- **RAM:** 4GB minimum (8GB recommended)
-- **Disk Space:** 2GB free space
+| Option | Requirements |
+|--------|--------------|
+| Docker Compose | Docker with the Compose plugin (`docker compose`) |
+| Local development | Java 17+, Maven 3.9+, Node.js 18+, npm 9+ |
+| Single JAR (run only) | Java 17+ |
 
-### Supported Operating Systems
+MySQL is **optional**. Without any database configuration, the backend uses an embedded H2 file database at `./data/testrium`. The Docker Compose setup runs MySQL 8.0 for you.
 
-- Windows 10/11 (64-bit)
-- macOS 11.0 (Big Sur) or higher
-- Linux (Ubuntu 20.04+, CentOS 8+, Debian 11+)
+**Hardware:** 2 GB RAM is enough for a small team, and 4 GB or more is better when MySQL runs on the same machine. You need about 1 GB of disk, plus space for attachments and the database.
 
-### Development Tools (Optional)
+**Supported OS:** Windows 10/11, macOS 12+, and Linux (any distribution that runs Docker or Java 17).
 
-- Maven 3.9.x
-- Git 2.x
-- VS Code / IntelliJ IDEA / Eclipse
-
----
-
-## Environment Setup
-
-### Windows Setup
-
-1. **Install Java JDK 17+**
-   ```powershell
-   # Download from Oracle or use Chocolatey
-   choco install openjdk17
-
-   # Verify installation
-   java -version
-   ```
-
-2. **Install Node.js**
-   ```powershell
-   # Download from nodejs.org or use Chocolatey
-   choco install nodejs-lts
-
-   # Verify installation
-   node --version
-   npm --version
-   ```
-
-3. **Install MySQL**
-   ```powershell
-   # Download from mysql.com or use Chocolatey
-   choco install mysql
-
-   # Start MySQL service
-   net start MySQL80
-   ```
-
-### macOS Setup
-
-1. **Install Java JDK 17+**
-   ```bash
-   # Using Homebrew
-   brew install openjdk@17
-
-   # Add to PATH
-   echo 'export PATH="/usr/local/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
-   source ~/.zshrc
-
-   # Verify
-   java -version
-   ```
-
-2. **Install Node.js**
-   ```bash
-   # Using Homebrew
-   brew install node@18
-
-   # Verify
-   node --version
-   npm --version
-   ```
-
-3. **Install MySQL**
-   ```bash
-   # Using Homebrew
-   brew install mysql@8.0
-   brew services start mysql@8.0
-
-   # Secure installation
-   mysql_secure_installation
-   ```
-
-### Linux (Ubuntu/Debian) Setup
-
-1. **Install Java JDK 17+**
-   ```bash
-   sudo apt update
-   sudo apt install openjdk-17-jdk -y
-
-   # Verify
-   java -version
-   ```
-
-2. **Install Node.js**
-   ```bash
-   # Using NodeSource repository
-   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-   sudo apt install -y nodejs
-
-   # Verify
-   node --version
-   npm --version
-   ```
-
-3. **Install MySQL**
-   ```bash
-   sudo apt install mysql-server -y
-   sudo systemctl start mysql
-   sudo systemctl enable mysql
-
-   # Secure installation
-   sudo mysql_secure_installation
-   ```
-
----
-
-## Database Configuration
-
-### 1. Create Database
-
-```sql
--- Login to MySQL
-mysql -u root -p
-
--- Create database
-CREATE DATABASE testrium;
-
--- Create user (optional - for production)
-CREATE USER 'testrium_user'@'localhost' IDENTIFIED BY 'YourStrongPassword123!';
-GRANT ALL PRIVILEGES ON testrium.* TO 'testrium_user'@'localhost';
-FLUSH PRIVILEGES;
-
--- Verify
-SHOW DATABASES;
-USE testrium;
-```
-
-### 2. Configure Database Connection
-
-Edit `backend/src/main/resources/application.properties`:
-
-```properties
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/testrium?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=your_mysql_password
-
-# JPA Configuration
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=false
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
-
-# Server Configuration
-server.port=8080
-```
-
-### 3. Test Database Connection
+### Installing Java and Node.js
 
 ```bash
-# Test connection using MySQL command
-mysql -u root -p -e "SELECT 1 FROM DUAL;"
+# Ubuntu / Debian
+sudo apt update
+sudo apt install -y openjdk-17-jdk maven
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# macOS (Homebrew)
+brew install openjdk@17 maven node@20
+
+# Windows (Chocolatey)
+choco install temurin17 maven nodejs-lts
+```
+
+Check the versions:
+
+```bash
+java -version
+mvn -v
+node --version
 ```
 
 ---
 
-## Backend Setup
+## Ways to Run Testrium
 
-### 1. Clone/Copy Project
+| | Database | Frontend served from | URL |
+|---|---|---|---|
+| **A. Docker Compose** (recommended) | MySQL 8.0 container | Backend (single container) | `http://localhost:${APP_PORT}` |
+| **B. Local development** | H2 file DB | Vite dev server | `http://localhost:5173` |
+| **C. Single JAR** | H2 file DB (or MySQL) | Backend | `http://localhost:8080` |
+
+---
+
+## Option A: Docker Compose
+
+This uses the published image `sddmhossain/testrium` and the `docker-compose.yml` in the repository root.
 
 ```bash
-cd /path/to/testrium
-cd backend
+# From a clone of the repo, or download the two files:
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/docker-compose.yml
+curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
+
+cp .env.example .env
+# Edit .env: set JWT_SECRET, the MySQL passwords and APP_PORT
+
+docker compose up -d
 ```
 
-### 2. Build Backend
+- The app listens on `APP_PORT`. `.env.example` sets it to `80`, so open `http://localhost`. Without a `.env`, the compose file defaults to `8080`.
+- Set `TESTRIUM_VERSION` in `.env` to pin a release (for example `2.2.1`) instead of `latest`.
+- Data is kept in the `mysql_data` and `uploads_data` volumes. `docker compose down` keeps them, while `docker compose down -v` **deletes** them.
 
-**Using Maven (recommended):**
+Useful commands:
 
 ```bash
-# Clean and compile
-mvn clean compile
-
-# Run tests
-mvn test
-
-# Package as JAR
-mvn clean package -DskipTests
+docker compose ps            # container status
+docker compose logs -f app   # follow application logs
+docker compose pull && docker compose up -d   # upgrade to a newer image
 ```
 
-**Using Maven Wrapper (if mvnw exists):**
+On Windows, `start.bat` and `stop.bat` in the repo root wrap these commands. If Docker isn't installed, `start.bat` falls back to running the JAR with Java.
 
-Windows:
-```cmd
-mvnw.cmd clean package -DskipTests
-```
+### Building the image yourself
 
-Linux/macOS:
 ```bash
-./mvnw clean package -DskipTests
+docker build -t testrium:local .
 ```
 
-### 3. Run Backend
+The `Dockerfile` builds the frontend, bundles it into the backend JAR and runs it on `eclipse-temurin:17-jre-alpine`. To run your local image, set `image: testrium:local` for the `app` service in `docker-compose.yml`.
 
-**Option A - Using Maven:**
+---
+
+## Option B: Local Development
+
+Use this when you work on the code. The backend and the frontend run separately.
+
+### 1. Backend
+
 ```bash
+git clone https://github.com/testrium/testrium.git
+cd testrium/backend
 mvn spring-boot:run
 ```
 
-**Option B - Using JAR:**
-```bash
-java -jar target/testrium-2.2.1.jar
-```
+The backend starts on `http://localhost:8080` with an H2 database in `backend/data/`. No database setup is needed, and tables are created on startup (`spring.jpa.hibernate.ddl-auto=update`).
 
-**Option C - With Custom Port:**
-```bash
-java -jar target/testrium-2.2.1.jar --server.port=8081
-```
+### 2. Frontend
 
-### 4. Verify Backend is Running
+In a second terminal, from the repository root:
 
 ```bash
-# Check health endpoint
-curl http://localhost:8080/actuator/health
-
-# Or open in browser
-# http://localhost:8080/actuator/health
-```
-
----
-
-## Frontend Setup
-
-### 1. Navigate to Frontend Directory
-
-```bash
-cd /path/to/testrium
-# Already in root directory
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install all npm packages
 npm install
-
-# Or use clean install
-npm ci
-```
-
-### 3. Configure API URL
-
-Edit `src/services/api.js` or relevant config file to point to backend:
-
-```javascript
-const API_BASE_URL = 'http://localhost:8080/api';
-```
-
-### 4. Run Frontend
-
-**Development Mode:**
-```bash
 npm run dev
 ```
 
-**Production Build:**
-```bash
-# Build for production
-npm run build
+Open `http://localhost:5173`. The frontend calls the API at `VITE_API_BASE_URL`, which defaults to `http://localhost:8080/api`. To point it elsewhere, create a `.env.local` in the repo root:
 
-# Preview production build
-npm run preview
+```properties
+VITE_API_BASE_URL=http://localhost:8080/api
 ```
 
-### 5. Access Application
+### 3. Check the backend is up
 
-- **Development:** http://localhost:5173
-- **Production Preview:** http://localhost:4173
+```bash
+curl http://localhost:8080/api/admin/admin-exists
+# {"exists":false}  on a fresh database
+```
+
+This endpoint doesn't need a login, so it works as a quick health check. Spring Boot Actuator is not included, so `/actuator/*` endpoints don't exist.
+
+### H2 console (local only)
+
+```bash
+H2_CONSOLE_ENABLED=true mvn spring-boot:run
+```
+
+Then open `http://localhost:8080/h2-console`. Use the JDBC URL `jdbc:h2:file:./data/testrium`, the user `sa` and an empty password. **Never enable this in production.**
 
 ---
 
-## Testing on Different Systems
+## Option C: Single JAR
 
-### Testing on Local Machine (Development)
+The JAR can include the built frontend, so a single process serves both the UI and the API.
 
-1. Start MySQL server
-2. Start backend: `mvn spring-boot:run`
-3. Start frontend: `npm run dev`
-4. Access at http://localhost:5173
+**Linux / macOS:**
 
-### Testing on Remote Server (Staging/Production)
-
-#### Option 1: Docker Deployment (Recommended)
-
-Create `Dockerfile` for backend:
-```dockerfile
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY target/testrium-2.2.1.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-Create `docker-compose.yml`:
-```yaml
-version: '3.8'
-services:
-  mysql:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: testrium
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/testrium
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: rootpassword
-    depends_on:
-      - mysql
-
-  frontend:
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "npm install && npm run build && npm run preview"
-    ports:
-      - "4173:4173"
-    volumes:
-      - ./:/app
-
-volumes:
-  mysql-data:
-```
-
-Run with Docker:
 ```bash
-docker-compose up -d
+VITE_API_BASE_URL=/api npm run build
+mkdir -p backend/src/main/resources/static
+cp -r dist/* backend/src/main/resources/static/
+cd backend
+mvn clean package -DskipTests
+java -jar target/testrium-2.2.1.jar
 ```
 
-#### Option 2: Traditional Deployment
+**Windows:** run `build.bat` from the repository root.
 
-**Backend on Linux Server:**
+Open `http://localhost:8080`. Pre-built JARs are also attached to [GitHub Releases](https://github.com/testrium/testrium/releases).
+
+Settings can be passed as environment variables or as command-line flags:
+
 ```bash
-# Create systemd service
-sudo nano /etc/systemd/system/testrium-backend.service
+java -jar target/testrium-2.2.1.jar --server.port=8081
+SERVER_PORT=8081 JWT_SECRET=... java -jar target/testrium-2.2.1.jar
 ```
+
+---
+
+## Using MySQL Instead of H2
+
+Docker Compose already uses MySQL. For a JAR or `mvn spring-boot:run`, create the database and a user:
+
+```sql
+CREATE DATABASE testrium CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'testrium'@'localhost' IDENTIFIED BY 'ChangeMe123!';
+GRANT ALL PRIVILEGES ON testrium.* TO 'testrium'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+Then point the backend at it with environment variables. You don't need to edit `application.properties`:
+
+```bash
+export DB_URL='jdbc:mysql://localhost:3306/testrium?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true'
+export DB_DRIVER=com.mysql.cj.jdbc.Driver
+export DB_DIALECT=org.hibernate.dialect.MySQLDialect
+export DB_USERNAME=testrium
+export DB_PASSWORD='ChangeMe123!'
+
+java -jar target/testrium-2.2.1.jar
+```
+
+All four of `DB_URL`, `DB_DRIVER`, `DB_DIALECT` and the credentials must be set together. If you change only the URL, the app still uses the H2 driver and dialect.
+
+---
+
+## First Run: Create the Admin Account
+
+On a fresh database there are no users. When you open the app, the login page detects this and redirects to **`/setup`**, where you create the first admin with your own email and password (at least 6 characters). After that, the setup screen is locked.
+
+You can also do this through the API:
+
+```bash
+curl -X POST http://localhost:8080/api/admin/create-admin \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"a-strong-password","username":"admin"}'
+```
+
+Other users can then register (if `REGISTRATION_ENABLED=true`) or be added by the admin.
+
+---
+
+## Deploying to a Server
+
+Docker Compose ([Option A](#option-a-docker-compose)) is the simplest way to deploy. Before you expose it:
+
+- Set a long random `JWT_SECRET` and your own MySQL passwords in `.env`.
+- Set `CORS_ALLOWED_ORIGINS` to your public URL, for example `https://testrium.example.com`.
+- Put a reverse proxy with TLS (Nginx, Caddy, Traefik) in front of the app.
+- Don't publish the MySQL port. The compose file keeps it on the internal network.
+
+### systemd service (single JAR)
 
 ```ini
+# /etc/systemd/system/testrium.service
 [Unit]
-Description=Testrium Backend
-After=mysql.service
+Description=Testrium
+After=network.target mysql.service
 
 [Service]
 User=testrium
-WorkingDirectory=/opt/testrium/backend
-ExecStart=/usr/bin/java -jar /opt/testrium/backend/target/testrium-2.2.1.jar
+WorkingDirectory=/opt/testrium
+EnvironmentFile=/opt/testrium/testrium.env
+ExecStart=/usr/bin/java -jar /opt/testrium/testrium.jar
 SuccessExitStatus=143
-TimeoutStopSec=10
 Restart=on-failure
 RestartSec=5
 
@@ -403,431 +264,283 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
+`testrium.env` holds the [environment variables](#environment-variables) as `KEY=value` lines. Uploads and the H2 database are stored relative to `WorkingDirectory`.
+
 ```bash
-# Enable and start service
 sudo systemctl daemon-reload
-sudo systemctl enable testrium-backend
-sudo systemctl start testrium-backend
-sudo systemctl status testrium-backend
+sudo systemctl enable --now testrium
+sudo systemctl status testrium
+journalctl -u testrium -f
 ```
 
-**Frontend with Nginx:**
-```bash
-# Build frontend
-npm run build
+### Nginx reverse proxy
 
-# Install Nginx
-sudo apt install nginx -y
-
-# Configure Nginx
-sudo nano /etc/nginx/sites-available/testrium
-```
+Because the JAR and the Docker image serve both the UI and the API, Nginx only needs to proxy everything to one port:
 
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name testrium.example.com;
 
-    root /var/www/testrium/dist;
-    index index.html;
+    client_max_body_size 10m;   # matches the 10 MB upload limit
 
     location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://localhost:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+        proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-```bash
-# Enable site and restart Nginx
-sudo ln -s /etc/nginx/sites-available/testrium /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
+Add TLS with `sudo certbot --nginx -d testrium.example.com`.
 
-### Testing on Different Networks
+### Testing from other devices on your network
 
-#### LAN Testing
-
-1. **Find your IP address:**
-   - Windows: `ipconfig`
-   - Linux/Mac: `ifconfig` or `ip addr`
-
-2. **Update API URL** in frontend to use server IP:
-   ```javascript
-   const API_BASE_URL = 'http://192.168.1.100:8080/api';
-   ```
-
-3. **Allow firewall access:**
+1. Find the machine's IP (`ip addr` on Linux and macOS, `ipconfig` on Windows).
+2. Allow the port through the firewall:
    ```bash
-   # Windows
-   netsh advfirewall firewall add rule name="Testrium Backend" dir=in action=allow protocol=TCP localport=8080
-
-   # Linux
-   sudo ufw allow 8080/tcp
-   sudo ufw allow 5173/tcp
+   sudo ufw allow 8080/tcp   # Linux
    ```
+   ```powershell
+   netsh advfirewall firewall add rule name="Testrium" dir=in action=allow protocol=TCP localport=8080
+   ```
+3. Add the URL you'll use (for example `http://192.168.1.100:8080`) to `CORS_ALLOWED_ORIGINS`.
+4. If you use the Vite dev server, run `npm run dev -- --host` and set `VITE_API_BASE_URL=http://192.168.1.100:8080/api`.
 
-4. **Access from other devices:**
-   - Frontend: http://192.168.1.100:5173
-   - Backend: http://192.168.1.100:8080
+### Cloud VMs (AWS, Azure, GCP)
 
-#### Cloud Testing (AWS, Azure, GCP)
-
-**AWS EC2 Example:**
-
-1. Launch EC2 instance (t2.medium recommended)
-2. Configure Security Group:
-   - Port 22 (SSH)
-   - Port 80 (HTTP)
-   - Port 443 (HTTPS)
-   - Port 8080 (Backend)
-   - Port 3306 (MySQL - restrict to VPC only)
-
-3. Install dependencies and deploy using Traditional Deployment method above
-
-4. Use Elastic IP for static address
-
-5. Configure Route 53 for domain mapping
+Any VM with 2 vCPU and 4 GB RAM is enough. Install Docker and follow Option A. Open only ports 80 and 443 (plus 22 for SSH) in the security group, never 3306.
 
 ---
 
 ## Environment Variables
 
-### Backend Environment Variables
+### Backend
 
-Create `.env` file in backend directory:
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `SERVER_PORT` | `8080` | HTTP port |
+| `DB_URL` | `jdbc:h2:file:./data/testrium` | JDBC URL |
+| `DB_DRIVER` | `org.h2.Driver` | Use `com.mysql.cj.jdbc.Driver` for MySQL |
+| `DB_DIALECT` | `org.hibernate.dialect.H2Dialect` | Use `org.hibernate.dialect.MySQLDialect` for MySQL |
+| `DB_USERNAME` / `DB_PASSWORD` | `sa` / *(empty)* | Database credentials |
+| `JWT_SECRET` | placeholder | **Change in production.** At least 32 characters |
+| `JWT_EXPIRATION` | `86400000` | Token lifetime in ms (24 h) |
+| `JIRA_ENCRYPTION_KEY` | `TestriumJiraKey1` | Encrypts stored JIRA tokens. Must be exactly 16 characters |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:5173,http://localhost` | Comma-separated list of allowed frontend origins |
+| `UPLOAD_DIR` | `./uploads` | Where attachments are stored |
+| `H2_CONSOLE_ENABLED` | `false` | Enable `/h2-console` (local only) |
+| `CLIENT_NAME` | `Testrium` | Display name |
+| `CLIENT_ALLOWED_DOMAINS` | *(empty)* | Restrict registration to these email domains |
+| `REGISTRATION_ENABLED` | `true` | Allow self-registration |
+| `EMAIL_VERIFICATION_REQUIRED` | `false` | Require email verification on sign-up (needs SMTP) |
+| `MAIL_SMTP_HOST` / `MAIL_SMTP_PORT` | `smtp.gmail.com` / `587` | SMTP server |
+| `MAIL_SMTP_USERNAME` / `MAIL_SMTP_PASSWORD` | *(empty)* | SMTP credentials |
+| `MAIL_SMTP_FROM` | `noreply@testrium.com` | Sender address |
 
-```properties
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=testrium
-DB_USERNAME=root
-DB_PASSWORD=your_password
+Docker Compose adds its own variables (`MYSQL_*`, `APP_PORT`, `TESTRIUM_VERSION`). See `.env.example`.
 
-# JWT Security
-JWT_SECRET=YourSuperSecretKeyMinimum256BitsLongForHS256Algorithm
-JWT_EXPIRATION=86400000
+JIRA, per-project SMTP and Slack/Teams webhooks are configured **in the UI** per project, not through environment variables.
 
-# Server
-SERVER_PORT=8080
+### Frontend (build time)
 
-# JIRA Integration (Optional)
-JIRA_BASE_URL=https://your-domain.atlassian.net
-JIRA_API_TOKEN=your_jira_api_token
-JIRA_EMAIL=your-email@example.com
-```
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `VITE_API_BASE_URL` | `http://localhost:8080/api` | API base URL. Use `/api` when the backend serves the UI |
 
-### Frontend Environment Variables
-
-Create `.env` file in root directory:
-
-```properties
-VITE_API_BASE_URL=http://localhost:8080/api
-VITE_APP_NAME=Testrium
-VITE_APP_VERSION=1.7.0
-```
-
-### Using Environment Variables
-
-**Backend (application.properties):**
-```properties
-spring.datasource.url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:testrium}
-spring.datasource.username=${DB_USERNAME:root}
-spring.datasource.password=${DB_PASSWORD}
-```
-
-**Frontend (Vite):**
-```javascript
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-```
+Vite reads this value when it builds, so changing it requires a rebuild.
 
 ---
 
 ## Common Issues & Troubleshooting
 
-### Issue 1: Backend fails to start - "Port 8080 already in use"
+### Port 8080 already in use
 
-**Solution:**
 ```bash
-# Find process using port 8080
+# Linux / macOS
+lsof -i :8080
 # Windows
 netstat -ano | findstr :8080
-taskkill /PID <PID> /F
-
-# Linux/Mac
-lsof -i :8080
-kill -9 <PID>
-
-# Or use different port
-java -jar target/testrium-2.2.1.jar --server.port=8081
 ```
 
-### Issue 2: Database connection refused
+Stop that process, or start Testrium on another port with `SERVER_PORT=8081`.
 
-**Solution:**
+### Port 5173 already in use
+
+The dev server uses `strictPort` and exits instead of switching ports. Stop the other Vite process, or run `npm run dev -- --port 5174` and add that origin to `CORS_ALLOWED_ORIGINS`.
+
+### CORS error in the browser console
+
+The frontend's origin isn't in `CORS_ALLOWED_ORIGINS`. Add it (scheme, host and port, comma-separated, no trailing slash) and restart the backend. There's no need to edit `SecurityConfig.java`.
+
+### Backend can't connect to MySQL
+
+- Check that MySQL is running: `sudo systemctl status mysql`, or `docker compose ps`.
+- Check that `DB_DRIVER` and `DB_DIALECT` are set to the MySQL values, not just `DB_URL`.
+- With Docker, the app waits for the MySQL health check. Watch `docker compose logs -f mysql` on first start, since initialization can take a minute.
+
+### Login page keeps redirecting to `/setup`
+
+No admin exists in the database the backend is using. This happens when you switch between H2 and MySQL, or run the JAR from a different working directory (the H2 file is relative). Create the admin again, or start from the original directory.
+
+### `npm install` fails
+
 ```bash
-# Check MySQL is running
-# Windows
-sc query MySQL80
-
-# Linux
-sudo systemctl status mysql
-
-# Start if not running
-# Windows
-net start MySQL80
-
-# Linux
-sudo systemctl start mysql
-
-# Verify connection
-mysql -u root -p -e "SELECT 1;"
-```
-
-### Issue 3: Frontend can't connect to backend (CORS error)
-
-**Solution:**
-
-Check backend CORS configuration in `SecurityConfig.java`:
-```java
-@Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList(
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "http://your-production-domain.com"
-    ));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    configuration.setAllowCredentials(true);
-    // ... rest of config
-}
-```
-
-### Issue 4: npm install fails
-
-**Solution:**
-```bash
-# Clear npm cache
+rm -rf node_modules
 npm cache clean --force
-
-# Delete node_modules and package-lock.json
-rm -rf node_modules package-lock.json
-
-# Reinstall
-npm install
-
-# If still fails, try with legacy peer deps
-npm install --legacy-peer-deps
+npm ci
 ```
 
-### Issue 5: Build fails - Java version mismatch
+### Build fails with a Java version error
 
-**Solution:**
 ```bash
-# Check Java version
-java -version
-
-# Set JAVA_HOME if needed
-# Windows
-set JAVA_HOME=C:\Program Files\Java\jdk-17
-
-# Linux/Mac
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-export PATH=$JAVA_HOME/bin:$PATH
+java -version   # must be 17 or newer
+mvn -v          # check the "Java version" line, since Maven may use a different JDK
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ```
 
 ---
 
 ## Testing Checklist
 
-### Pre-Deployment Testing
+Use this before tagging a release or after deploying to a new environment.
 
-- [ ] Database connection successful
-- [ ] Backend starts without errors
-- [ ] Frontend builds successfully
-- [ ] All API endpoints respond correctly
-- [ ] Authentication/Authorization working
-- [ ] CORS configured properly for target environment
+### Build & startup
 
-### Feature Testing
+- [ ] `mvn -B verify` passes in `backend/` (CI runs this)
+- [ ] `npm run build` passes
+- [ ] `docker build .` succeeds
+- [ ] App starts with H2 and with MySQL
+- [ ] `/setup` appears on a fresh database and is locked after the admin is created
+- [ ] CORS works from the configured origins
 
-#### User Management
-- [ ] User registration works
-- [ ] User login works
-- [ ] JWT token generation and validation
-- [ ] Role-based access control (ADMIN/USER)
-- [ ] Password reset functionality
+### Users & access
 
-#### Project Management
-- [ ] Create/Read/Update/Delete projects
-- [ ] Project member management
-- [ ] Access control based on project membership
+- [ ] Registration (respects `REGISTRATION_ENABLED` and allowed domains)
+- [ ] Email verification, when enabled
+- [ ] Login, logout and token expiry
+- [ ] Forgot password
+- [ ] Role-based access: admin, lead and member see only what they should
 
-#### Test Case Management
-- [ ] Create/Read/Update/Delete test cases
-- [ ] Test case prioritization
-- [ ] Module association
-- [ ] Test case search and filtering
+### Projects
 
-#### Test Run Execution
-- [ ] Create test runs
-- [ ] Execute individual tests
-- [ ] **Bulk update test status (NEW in 1.7.0)**
-- [ ] Select all tests
-- [ ] Select tests by module
-- [ ] JIRA integration for bug creation
+- [ ] Create, edit and delete projects
+- [ ] Add and remove project members
+- [ ] Non-members can't open a project
+
+### Test cases
+
+- [ ] Create, edit and delete test cases with steps and expected results
+- [ ] Modules, priority and automation type
+- [ ] Tags: add, remove, and filter by tag
+- [ ] Search and filters
+- [ ] Bulk import from Excel/CSV (see [BULK_IMPORT_GUIDE.md](./BULK_IMPORT_GUIDE.md))
+- [ ] Export filtered test cases to Excel
+
+### Test runs
+
+- [ ] Create, edit and clone test runs
+- [ ] Execute individual tests with comments and actual results
+- [ ] Bulk status update, select all, and select by module
+- [ ] Create a JIRA bug from a failed execution
 - [ ] Progress tracking
 
-#### Test Data Management
-- [ ] Create/Read/Update/Delete test data
-- [ ] Environment-specific data (DEV/QA/STAGING/PROD)
-- [ ] Data type support (KEY_VALUE/JSON/CSV/XML)
-- [ ] Automation API access
-- [ ] Search and filtering
+### Notifications
 
-#### Reporting
-- [ ] Test run reports generation
-- [ ] PDF export with pie charts
-- [ ] Excel export
-- [ ] Custom report naming
-- [ ] Trend analysis
-- [ ] Project-based filtering
+- [ ] Per-project SMTP settings, including the "send test email" button
+- [ ] Slack / Teams webhooks fire on "test run assigned" and "test run completed"
 
-#### Metrics & Dashboard
-- [ ] Dashboard statistics display
-- [ ] Project metrics
-- [ ] Test execution metrics
-- [ ] Pass/Fail rate calculations
+### Test data & automation API
 
-### Performance Testing
+- [ ] Create, edit and delete test data in every environment (DEV, QA, STAGING, PROD)
+- [ ] All data types (KEY_VALUE, JSON, CSV, XML)
+- [ ] Automation API with a JWT (see [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_GUIDE.md))
 
-- [ ] Page load time < 3 seconds
-- [ ] API response time < 500ms
-- [ ] Concurrent user handling (10+ users)
-- [ ] Large dataset handling (1000+ test cases)
-- [ ] File upload/download performance
+### Reports & dashboards
 
-### Security Testing
+- [ ] Dashboard statistics
+- [ ] Cross-project Overview: admins see all projects, leads and members see their own
+- [ ] PDF export with charts, and Excel export
+- [ ] Custom report names, trends and project filtering
 
-- [ ] SQL injection prevention
-- [ ] XSS prevention
-- [ ] CSRF protection
-- [ ] JWT token expiration
-- [ ] Unauthorized access blocked
-- [ ] Sensitive data encryption
+### Security
 
-### Cross-Browser Testing
+- [ ] `/api/**` returns 401 without a token
+- [ ] Users can't reach other projects' data by changing IDs
+- [ ] Stored JIRA and SMTP passwords are encrypted
+- [ ] Production uses a custom `JWT_SECRET` and has the H2 console disabled
 
-- [ ] Chrome (latest)
-- [ ] Firefox (latest)
-- [ ] Edge (latest)
-- [ ] Safari (latest)
+### Browsers & layouts
 
-### Responsive Design Testing
-
-- [ ] Desktop (1920x1080)
-- [ ] Laptop (1366x768)
-- [ ] Tablet (768x1024)
-- [ ] Mobile (375x667)
+- [ ] Chrome, Firefox, Edge and Safari (latest)
+- [ ] Light and dark mode
+- [ ] Desktop (1920×1080), laptop (1366×768), tablet (768×1024) and mobile (375×667)
 
 ---
 
 ## Performance Testing
 
-### Load Testing with Apache JMeter
+### Targets
 
-1. **Install JMeter**
-   ```bash
-   # Download from https://jmeter.apache.org/download_jmeter.cgi
-   ```
+- Pages load in under 3 seconds.
+- Most API calls respond in under 500 ms.
+- The app stays responsive with 10+ concurrent users and 1,000+ test cases in a project.
 
-2. **Create Test Plan**
-   - Add Thread Group (100 users, 10 second ramp-up)
-   - Add HTTP Request sampler for API endpoints
-   - Add listeners (View Results Tree, Summary Report)
+### Load testing
 
-3. **Run Load Test**
-   ```bash
-   jmeter -n -t test-plan.jmx -l results.jtl -e -o report
-   ```
+Any HTTP load tool works. With [k6](https://k6.io):
 
-### Database Performance
+```javascript
+// load-test.js
+import http from 'k6/http';
+import { check } from 'k6';
 
-```sql
--- Check slow queries
-SHOW VARIABLES LIKE 'slow_query_log';
-SET GLOBAL slow_query_log = 'ON';
+export const options = { vus: 20, duration: '1m' };
+const BASE = 'http://localhost:8080/api';
+const TOKEN = __ENV.TOKEN; // a JWT from POST /api/auth/login
 
--- Analyze table
-ANALYZE TABLE test_cases;
-ANALYZE TABLE test_runs;
-ANALYZE TABLE test_executions;
-
--- Check indexes
-SHOW INDEX FROM test_cases;
+export default function () {
+  const res = http.get(`${BASE}/projects`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  check(res, { 'status 200': (r) => r.status === 200 });
+}
 ```
 
-### Application Monitoring
-
-**Spring Boot Actuator Endpoints:**
 ```bash
-# Health check
-curl http://localhost:8080/actuator/health
+k6 run -e TOKEN=eyJ... load-test.js
+```
 
-# Metrics
-curl http://localhost:8080/actuator/metrics
+JMeter works too: create a thread group that calls the same endpoints with an `Authorization: Bearer` header, then run `jmeter -n -t plan.jmx -l results.jtl -e -o report`.
 
-# HTTP trace
-curl http://localhost:8080/actuator/httptrace
+Run load tests against MySQL, not H2, to get realistic numbers.
+
+### Database
+
+```sql
+-- MySQL: log queries slower than 1 second
+SET GLOBAL slow_query_log = 'ON';
+SET GLOBAL long_query_time = 1;
+
+SHOW INDEX FROM test_cases;
+ANALYZE TABLE test_cases, test_runs, test_executions;
 ```
 
 ---
 
 ## Version History
 
-### Version 1.7.0 (Current)
-- **NEW:** Bulk update functionality for test executions
-- **NEW:** Select all tests option
-- **NEW:** Module-based test selection
-- **NEW:** Bulk status update with dropdown
-- **IMPROVED:** User experience in test execution workflow
-- **ENHANCED:** Backend bulk update API endpoint
-
-### Version 1.6.0
-- JIRA integration for bug creation
-- Advanced reporting with pie charts
-- Custom report naming
-- Project access filtering
-
-### Version 1.5.0
-- Test Data Management UI redesign
-- Test Runs table view with pagination
-- Reports page improvements
-- Environment-based data filtering
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ---
 
 ## Support & Contribution
 
-For issues, questions, or contributions:
-- **GitHub Issues:** [Create an issue]
-- **Email:** support@testrium.com
-- **Documentation:** See AUTOMATION_API_GUIDE.md for API integration
+- **Issues:** https://github.com/testrium/testrium/issues
+- **Automation API:** [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_GUIDE.md)
+- **Contributing:** see the Contributing section in [README.md](./README.md)
 
 ---
 
 ## License
 
-Testrium © 2024. All rights reserved.
+Testrium is licensed under the [Apache License 2.0](./LICENSE.txt). See [NOTICE](./NOTICE) and the [Trademark & Attribution Policy](./TRADEMARKS.md).
