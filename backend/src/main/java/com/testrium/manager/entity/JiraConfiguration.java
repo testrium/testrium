@@ -32,7 +32,7 @@ public class JiraConfiguration {
 
     private String defaultPriority; // High, Medium, Low
 
-    private Boolean enableUserMapping; // Map Pramana users to JIRA users
+    private Boolean enableUserMapping; // Map Testrium users to JIRA users
 
     @Column(columnDefinition = "TEXT")
     private String userMappings; // JSON string of user mappings

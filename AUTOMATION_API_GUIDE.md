@@ -1,6 +1,6 @@
 # Automation Test Data API Guide
 
-This guide explains how to use the Pramana Manager API to fetch and manage test data from your automation test frameworks (Selenium, RestAssured, Playwright, etc.).
+This guide explains how to use the Testrium API to fetch and manage test data from your automation test frameworks (Selenium, RestAssured, Playwright, etc.).
 
 ## Base URL
 ```
@@ -364,4 +364,4 @@ curl -X POST "http://localhost:8080/api/auth/login" \
 
 ## Support
 
-For issues or questions, contact the Pramana Manager team.
+For issues or questions, contact the Testrium team.
