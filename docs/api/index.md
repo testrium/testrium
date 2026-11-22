@@ -11,8 +11,8 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@testrium.com",
-  "password": "Admin@123"
+  "email": "admin@example.com",
+  "password": "your-password"
 }
 ```
 
@@ -20,7 +20,7 @@ Response:
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "user": { "id": 1, "email": "admin@testrium.com", "role": "ADMIN" }
+  "user": { "id": 1, "email": "admin@example.com", "role": "ADMIN" }
 }
 ```
 
