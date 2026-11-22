@@ -18,6 +18,7 @@ export default function TestCaseDetails() {
 
   useEffect(() => {
     loadTestCase();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [id]
   }, [id]);
 
   const loadTestCase = async () => {

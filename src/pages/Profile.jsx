@@ -29,6 +29,7 @@ export default function Profile() {
       setNameInput(user?.username || '');
       resolveDisplayRole(user);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   const resolveDisplayRole = async (profileData) => {

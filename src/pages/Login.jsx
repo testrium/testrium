@@ -25,6 +25,7 @@ export default function Login() {
     axios.get(`${API_BASE_URL}/admin/admin-exists`).then((res) => {
       if (!res.data.exists) navigate('/setup', { replace: true });
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   const handleChange = (e) => {

@@ -41,6 +41,7 @@ export default function Settings() {
       setPasswordSaved(d.passwordSaved === 'true');
       setTestEmail(d.username || '');
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   const handleSave = async () => {

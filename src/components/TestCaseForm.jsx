@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { testCasesAPI, projectsAPI, testModulesAPI, automationCommentsAPI } from '../services/api';
+import { testCasesAPI, testModulesAPI, automationCommentsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
@@ -180,7 +180,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
         setAutomationComment(response.data.comment);
         setAutomationStatus(response.data.automationStatus || '');
       }
-    } catch (err) {
+    } catch {
       // No current comment exists, which is fine
       console.log('No automation comment found');
     }
@@ -560,7 +560,7 @@ export default function TestCaseForm({ isOpen, onClose, onSuccess, testCase = nu
                       </p>
                     ) : (
                       <div className="space-y-3">
-                        {commentHistory.map((historyItem, index) => (
+                        {commentHistory.map((historyItem) => (
                           <div
                             key={historyItem.id}
                             className={`p-2 rounded border ${

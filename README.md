@@ -89,7 +89,7 @@ curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
 
 ```bash
 cp .env.example .env
-# Edit .env and set your JWT_SECRET, DB passwords, and admin credentials
+# Edit .env and set your JWT_SECRET and DB passwords
 ```
 
 ### 3. Run
@@ -98,7 +98,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-Open `http://localhost:8080` — login with `admin@testrium.com` / `Admin@123` (change after first login).
+Open `http://localhost:8080`. On first start you'll see a setup screen where you create the admin account.
 
 ### Docker Image
 
@@ -296,10 +296,6 @@ JIRA_ENCRYPTION_KEY=TestriumJiraKey1
 # CORS (your public domain in production)
 CORS_ALLOWED_ORIGINS=http://localhost
 
-# Admin account
-ADMIN_EMAIL=admin@testrium.com
-ADMIN_PASSWORD=Admin@123
-
 # Optional: email / SMTP
 MAIL_SMTP_HOST=smtp.gmail.com
 MAIL_SMTP_USERNAME=
@@ -332,7 +328,7 @@ docker compose up -d
 # Backend
 cd backend
 mvn clean package -DskipTests
-java -jar target/testrium-2.0.0.jar
+java -jar target/testrium-2.2.1.jar
 
 # Frontend
 npm run build

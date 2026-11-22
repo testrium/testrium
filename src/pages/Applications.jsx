@@ -36,6 +36,7 @@ export default function Applications() {
       loadData();
       checkUserPermissions();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [user]
   }, [user]);
 
   const loadData = async () => {
@@ -116,7 +117,7 @@ export default function Applications() {
     try {
       await applicationsAPI.delete(id);
       loadData();
-    } catch (err) {
+    } catch {
       setError('Failed to delete application');
     }
   };

@@ -201,7 +201,7 @@ export default function Overview() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                    <Tooltip formatter={(val, name, props) => [val, name]} labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label} />
+                    <Tooltip formatter={(val, name) => [val, name]} labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label} />
                     <Legend />
                     <Bar dataKey="Test Cases" fill="#6366f1" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="Test Runs"  fill="#22c55e" radius={[4, 4, 0, 0]} />

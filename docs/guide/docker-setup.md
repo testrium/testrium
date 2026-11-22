@@ -28,10 +28,6 @@ JWT_SECRET=replace_this_with_a_long_random_string_at_least_32_chars
 # Database passwords
 MYSQL_ROOT_PASSWORD=your_root_password
 MYSQL_PASSWORD=your_db_password
-
-# Admin login
-ADMIN_EMAIL=admin@yourcompany.com
-ADMIN_PASSWORD=YourSecurePassword
 ```
 
 ::: warning Change the defaults
@@ -55,11 +51,7 @@ This starts:
 
 Open **http://localhost:8080** in your browser.
 
-Log in with the admin email and password you set in `.env`.
-
-::: tip First login
-After logging in, go to your profile and change the default password immediately.
-:::
+On first start, Testrium opens a **setup screen** where you create the admin account with your own email and password. After that, log in with those credentials.
 
 ## Useful Commands
 

@@ -18,7 +18,7 @@ import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestCases() {
   usePageTitle('Test Cases');
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [testCases, setTestCases] = useState([]);
@@ -56,6 +56,7 @@ export default function TestCases() {
     if (editId) {
       loadTestCaseForEdit(editId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [location]
   }, [location]);
 
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function TestCases() {
     if (projects.length > 0 || user?.role === 'ADMIN') {
       loadTestCases();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [filters.projectId, filters.moduleId, filters.status, filters.priority, projects]
   }, [filters.projectId, filters.moduleId, filters.status, filters.priority, projects]);
 
   const loadData = async () => {

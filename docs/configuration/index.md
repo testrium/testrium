@@ -21,10 +21,7 @@ All Testrium settings are controlled via environment variables. Set them in your
 
 ## Admin Account
 
-| Variable | Default | Description |
-|---|---|---|
-| `ADMIN_EMAIL` | `admin@testrium.com` | Initial admin login email |
-| `ADMIN_PASSWORD` | `Admin@123` | Initial admin password — **change after first login** |
+There are no admin environment variables. On first start, Testrium opens a **setup screen** where you create the admin account with your own email and password. After that, the setup screen is locked.
 
 ## Application
 
@@ -58,10 +55,6 @@ MYSQL_PASSWORD=str0ng_db_pass
 
 # Security
 JWT_SECRET=b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4
-
-# Admin
-ADMIN_EMAIL=admin@mycompany.com
-ADMIN_PASSWORD=MySecurePass@2024
 
 # App
 APP_PORT=8080

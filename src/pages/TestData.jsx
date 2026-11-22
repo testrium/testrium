@@ -39,6 +39,7 @@ export default function TestData() {
     if (projectId) {
       loadTestData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [projectId, filterEnvironment]
   }, [projectId, filterEnvironment]);
 
   const loadTestData = async () => {
@@ -48,7 +49,7 @@ export default function TestData() {
         ? await testDataAPI.getByProject(projectId)
         : await testDataAPI.getByProjectAndEnvironment(projectId, filterEnvironment);
       setTestDataList(response.data);
-    } catch (err) {
+    } catch {
       setError('Failed to load test data');
     } finally {
       setLoading(false);
@@ -112,7 +113,7 @@ export default function TestData() {
     try {
       await testDataAPI.delete(id);
       loadTestData();
-    } catch (err) {
+    } catch {
       setError('Failed to delete test data');
     }
   };

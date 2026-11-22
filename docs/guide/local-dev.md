@@ -29,7 +29,7 @@ Backend starts at **http://localhost:8080**
 
 ### First Run — Create Admin
 
-Hit the endpoint to create the default admin account:
+Open the app and create the first admin on the setup screen, or use the API:
 
 ```
 GET http://localhost:8080/api/admin/admin-exists

@@ -29,7 +29,6 @@ const TestRunExecution = () => {
 
   // Bulk update state
   const [selectedExecutionIds, setSelectedExecutionIds] = useState([]);
-  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [bulkUpdateStatus, setBulkUpdateStatus] = useState('PASS');
 
   // JIRA bug creation state
@@ -46,6 +45,7 @@ const TestRunExecution = () => {
   useEffect(() => {
     loadTestRun();
     loadExecutions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [id]
   }, [id]);
 
   useEffect(() => {
@@ -248,7 +248,6 @@ const TestRunExecution = () => {
 
       // Clear selection
       setSelectedExecutionIds([]);
-      setShowBulkUpdate(false);
       setError('');
     } catch (err) {
       console.error('Bulk update error:', err);
@@ -258,7 +257,6 @@ const TestRunExecution = () => {
 
   const handleCancelBulkUpdate = () => {
     setSelectedExecutionIds([]);
-    setShowBulkUpdate(false);
   };
 
   const getStatusIcon = (status) => {

@@ -15,15 +15,13 @@ curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
 
 # 2. Configure
 cp .env.example .env
-# Edit .env — set your DB passwords, JWT secret, and admin credentials
+# Edit .env — set your DB passwords and JWT secret
 
 # 3. Run
 docker compose up -d
 ```
 
-Open **http://localhost:8080** and login with `admin@testrium.com` / `Admin@123`
-
-> Change the default admin password after first login.
+Open **http://localhost:8080**. On first start you'll see a setup screen where you create the admin account.
 
 ---
 
@@ -68,8 +66,6 @@ A single all-in-one image:
 | `MYSQL_PASSWORD` | `testrium123` | MySQL user password |
 | `MYSQL_ROOT_PASSWORD` | `rootpassword` | MySQL root password |
 | `JWT_SECRET` | *(insecure default)* | **Change this!** Min 32 chars |
-| `ADMIN_EMAIL` | `admin@testrium.com` | Default admin login |
-| `ADMIN_PASSWORD` | `Admin@123` | Default admin password |
 | `JIRA_ENCRYPTION_KEY` | `TestriumJiraKey1` | Exactly 16 chars for AES-128 |
 | `APP_PORT` | `8080` | Host port to expose |
 | `CLIENT_NAME` | `Testrium` | Branding name |
