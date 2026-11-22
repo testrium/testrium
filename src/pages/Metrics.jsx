@@ -36,12 +36,14 @@ export default function Metrics() {
 
   useEffect(() => {
     loadProjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   useEffect(() => {
     if (selectedProjectId) {
       loadMetrics();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [selectedProjectId]
   }, [selectedProjectId]);
 
   const loadProjects = async () => {
@@ -477,7 +479,7 @@ export default function Metrics() {
                               outerRadius={100}
                               paddingAngle={2}
                               dataKey="value"
-                              label={({ name, percentage, value }) => `${percentage}%`}
+                              label={({ percentage }) => `${percentage}%`}
                               labelLine={false}
                             >
                               <Cell fill="#61BF3D" />

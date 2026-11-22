@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import {
   BookOpen, Package, Layers, FileText, Play, BarChart3,
@@ -187,7 +186,6 @@ import usePageTitle from '../hooks/usePageTitle';
 
 export default function Help() {
   usePageTitle('Help');
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

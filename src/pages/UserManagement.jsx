@@ -40,6 +40,7 @@ export default function UserManagement() {
   useEffect(() => {
     if (currentUser?.role !== 'ADMIN') { navigate('/dashboard'); return; }
     fetchUsers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   async function fetchUsers() {

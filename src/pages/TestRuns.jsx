@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Plus, Search, Filter, Play, CheckCircle2, Clock, XCircle, Calendar, User, Trash2, AlertCircle, ChevronLeft, ChevronRight, Eye, Copy, Pencil
+  Plus, Search, Filter, Play, Clock, Calendar, User, Trash2, AlertCircle, ChevronLeft, ChevronRight, Eye, Copy, Pencil
 } from 'lucide-react';
 import { testRunsAPI } from '../services/testRuns';
 import { projectsAPI, testModulesAPI, testCasesAPI, projectMembersAPI, usersAPI } from '../services/api';
@@ -60,12 +60,14 @@ export default function TestRuns() {
   useEffect(() => {
     loadData();
     loadAllUsers();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [location]
   }, [location]);
 
   useEffect(() => {
     if (projects.length > 0 || user?.role === 'ADMIN') {
       loadTestRuns();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [filters.projectId, filters.status, projects]
   }, [filters.projectId, filters.status, projects]);
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function TestRuns() {
     } else if (newTestRun.projectId) {
       loadTestCasesForProject(newTestRun.projectId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [newTestRun.moduleId]
   }, [newTestRun.moduleId]);
 
   const loadData = async () => {
@@ -278,19 +281,6 @@ export default function TestRuns() {
       setNewTestRun(prev => ({ ...prev, testCaseIds: [] }));
     } else {
       setNewTestRun(prev => ({ ...prev, testCaseIds: testCases.map(tc => tc.id) }));
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'COMPLETED':
-        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'IN_PROGRESS':
-        return <Play className="w-4 h-4 text-blue-500" />;
-      case 'NOT_STARTED':
-        return <Clock className="w-4 h-4 text-gray-500" />;
-      default:
-        return <XCircle className="w-4 h-4 text-gray-400" />;
     }
   };
 

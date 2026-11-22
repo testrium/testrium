@@ -55,6 +55,7 @@ const Reports = () => {
     loadStats();
     loadProjects();
     loadTemplates();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount
   }, []);
 
   const loadStats = async () => {
@@ -485,19 +486,6 @@ const Reports = () => {
       </div>
     );
   }
-
-  const pieData = stats ? [
-    { name: 'Passed', value: stats.passedExecutions, color: '#10b981' },
-    { name: 'Failed', value: stats.failedExecutions, color: '#ef4444' },
-    { name: 'Skipped', value: stats.skippedExecutions, color: '#f59e0b' }
-  ] : [];
-
-  const barData = stats ? stats.projectStats.map(p => ({
-    name: p.projectName.length > 15 ? p.projectName.substring(0, 15) + '...' : p.projectName,
-    Passed: p.passedExecutions,
-    Failed: p.failedExecutions,
-    Skipped: p.skippedExecutions
-  })) : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">

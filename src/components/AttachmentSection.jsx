@@ -28,6 +28,7 @@ export default function AttachmentSection({ executionId }) {
 
   useEffect(() => {
     if (executionId) load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [executionId]
   }, [executionId]);
 
   const load = async () => {

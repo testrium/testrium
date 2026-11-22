@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { projectsAPI, projectMembersAPI, usersAPI } from '../services/api';
+import { projectsAPI, projectMembersAPI } from '../services/api';
 import { jiraAPI } from '../api/jira';
 import { emailConfigAPI } from '../api/emailConfig';
 import { webhookConfigAPI } from '../api/webhookConfig';
@@ -26,7 +26,7 @@ import usePageTitle from '../hooks/usePageTitle';
 
 export default function Dashboard() {
   usePageTitle('Dashboard');
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [projects, setProjects] = useState([]);
@@ -220,6 +220,7 @@ export default function Dashboard() {
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadProjects();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [location]
   }, [location]);
 
   useEffect(() => {
@@ -484,10 +485,6 @@ export default function Dashboard() {
       isEnabled: true
     });
     setError('');
-  };
-
-  const handleLogout = async () => {
-    await logout();
   };
 
   const activeProjects = projects.filter(p => p.status === 'ACTIVE').length;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { testModulesAPI, projectsAPI, projectMembersAPI } from '../services/api';
 import { applicationsAPI } from '../services/applications';
@@ -25,8 +25,7 @@ import usePageTitle from '../hooks/usePageTitle';
 
 export default function TestModules() {
   usePageTitle('Test Modules');
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
   const [modules, setModules] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -55,6 +54,7 @@ export default function TestModules() {
   // Reload data whenever this component mounts or location changes
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [location]
   }, [location]);
 
   useEffect(() => {
@@ -62,6 +62,7 @@ export default function TestModules() {
     if (projects.length > 0) {
       loadModules();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on [filters.projectId, filters.applicationId, projects]
   }, [filters.projectId, filters.applicationId, projects]);
 
   useEffect(() => {
