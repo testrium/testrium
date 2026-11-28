@@ -26,7 +26,7 @@ The license **does not** let you use the Testrium name or logo for your own prod
 ## Apache License 2.0
 
 ```
-Copyright 2025 Testrium
+Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

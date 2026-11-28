@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
