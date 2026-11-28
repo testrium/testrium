@@ -9,6 +9,8 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt)
 
+![Testrium overview: write a test case, run it in a sprint, see the report](assets/images/testrium-overview.gif)
+
 ---
 
 ## Overview
@@ -384,13 +386,16 @@ For comprehensive testing checklist, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
 ## Screenshots
 
 ### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
+![Dashboard](assets/images/screenshots/dashboard.png)
 
-### Test Run Execution with Bulk Update
-![Test Execution](docs/screenshots/test-execution-bulk.png)
+### Test Cases
+![Test Cases](assets/images/screenshots/test_cases.png)
+
+### Test Runs
+![Test Runs](assets/images/screenshots/test_runs.png)
 
 ### Reports with Charts
-![Reports](docs/screenshots/reports-charts.png)
+![Reports](assets/images/screenshots/reports.png)
 
 ---
 
