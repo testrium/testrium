@@ -24,7 +24,7 @@ import Setup from './pages/Setup';
 import UserManagement from './pages/UserManagement';
 import Profile from './pages/Profile';
 import Overview from './pages/Overview';
-import NotFound from "./pages/NotFound.jsx";
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -118,13 +118,11 @@ function App() {
           <Route path="/admin/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
 
-          <Route path="/does-not-exist" element={<NotFound />} />
-
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
           {/* 404 */}
-          <Route path="*" element={<Navigate to="/does-not-exist" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

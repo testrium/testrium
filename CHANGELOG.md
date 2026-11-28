@@ -7,11 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.2] - 2026-11-23
+## [Unreleased]
 
 ### Added
-- "Page not found" screen
-- Undefined URLs will now be redirected to /does-not-exist
+- Unknown URLs now show a 404 page instead of redirecting to the dashboard
 
 ---
 
