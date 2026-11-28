@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Shield, Calendar, Pencil, Check, X } from 'lucide-react';
 import { usersAPI, projectMembersAPI } from '../services/api';

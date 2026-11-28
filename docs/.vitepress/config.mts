@@ -95,7 +95,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the <a href="/testrium/legal/license">Apache 2.0 License</a>. · <a href="/testrium/legal/privacy">Privacy Policy</a>',
-      copyright: 'Copyright © 2025-present Testrium'
+      copyright: 'Copyright © 2025-present Mohammad Saddam Hossain and the Testrium contributors'
     },
 
     editLink: {

@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Paperclip, Upload, Trash2, Download, FileText, Image, FileArchive, X } from 'lucide-react';
 import { attachmentsAPI } from '../services/api';

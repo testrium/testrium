@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import React, { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Mail, Send, Save, CheckCircle, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { settingsAPI } from '../services/api';

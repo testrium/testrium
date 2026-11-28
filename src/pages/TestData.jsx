@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Database, Plus, Edit, Trash2, X, Save, Filter, Search, ChevronLeft, ChevronRight } from 'lucide-react';

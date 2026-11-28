@@ -1,3 +1,6 @@
+// Copyright 2025-2026 Mohammad Saddam Hossain and the Testrium contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api';

@@ -1,522 +1,197 @@
+<div align="center">
+
 # Testrium
 
-**Version:** 2.2.1
-**A Comprehensive Test Case Management System**
+**Open-source test case management for QA teams.**
+Write test cases, run them in sprints, and see exactly what passed. Self-hosted, free, and up in one command.
 
-![Java](https://img.shields.io/badge/Java-17-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen)
-![React](https://img.shields.io/badge/React-18.2-blue)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE.txt)
+![Version](https://img.shields.io/badge/version-2.2.1-informational)
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen)
+![React](https://img.shields.io/badge/React-18-blue)
+
+[**Documentation**](https://testrium.github.io/testrium/) ·
+[**Quick start**](#quick-start) ·
+[**Features**](#what-you-can-do) ·
+[**Contributing**](#contributing) ·
+[**Changelog**](./CHANGELOG.md)
+
+![Testrium overview: write a test case, run it in a sprint, see the report](assets/images/testrium-overview.gif)
+
+</div>
 
 ---
 
-## Overview
+## Quick start
 
-Testrium is a modern, full-stack test case management system designed to streamline test planning, execution, and reporting for QA teams. Built with Spring Boot and React, it provides a comprehensive solution for managing test cases, executing test runs, tracking results, and generating detailed reports.
+All you need is [Docker](https://docs.docker.com/get-docker/). You don't need Java, Node.js or a database.
 
-### Key Features
-
-✅ **Test Case Management**
-Create, organize, and maintain test cases with detailed steps and expected results.
-
-✅ **Test Run Execution**
-Execute tests individually or in bulk with real-time status tracking.
-
-✅ **Bulk Operations**
-Select and update multiple test results at once; bulk import and export test cases via Excel.
-
-✅ **Tags & Labels**
-Tag test cases (smoke, regression, critical…) and filter by tag.
-
-✅ **Cross-Project Overview**
-Aggregated KPIs and charts across all projects, scoped by role.
-
-✅ **Notifications**
-Per-project email (SMTP) and Slack / Microsoft Teams webhook notifications for test run events.
-
-✅ **JIRA Integration**
-Create bugs directly from failed test executions.
-
-✅ **Test Data Management**
-Centralized test data with environment-specific configurations.
-
-✅ **Advanced Reporting**
-Generate PDF/Excel reports with charts and visualizations.
-
-✅ **Automation API**
-RESTful API for integration with automation frameworks.
-
-✅ **Role-Based Access**
-Secure access control with user roles and permissions.
-
-✅ **Dark Mode**
-Full dark mode support across the application.
-
----
-
-## Technology Stack
-
-### Backend
-- **Framework:** Spring Boot 3.2.0
-- **Language:** Java 17
-- **Database:** MySQL 8.0
-- **Security:** Spring Security + JWT
-- **Build Tool:** Maven 3.9+
-
-### Frontend
-- **Framework:** React 18.2
-- **Build Tool:** Vite 5.4.21
-- **UI Library:** Tailwind CSS
-- **Icons:** Lucide React
-- **Charts:** Recharts
-- **HTTP Client:** Axios
-
----
-
-## Quick Start (Docker — Recommended)
-
-The easiest way to run Testrium is with Docker Compose. No Java or Node.js required.
-
-### 1. Download the compose file
+**1. Download the two config files**
 
 ```bash
+mkdir testrium && cd testrium
 curl -O https://raw.githubusercontent.com/testrium/testrium/master/docker-compose.yml
-curl -O https://raw.githubusercontent.com/testrium/testrium/master/.env.example
+curl -o .env https://raw.githubusercontent.com/testrium/testrium/master/.env.example
 ```
 
-### 2. Configure environment
+**2. Set your secrets.** Open `.env` and change at least these three values:
 
-```bash
-cp .env.example .env
-# Edit .env and set your JWT_SECRET and DB passwords
-```
+| Setting | What to put there |
+|---------|-------------------|
+| `JWT_SECRET` | Any long random string (32+ characters) |
+| `MYSQL_ROOT_PASSWORD` | A password for the database's root user |
+| `MYSQL_PASSWORD` | A password for the app's database user |
 
-### 3. Run
+**3. Start it**
 
 ```bash
 docker compose up -d
 ```
 
-Open `http://localhost:8080`. On first start you'll see a setup screen where you create the admin account.
+**4. Open [http://localhost](http://localhost)** and create the admin account on the setup screen. That's it.
 
-### Docker Image
+> The port comes from `APP_PORT` in `.env`, which is `80` by default. If port 80 is already taken, set `APP_PORT=8080` and open http://localhost:8080 instead.
 
-| Image | Docker Hub |
-|-------|-----------|
-| Testrium (all-in-one) | `sddmhossain/testrium:latest` |
+To stop Testrium, run `docker compose down`. Your data stays in a Docker volume, so it's still there the next time you start it.
 
 ---
 
-## Local Development Setup
+## What you can do
 
-### Prerequisites
+| | |
+|---|---|
+| 📝 **Test cases** | Write test cases with steps and expected results, organized by project and module. Tag them (smoke, regression…) and filter by priority, status or tag. |
+| ▶️ **Test runs** | Group test cases into a run, assign it, and mark results one by one or in bulk. Progress updates as you go. |
+| 📊 **Reports** | Pass/fail charts for every run. Export to PDF or Excel. |
+| 🗂 **Overview** | KPIs and charts across all your projects, scoped to what each person can see. |
+| 🐞 **JIRA** | Create a JIRA bug straight from a failed test. |
+| 🔔 **Notifications** | Per-project email (SMTP) and Slack / Microsoft Teams alerts when runs are assigned or completed. |
+| 📥 **Import & export** | Bulk-import test cases from Excel, and export them back out. |
+| 🧪 **Test data** | Store test data per environment (DEV, QA, STAGING, PROD) and fetch it from your automation. |
+| 🤖 **Automation API** | A REST API for Selenium, Playwright, RestAssured and other frameworks. |
+| 🔐 **Roles** | Admins, leads and members, each with their own access. |
+| 🌙 **Dark mode** | Across the whole app. |
 
-- Java JDK 17+
-- Node.js 18+
-- Maven 3.9+
+<details>
+<summary><b>Screenshots</b></summary>
 
-### 1. Backend
+### Dashboard
+![Dashboard](assets/images/screenshots/dashboard.png)
 
-```bash
-cd backend
-mvn spring-boot:run
-```
+### Test Cases
+![Test Cases](assets/images/screenshots/test_cases.png)
 
-Backend starts at `http://localhost:8080` (uses H2 file DB by default).
+### Test Runs
+![Test Runs](assets/images/screenshots/test_runs.png)
 
-### 2. Frontend
+### Reports
+![Reports](assets/images/screenshots/reports.png)
 
-```bash
-npm install
-npm run dev
-```
-
-Frontend starts at `http://localhost:5173`
-
----
-
-## What's New in Version 2.2.0
-
-- **Cross-Project Overview** — a new Overview page with KPIs (projects, test cases, runs, members, pass rate), status/priority/automation charts, and a per-project breakdown. Admins see all projects; leads and members see their own.
-- **Slack / Teams Notifications** — per-project webhooks for "test run assigned" and "test run completed", with test buttons in the UI.
-- **Per-Project Email Notifications** — SMTP settings per project with encrypted password storage and a "send test email" button.
-- **Export Test Cases to Excel** — exports the currently filtered test cases to a styled `.xlsx` file.
-
-Version 2.1.0 added tags on test cases, cloning and editing of test runs. See [CHANGELOG.md](./CHANGELOG.md) for the full history.
+</details>
 
 ---
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [TESTING_GUIDE.md](./TESTING_GUIDE.md) | Complete guide for testing on different systems and environments |
-| [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_GUIDE.md) | API documentation for automation framework integration |
-| [CHANGELOG.md](./CHANGELOG.md) | Version history and release notes |
-
----
-
-## Project Structure
-
-```
-testrium/
-├── backend/                    # Spring Boot backend
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/com/testrium/
-│   │   │   │   ├── controller/    # REST controllers
-│   │   │   │   ├── service/       # Business logic
-│   │   │   │   ├── repository/    # Data access
-│   │   │   │   ├── entity/        # JPA entities
-│   │   │   │   ├── dto/           # Data transfer objects
-│   │   │   │   └── security/      # Security configuration
-│   │   │   └── resources/
-│   │   │       └── application.properties
-│   │   └── test/
-│   └── pom.xml
-├── src/                        # React frontend
-│   ├── components/            # Reusable components
-│   ├── pages/                 # Page components
-│   ├── services/              # API services
-│   ├── contexts/              # React contexts
-│   ├── api/                   # API configurations
-│   └── App.jsx
-├── public/
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-├── README.md
-├── TESTING_GUIDE.md
-├── AUTOMATION_API_GUIDE.md
-└── CHANGELOG.md
-```
-
----
-
-## Core Modules
-
-### 1. User Management
-- User registration and authentication
-- JWT-based security
-- Role-based access control (ADMIN/USER)
-- Password encryption and validation
-
-### 2. Project Management
-- Create and manage test projects
-- Assign team members to projects
-- Project-level access control
-- Project statistics and metrics
-
-### 3. Test Case Management
-- Create detailed test cases with steps and expected results
-- Organize by projects and modules
-- Priority levels (Critical, High, Medium, Low)
-- Search and filter capabilities
-- Test case templates
-
-### 4. Test Run Execution
-- Create test runs from selected test cases
-- Real-time execution tracking
-- **NEW: Bulk status updates**
-- Execution time recording
-- Comments and actual results
-- Progress visualization
-- JIRA integration for bug creation
-
-### 5. Test Data Management
-- Environment-specific test data (DEV, QA, STAGING, PROD)
-- Multiple data types (KEY_VALUE, JSON, CSV, XML)
-- Centralized data repository
-- API access for automation frameworks
-- Search and filter by environment
-
-### 6. Reports & Analytics
-- Test execution reports with charts
-- PDF export with pie charts
-- Excel export with detailed data
-- Custom report naming
-- Trend analysis over time
-- Pass/fail rate calculations
-
-### 7. Dashboard & Metrics
-- Real-time statistics
-- Project-wise metrics
-- Test execution trends
-- Performance indicators
-
----
-
-## API Integration
-
-Testrium provides RESTful APIs for integration with automation frameworks like Selenium, RestAssured, Playwright, and more.
-
-### Example: Fetch Test Data
-
-```bash
-curl -X GET "http://localhost:8080/api/automation/test-data/by-name?projectId=1&name=Login%20Credentials&environment=QA" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Example Response
-
-```json
-{
-  "id": 1,
-  "name": "Login Credentials",
-  "environment": "QA",
-  "dataType": "KEY_VALUE",
-  "data": "{\"username\":\"testuser@example.com\",\"password\":\"Test@123\"}"
-}
-```
-
-For complete API documentation, see [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_GUIDE.md)
-
----
-
-## Configuration
-
-### Docker Configuration (via `.env`)
-
-All settings are controlled through environment variables. Copy `.env.example` to `.env`:
-
-```env
-# Database
-MYSQL_ROOT_PASSWORD=changeme_root
-MYSQL_DATABASE=testrium
-MYSQL_USER=testrium
-MYSQL_PASSWORD=changeme_db
-
-# JWT (min 32 chars, use a strong random string)
-JWT_SECRET=REPLACE_WITH_A_LONG_RANDOM_SECRET_STRING_HERE
-
-# JIRA encryption key (must be exactly 16 characters)
-JIRA_ENCRYPTION_KEY=TestriumJiraKey1
-
-# CORS (your public domain in production)
-CORS_ALLOWED_ORIGINS=http://localhost
-
-# Optional: email / SMTP
-MAIL_SMTP_HOST=smtp.gmail.com
-MAIL_SMTP_USERNAME=
-MAIL_SMTP_PASSWORD=
-```
-
-### Local Dev Configuration
-
-For local dev, set in `backend/src/main/resources/application.properties` (H2 used by default, no MySQL needed).
-
----
-
-## Building for Production
-
-### Build Docker Image Locally
-
-```bash
-docker build -t sddmhossain/testrium:latest .
-```
-
-### Run with Docker Compose
-
-```bash
-docker compose up -d
-```
-
-### Manual Build (without Docker)
-
-```bash
-# Backend
-cd backend
-mvn clean package -DskipTests
-java -jar target/testrium-2.2.1.jar
-
-# Frontend
-npm run build
-npm run preview
-```
-
----
-
-## Deployment
-
-### Docker Deployment (Recommended)
-
-```bash
-# Using docker-compose
-docker-compose up -d
-```
-
-### Traditional Deployment
-
-See [TESTING_GUIDE.md](./TESTING_GUIDE.md) for detailed deployment instructions for:
-- Linux servers
-- Windows servers
-- Cloud platforms (AWS, Azure, GCP)
-- Nginx configuration
-- SSL setup
-
----
-
-## Testing
-
-### Run Backend Tests
-
-```bash
-cd backend
-mvn test
-```
-
-### Testing Checklist
-
-For comprehensive testing checklist, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
-
----
-
-## Browser Support
-
-- ✅ Chrome (latest)
-- ✅ Firefox (latest)
-- ✅ Edge (latest)
-- ✅ Safari (latest)
-
----
-
-## Screenshots
-
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Test Run Execution with Bulk Update
-![Test Execution](docs/screenshots/test-execution-bulk.png)
-
-### Reports with Charts
-![Reports](docs/screenshots/reports-charts.png)
-
----
-
-## Roadmap
-
-### Recently shipped
-- Per-project email notifications (2.2.0)
-- Slack / Teams webhook notifications (2.2.0)
-- Cross-project Overview dashboard (2.2.0)
-- Excel export of test cases (2.2.0)
-- Tags / labels, clone and edit test runs (2.1.0)
-- JIRA integration and Automation API
-
-### Next up
-- Test case templates
-- Test suites: reusable groups of test cases to start runs from
-- Test case history: see who changed what, and when
-- CI/CD result import: push automated results (e.g. JUnit XML) into a test run
-- Scheduled / recurring test runs
-
-### Later
-- Multi-tenancy (organizations / workspaces)
-- Advanced analytics: flaky-test detection and trend insights
-- Real-time collaboration during test execution
-- Mobile-friendly execution view
-
-Want to help? Look for issues labeled [`good first issue`](https://github.com/testrium/testrium/labels/good%20first%20issue). See [CHANGELOG.md](./CHANGELOG.md) for the full version history.
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**Port 8080 already in use:**
-```bash
-# Kill process or use different port
-java -jar target/testrium-2.2.1.jar --server.port=8081
-```
-
-**Database connection failed:**
-```bash
-# Check MySQL is running
-sudo systemctl status mysql
-```
-
-**CORS errors:**
-- Update CORS configuration in SecurityConfig.java
-- Add frontend URL to allowed origins
-
-For more troubleshooting, see [TESTING_GUIDE.md](./TESTING_GUIDE.md)
+The full docs are at **[testrium.github.io/testrium](https://testrium.github.io/testrium/)**.
+
+| I want to… | Read |
+|------------|------|
+| Install with Docker, step by step | [Docker setup](https://testrium.github.io/testrium/guide/docker-setup) |
+| Run it from source to hack on it | [Local development](https://testrium.github.io/testrium/guide/local-dev) |
+| Change ports, the database, email or CORS | [Configuration](https://testrium.github.io/testrium/configuration/) |
+| Learn each feature | [Features](https://testrium.github.io/testrium/features/) |
+| Connect my automation framework | [API guide](https://testrium.github.io/testrium/api/) · [AUTOMATION_API_GUIDE.md](./AUTOMATION_API_GUIDE.md) |
+| Import test cases from Excel | [BULK_IMPORT_GUIDE.md](./BULK_IMPORT_GUIDE.md) |
+| Understand how the code is organized | [ARCHITECTURE.md](./ARCHITECTURE.md) |
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please follow these steps:
+New contributors are very welcome. You don't have to be an expert, and small fixes count.
 
-1. Fork the repository: https://github.com/testrium/testrium.git
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+**1. Pick something to work on.** Issues labeled [`good first issue`](https://github.com/testrium/testrium/labels/good%20first%20issue) are a good start. Comment on the issue so others know you're on it.
 
-### Coding Standards
+**2. Run it locally.** You need Java 17+, Maven 3.9+ and Node.js 18+. Run the backend and frontend in two terminals:
 
-- **Backend:** Follow Java coding conventions
-- **Frontend:** Use ESLint and Prettier
-- **Commits:** Use conventional commit messages
-- **Tests:** Write unit tests for new features
+```bash
+# Terminal 1: backend on http://localhost:8080 (uses a local H2 database, no MySQL needed)
+cd backend
+mvn spring-boot:run
+```
+
+```bash
+# Terminal 2: frontend on http://localhost:5173
+npm install
+npm run dev
+```
+
+**3. Check your change** before opening a pull request:
+
+```bash
+npm run lint            # frontend lint
+npm run build           # frontend build
+cd backend && mvn test  # backend tests
+```
+
+**4. Open a pull request.** Fork the repo, create a branch, and open a PR against `master`. Use a [conventional commit](https://www.conventionalcommits.org/) title (`feat:`, `fix:`, `docs:`…). For user-facing changes, add a line to [CHANGELOG.md](./CHANGELOG.md) under `[Unreleased]`. CI builds the frontend, the backend and the Docker image on every PR.
+
+<details>
+<summary><b>Project layout</b></summary>
+
+```
+testrium/
+├── backend/          Spring Boot API (Java 17, Spring Security + JWT, JPA)
+│   └── src/main/java/com/testrium/manager/
+│       ├── controller/   REST endpoints
+│       ├── service/      business logic
+│       ├── repository/   data access
+│       ├── entity/       JPA entities
+│       └── security/     auth and JWT
+├── src/              React frontend (Vite, Tailwind CSS)
+│   ├── pages/            one file per screen
+│   ├── components/       shared UI
+│   └── services/         API calls
+├── docs/             documentation site (VitePress)
+└── docker-compose.yml
+```
+
+</details>
 
 ---
 
-## Security
+## Roadmap
 
-### Reporting Security Issues
+**Next up:** test case templates · reusable test suites · test case history · importing CI results (JUnit XML) · scheduled runs
 
-If you discover a security vulnerability, please open an issue at https://github.com/testrium/testrium/issues instead of using email.
+**Later:** organizations / workspaces · flaky-test detection · real-time collaboration · mobile-friendly execution
 
-### Security Features
-
-- JWT-based authentication
-- Password encryption with BCrypt
-- SQL injection prevention
-- XSS protection
-- CSRF tokens
-- Role-based access control
+See [CHANGELOG.md](./CHANGELOG.md) for what has already shipped.
 
 ---
 
-## Support
+## Getting help
 
-For support and questions:
-
-- **GitHub:** https://github.com/testrium/testrium
-- **Documentation:** See guides in the repository
-- **Issues:** Use GitHub Issues for bug reports
+- **Questions and ideas:** [GitHub Discussions](https://github.com/testrium/testrium/discussions)
+- **Bugs:** [open an issue](https://github.com/testrium/testrium/issues)
+- **Security issues:** [open an issue](https://github.com/testrium/testrium/issues), but leave out exploit details until a maintainer replies
 
 ---
 
 ## License
 
-Testrium is licensed under the [Apache License 2.0](./LICENSE.txt).
+Testrium is free and open source under the [Apache License 2.0](./LICENSE.txt). You can use, modify and self-host it, including commercially.
 
-**Attribution is required.** If you fork, modify, rebrand or redistribute Testrium, you must keep the [`LICENSE.txt`](./LICENSE.txt) and [`NOTICE`](./NOTICE) files and credit the project, for example: *"Based on [Testrium](https://github.com/testrium/testrium), licensed under the Apache License 2.0."*
+**If you redistribute it, you must credit Testrium.** Anyone who forks, modifies, rebrands or redistributes Testrium must keep the [`LICENSE.txt`](./LICENSE.txt) and [`NOTICE`](./NOTICE) files, keep the existing copyright notices, mark the files they changed, and credit the project, for example:
 
-The Testrium name and logo are **not** covered by the license. Derivative tools must use their own name and branding. See the [Trademark & Attribution Policy](./TRADEMARKS.md).
+> Based on [Testrium](https://github.com/testrium/testrium), licensed under the Apache License 2.0.
 
----
-
-## Acknowledgments
-
-- Spring Boot team for the excellent framework
-- React team for the powerful UI library
-- Tailwind CSS for the utility-first CSS framework
-- All contributors and users of Testrium
+The Testrium name and logo are **not** covered by the license. A derivative product must use its own name and branding. See the [Trademark & Attribution Policy](./TRADEMARKS.md).
 
 ---
 
-## Contact
-
-**Project:** Testrium
-**GitHub:** https://github.com/testrium/testrium
-**Version:** 2.2.1
-**Last Updated:** November 2026
-
----
-
-Made with ❤️ for QA Teams
+<div align="center">
+Made with ❤️ for QA teams
+</div>
